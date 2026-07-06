@@ -9,8 +9,10 @@ const STORIES = [
   "maps-choropleth--patterns",
   "layers-routes--multi-stop",
   "globe-globe--rotatable",
-  "theming-themes--dark",
-  "theming-themes--unstyled",
+  "theming-presets--light",
+  "theming-presets--dark",
+  "theming-presets--minimal",
+  "theming-presets--none",
 ];
 
 for (const id of STORIES) {

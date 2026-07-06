@@ -179,32 +179,46 @@ const { projection, path, size, project, isVisible } = useGeo();
 
 This is the documented SVG-coupled surface; everything else is renderer-agnostic.
 
-## Theming & CSS
+## Presets, theming & CSS
 
-No CSS import is required; no Tailwind, resets, global CSS or runtime CSS-in-JS.
-The `theme` prop takes `"light" | "dark" | "unstyled" | Partial<GeoTheme>`:
+Components look complete by default with zero CSS imports; no Tailwind, resets,
+global CSS or runtime CSS-in-JS. Presentation = SVG attributes + theme objects.
 
 ```ts
+type GeoPresetName = "light" | "dark" | "minimal" | "none";
 interface GeoTheme {
-  ocean; land; landStroke; landMuted; selectedStroke; graticule; sphere;
-  marker; markerLabel; route; live; trail; patternInk;
+  ocean; land; landMuted; landDisabled; landHover; landStroke; selectedStroke;
+  graticule; sphere; marker; markerLabel; route; live; trail; patternInk;
+  focus; controlBg; controlInk; controlBorder; tooltipBg; tooltipInk; tooltipBorder;
 }
-lightTheme / darkTheme: GeoTheme;        // every value: var(--cublya-geo-*, fallback)
-unstyledTheme;                            // emits no presentation attributes
-resolveTheme(input): ResolvedGeoTheme;
+presets: Record<GeoPresetName, ResolvedGeoTheme>;   // exported for composition
+resolveTheme(preset?, overrides?): ResolvedGeoTheme;
 ```
 
-Three styling channels, combinable:
-1. **Props** — `theme={{ land: "#223" }}` per instance (values may be `var(...)`).
-2. **CSS variables** — define `--cublya-geo-land` etc. on any ancestor.
-3. **Class names** (all modes; required in `"unstyled"`): `cublya-geo`,
-   `cublya-geo-map`/`-globe`, `cublya-geo-country` (+ `[data-country]`,
-   `[data-selected]`), `-pattern`, `-selection`, `-route`, `-marker`, `-label`,
-   `-live`, `-trail`, `-graticule`, `-sphere`.
+Palettes are OKLCH neutrals (no raw #fff/#000), AA ink/surface contrast, themed
+`:focus-visible` rings, and deliberately generic — no brand colors, no metric
+scales, no visited-country semantics. `"none"` emits no presentation attributes.
 
-`GeoControls` and `GeoTooltip` are optional UI helpers; their functional styles
-are inline, their cosmetics live in the optional `@cublya/geo/styles.css`
-(namespaced under `.cublya-geo-*`, cannot leak).
+Style precedence (lowest → highest):
+1. package defaults — the `light` preset
+2. selected `preset`
+3. `theme` partial token overrides
+4. per-feature callbacks — `countries.fill`/`pattern`/`disabled`, `renderMarker`, `renderObject`
+5. direct element props — `marker.color`, `route.color`, `countries.stroke`, …
+
+Consumer override channels, combinable:
+- **Props** — `preset="dark"`, `theme={{ land: "…" }}` (values may be `var(...)`).
+- **CSS variables** — every preset value is `var(--cublya-geo-*, fallback)`;
+  define the variables on any ancestor.
+- **Class names** (all presets; the whole story under `"none"`): `cublya-geo`,
+  `cublya-geo-map`/`-globe`, `cublya-geo-country` (+ `[data-country]`,
+  `[data-selected]`, `[data-disabled]`), `-hover`, `-pattern`, `-selection`,
+  `-route`, `-marker`, `-label`, `-live`, `-trail`, `-graticule`, `-sphere`.
+
+`GeoControls` and `GeoTooltip` (optional HTML helpers) take the same
+`preset`/`theme` props and are complete without CSS; the optional
+`@cublya/geo/styles.css` adds only hover/active/focus-visible polish and a
+tooltip shadow — namespaced under `.cublya-geo-*`, it styles nothing else.
 
 ## Static output (share images)
 

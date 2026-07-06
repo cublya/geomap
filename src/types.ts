@@ -77,11 +77,13 @@ export interface CountryHover {
 
 export interface CountriesLayerProps {
   data: CountrySet;
-  /** Fill for a country; return undefined to use the theme land colour. */
+  /** Fill for a country; return undefined for the muted "no data" tone. */
   fill?: (country: PreparedCountry) => string | undefined;
   stroke?: string;
   /** Non-colour state encoding overlaid on the fill. */
   pattern?: (country: PreparedCountry) => CountryPattern | undefined;
+  /** Inert countries: dimmed, no hover highlight, no selection. */
+  disabled?: (country: PreparedCountry) => boolean;
   selectedId?: string | null;
   /** Called with null when the ocean/background is clicked. */
   onSelect?: (country: PreparedCountry | null) => void;

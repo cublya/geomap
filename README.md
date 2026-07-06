@@ -135,43 +135,71 @@ function Halo({ at }: { at: Coordinate }) {
 <GeoMap countries={{ data: world }}><Halo at={paris} /></GeoMap>
 ```
 
-## Theming & CSS
+## Presets & theming
 
-The package needs **no CSS import**: everything is styled through SVG attributes.
-There is no Tailwind, no global CSS, no resets, no runtime CSS-in-JS. Four modes:
+Components look complete by default — **no CSS import required**, ever. All
+presentation flows through SVG attributes and theme objects. There is no
+Tailwind, no global CSS, no resets, no runtime CSS-in-JS.
 
 ```tsx
-<GeoMap />                                    // "light" — complete default palette
-<GeoMap theme="dark" />                       // complete dark palette
-<GeoMap theme={{ land: "var(--muted)" }} />   // custom: overrides over light
-<GeoMap theme="unstyled" />                   // emits no colors at all — your CSS rules
+<GeoMap />                    // "light" — the default preset
+<GeoMap preset="dark" />      // complete dark palette
+<GeoMap preset="minimal" />   // hue-less line-art look
+<GeoMap preset="none" />      // explicitly unstyled — your CSS owns everything
 ```
 
-Every built-in value is `var(--cublya-geo-*, fallback)`, so any ancestor can
-retheme every map inside it without touching props:
+Presets are generic, accessible (AA ink/surface contrast, visible focus
+indicators) OKLCH neutral palettes with no raw `#fff`/`#000` and no product
+semantics. They cover the ocean/background, default/hover/selected/disabled
+countries, borders, markers, routes, live objects, focus rings, and the
+optional controls/tooltip.
+
+**Style precedence** (lowest → highest):
+
+1. package defaults (the `light` preset)
+2. selected `preset`
+3. `theme` token overrides
+4. per-feature callbacks (`countries.fill` / `pattern` / `disabled`, `renderMarker`, …)
+5. direct element props (`marker.color`, `route.color`, `countries.stroke`, …)
+
+```tsx
+// 3 — partial tokens over any preset:
+<GeoMap preset="dark" theme={{ route: "oklch(0.8 0.1 150)" }} />
+
+// exported preset objects compose:
+import { presets } from "@cublya/geo";
+<GeoMap theme={{ ...presets.dark, marker: "var(--brand)" }} />
+```
+
+Every preset value is `var(--cublya-geo-*, fallback)`, so any ancestor can
+retheme every map inside it with plain CSS variables — no props needed:
 
 ```css
-:root { --cublya-geo-land: #223; --cublya-geo-route: var(--brand); }
+:root { --cublya-geo-land: oklch(0.9 0.02 150); --cublya-geo-route: var(--brand); }
 ```
 
-In `"unstyled"` mode no presentation attributes are emitted; style the stable
-class names instead — `cublya-geo-country` (`[data-selected]` when selected),
-`cublya-geo-route`, `cublya-geo-marker`, `cublya-geo-label`, `cublya-geo-live`,
-`cublya-geo-trail`, `cublya-geo-graticule`, `cublya-geo-sphere`.
+With `preset="none"` no presentation attributes are emitted; start from scratch
+against the semantic class names — `cublya-geo-country` (plus `[data-country]`,
+`[data-selected]`, `[data-disabled]`), `cublya-geo-route`, `cublya-geo-marker`,
+`cublya-geo-label`, `cublya-geo-live`, `cublya-geo-trail`,
+`cublya-geo-graticule`, `cublya-geo-sphere`, `cublya-geo-hover`.
 
 Non-color state encoding (colour-blind-safe, à la ) via
-`countries.pattern: (c) => "hatch" | "dots" | undefined`.
+`countries.pattern: (c) => "hatch" | "dots" | undefined`; inert countries via
+`countries.disabled: (c) => boolean`.
 
 ### Optional controls, tooltip and stylesheet
 
-`GeoControls` (zoom in/out/reset buttons for either camera) and `GeoTooltip`
-(pointer-anchored hover tooltip) are fully functional with zero CSS. For their
-cosmetics, import the optional stylesheet — every selector is namespaced under
-`.cublya-geo-*`, so it cannot leak into the rest of your app:
+`GeoControls` (zoom in/out/reset for either camera) and `GeoTooltip`
+(pointer-anchored hover tooltip) take the same `preset`/`theme` props and look
+complete out of the box. The optional stylesheet only adds what inline styles
+can't express — hover/active/focus-visible states and a tooltip shadow — and
+styles nothing but these HTML helpers (all selectors namespaced under
+`.cublya-geo-*`, so it cannot leak):
 
 ```tsx
 import { GeoControls, GeoTooltip } from "@cublya/geo";
-import "@cublya/geo/styles.css";   // optional; controls/tooltip looks only
+import "@cublya/geo/styles.css";   // optional pseudo-class polish
 ```
 
 ## Interaction & accessibility

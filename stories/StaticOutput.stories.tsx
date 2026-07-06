@@ -24,8 +24,8 @@ const visited = new Set(["at", "jp", "br", "us", "ke", "au"]);
 const shareSvg = renderStaticMapSvg({
   width: 1080,
   height: 720,
-  background: "#101314",
-  theme: "dark",
+  background: "oklch(0.19 0.008 250)",
+  preset: "dark",
   countries: {
     data: world,
     fill: (c) => (visited.has(c.id) ? "#8f76e8" : undefined),

@@ -15,18 +15,13 @@ export type {
   Rotation,
 } from "./types";
 
-// Theme
+// Presets & theme tokens
 export {
   cx,
-  darkTheme,
-  defaultTheme,
-  lightTheme,
-  mergeTheme,
+  presets,
   resolveTheme,
-  unstyledTheme,
+  type GeoPresetName,
   type GeoTheme,
-  type GeoThemeInput,
-  type GeoThemeMode,
   type ResolvedGeoTheme,
 } from "./theme";
 

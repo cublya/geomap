@@ -59,11 +59,13 @@ export function CountriesLayer({
   fill,
   stroke,
   pattern,
+  disabled,
   selectedId,
   onSelect,
   onHover,
 }: CountriesLayerProps) {
   const { path, theme, isDraggingRef, patternIds } = useGeo();
+  const [hoveredId, setHoveredId] = React.useState<string | null>(null);
 
   const shapes = React.useMemo(
     () =>
@@ -74,13 +76,22 @@ export function CountriesLayer({
   );
 
   const interactive = !!(onSelect || onHover);
+  // The hover highlight is a translucent overlay so it composes with any fill
+  // (choropleths included) via the landHover token.
+  const trackHover = interactive && theme.landHover !== undefined;
 
   return (
     <g className="cublya-geo-countries">
       {shapes.map(({ country, d }) => {
         const isSelected = selectedId != null && country.id === selectedId;
-        const resolvedFill = fill ? (fill(country) ?? theme.landMuted) : theme.land;
-        const patternKind = pattern?.(country);
+        const isDisabled = disabled?.(country) ?? false;
+        const resolvedFill = isDisabled
+          ? theme.landDisabled
+          : fill
+            ? (fill(country) ?? theme.landMuted)
+            : theme.land;
+        const patternKind = isDisabled ? undefined : pattern?.(country);
+        const hoverable = interactive && !isDisabled;
         return (
           <React.Fragment key={country.id}>
             <path
@@ -92,32 +103,45 @@ export function CountriesLayer({
               vectorEffect="non-scaling-stroke"
               data-country={country.id}
               data-selected={isSelected ? "" : undefined}
-              cursor={onSelect ? "pointer" : undefined}
+              data-disabled={isDisabled ? "" : undefined}
+              cursor={onSelect && !isDisabled ? "pointer" : undefined}
               onClick={
-                interactive
+                hoverable
                   ? (e) => {
                       e.stopPropagation();
                       if (!isDraggingRef.current) onSelect?.(country);
                     }
-                  : undefined
+                  : isDisabled && interactive
+                    ? // Fully inert: don't let the click fall through to the
+                      // ocean handler and clear the selection.
+                      (e) => e.stopPropagation()
+                    : undefined
               }
               onPointerEnter={
-                onHover
+                hoverable
                   ? (e) => {
-                      if (!isDraggingRef.current)
-                        onHover({ country, point: [e.clientX, e.clientY] });
+                      if (isDraggingRef.current) return;
+                      if (trackHover) setHoveredId(country.id);
+                      onHover?.({ country, point: [e.clientX, e.clientY] });
                     }
                   : undefined
               }
               onPointerMove={
-                onHover
+                hoverable && onHover
                   ? (e) => {
                       if (!isDraggingRef.current)
                         onHover({ country, point: [e.clientX, e.clientY] });
                     }
                   : undefined
               }
-              onPointerLeave={onHover ? () => onHover(null) : undefined}
+              onPointerLeave={
+                hoverable
+                  ? () => {
+                      if (trackHover) setHoveredId((h) => (h === country.id ? null : h));
+                      onHover?.(null);
+                    }
+                  : undefined
+              }
             >
               <title>{country.name}</title>
             </path>
@@ -126,6 +150,15 @@ export function CountriesLayer({
                 className="cublya-geo-pattern"
                 d={d}
                 fill={`url(#${patternKind === "hatch" ? patternIds.hatch : patternIds.dots})`}
+                stroke="none"
+                pointerEvents="none"
+              />
+            )}
+            {trackHover && hoveredId === country.id && (
+              <path
+                className="cublya-geo-hover"
+                d={d}
+                fill={theme.landHover}
                 stroke="none"
                 pointerEvents="none"
               />

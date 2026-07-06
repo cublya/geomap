@@ -1,38 +1,57 @@
 import { describe, expect, it } from "vitest";
-import { cx, darkTheme, lightTheme, resolveTheme, unstyledTheme } from "./theme";
+import { cx, presets, resolveTheme } from "./theme";
 
-describe("themes", () => {
-  it("every built-in value is a --cublya-geo-* variable with a concrete fallback", () => {
-    for (const theme of [lightTheme, darkTheme]) {
-      for (const [key, value] of Object.entries(theme)) {
-        expect(value, key).toMatch(/^var\(--cublya-geo-[a-z-]+, .+\)$/);
+describe("presets", () => {
+  it("exposes exactly light, dark, minimal and none", () => {
+    expect(Object.keys(presets).sort()).toEqual(["dark", "light", "minimal", "none"]);
+  });
+
+  it("styled presets wrap every token in a --cublya-geo-* variable with a fallback", () => {
+    for (const name of ["light", "dark", "minimal"] as const) {
+      const values = Object.values(presets[name]);
+      expect(values.length).toBeGreaterThanOrEqual(22);
+      for (const value of values) {
+        expect(value, name).toMatch(/^var\(--cublya-geo-[a-z-]+, .+\)$/);
       }
     }
   });
 
-  it("light and dark use the same variable names", () => {
-    const names = (t: object) =>
-      Object.values(t).map((v: string) => v.match(/--cublya-geo-[a-z-]+/)![0]);
-    expect(names(lightTheme)).toEqual(names(darkTheme));
+  it("uses OKLCH tokens — no raw #fff/#000 anywhere", () => {
+    for (const preset of Object.values(presets)) {
+      for (const value of Object.values(preset)) {
+        expect(value).not.toMatch(/#fff\b|#ffffff|#000\b|#000000/i);
+      }
+    }
+  });
+
+  it("all styled presets define the same token set", () => {
+    const keys = (p: object) => Object.keys(p).sort();
+    expect(keys(presets.dark)).toEqual(keys(presets.light));
+    expect(keys(presets.minimal)).toEqual(keys(presets.light));
+  });
+
+  it("none is explicitly empty", () => {
+    expect(Object.keys(presets.none)).toHaveLength(0);
   });
 });
 
 describe("resolveTheme", () => {
-  it("resolves modes", () => {
-    expect(resolveTheme()).toBe(lightTheme);
-    expect(resolveTheme("light")).toBe(lightTheme);
-    expect(resolveTheme("dark")).toBe(darkTheme);
-    expect(resolveTheme("unstyled")).toBe(unstyledTheme);
+  it("defaults to the light preset", () => {
+    expect(resolveTheme()).toBe(presets.light);
+    expect(resolveTheme("dark")).toBe(presets.dark);
+    expect(resolveTheme("none")).toBe(presets.none);
   });
 
-  it("merges custom overrides over the light palette", () => {
-    const theme = resolveTheme({ land: "#111" });
-    expect(theme.land).toBe("#111");
-    expect(theme.route).toBe(lightTheme.route);
+  it("merges theme overrides over the preset (precedence steps 2→3)", () => {
+    const theme = resolveTheme("dark", { land: "#123" });
+    expect(theme.land).toBe("#123");
+    expect(theme.route).toBe(presets.dark.route);
   });
 
-  it("unstyled has no values at all", () => {
-    expect(Object.keys(unstyledTheme)).toHaveLength(0);
+  it("overrides over none give a from-scratch starting point", () => {
+    const theme = resolveTheme("none", { land: "rebeccapurple" });
+    expect(theme.land).toBe("rebeccapurple");
+    expect(theme.route).toBeUndefined();
   });
 });
 

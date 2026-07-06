@@ -1,51 +1,28 @@
 /**
- * Optional cosmetics for @cublya/geo's GeoControls and GeoTooltip.
- * The core map components need no CSS at all — do not import this file unless
- * you use those two helpers (or want these looks for them).
+ * Optional polish for @cublya/geo's GeoControls and GeoTooltip — the only HTML
+ * pieces of the package. The core map (SVG) takes all of its presentation from
+ * presets/theme tokens and never needs CSS; the controls and tooltip already
+ * look complete from those tokens too. This file adds only what inline styles
+ * cannot express: hover/active/focus-visible states and a tooltip shadow.
  *
- * Every selector is namespaced under .cublya-geo-* : importing this file cannot
- * affect anything outside package components. No resets, no element selectors.
- * Override the --cublya-geo-control-* / --cublya-geo-tooltip-* variables to
- * restyle without replacing the file.
+ * Every selector is namespaced under .cublya-geo-* — importing this file cannot
+ * affect anything outside package components. No resets, no element selectors,
+ * no raw #fff/#000.
  */
 
-.cublya-geo-controls {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.cublya-geo-controls__button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  border: 1px solid var(--cublya-geo-control-border, rgba(19, 21, 21, 0.18));
-  border-radius: 8px;
-  background: var(--cublya-geo-control-bg, #ffffff);
-  color: var(--cublya-geo-control-ink, #131515);
-  font: 600 14px/1 system-ui, sans-serif;
-  cursor: pointer;
-}
-
 .cublya-geo-controls__button:hover {
-  background: var(--cublya-geo-control-bg-hover, #f2f0eb);
+  filter: brightness(0.96);
+}
+
+.cublya-geo-controls__button:active {
+  filter: brightness(0.92);
 }
 
 .cublya-geo-controls__button:focus-visible {
-  outline: 2px solid var(--cublya-geo-focus, #4067f0);
+  outline: 2px solid var(--cublya-geo-focus, oklch(0.55 0.17 255));
   outline-offset: 2px;
 }
 
 .cublya-geo-tooltip {
-  max-width: 280px;
-  padding: 6px 10px;
-  border: 1px solid var(--cublya-geo-tooltip-border, rgba(19, 21, 21, 0.14));
-  border-radius: 8px;
-  background: var(--cublya-geo-tooltip-bg, #ffffff);
-  color: var(--cublya-geo-tooltip-ink, #131515);
-  font: 500 13px/1.35 system-ui, sans-serif;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 16px oklch(0.15 0.01 250 / 0.14);
 }

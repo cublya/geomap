@@ -11,9 +11,10 @@ import { toLonLat } from "../core/coords";
 import { configureGlobe, createGlobeProjection } from "../core/projections";
 import { createGlobeCamera, type GlobeCamera } from "../core/camera-globe";
 import type { FitTarget } from "../core/camera-map";
-import { cx, resolveTheme, type GeoThemeInput } from "../theme";
+import { cx, resolveTheme, type GeoPresetName, type GeoTheme } from "../theme";
 import { GeoProvider, type GeoContextValue } from "./geo-context";
 import { usePointerGestures } from "./gestures";
+import { useFocusVisible } from "./use-focus-visible";
 import { usePrefersReducedMotion } from "./use-reduced-motion";
 import {
   CountriesLayer,
@@ -45,8 +46,10 @@ export interface GeoGlobeProps<TMarker = unknown, TRoute = unknown, TLive = unkn
   /** Idle spin in degrees per second; pauses while interacting. Off by default. */
   autoRotate?: number;
   graticule?: boolean;
-  /** "light" (default) | "dark" | "unstyled" | partial overrides of the light palette. */
-  theme?: GeoThemeInput;
+  /** Visual preset: "light" (default) | "dark" | "minimal" | "none" (unstyled). */
+  preset?: GeoPresetName;
+  /** Partial token overrides applied over the preset. */
+  theme?: Partial<GeoTheme>;
   width?: number;
   height?: number;
   className?: string;
@@ -95,6 +98,7 @@ export function GeoGlobe<TMarker = unknown, TRoute = unknown, TLive = unknown>({
   inertia = true,
   autoRotate,
   graticule = true,
+  preset = "light",
   theme: themeInput,
   width = 960,
   height = 540,
@@ -111,7 +115,8 @@ export function GeoGlobe<TMarker = unknown, TRoute = unknown, TLive = unknown>({
   const [fallbackCamera] = React.useState<GlobeCamera>(() => createGlobeCamera());
   const camera = cameraProp ?? fallbackCamera;
 
-  const theme = React.useMemo(() => resolveTheme(themeInput), [themeInput]);
+  const theme = React.useMemo(() => resolveTheme(preset, themeInput), [preset, themeInput]);
+  const { focusVisible, onFocus, onBlur } = useFocusVisible();
 
   const globe = React.useMemo(() => createGlobeProjection({ width, height }), [width, height]);
 
@@ -250,6 +255,8 @@ export function GeoGlobe<TMarker = unknown, TRoute = unknown, TLive = unknown>({
       aria-label={ariaLabel}
       tabIndex={interactive && keyboard ? 0 : undefined}
       onKeyDown={onKeyDown}
+      onFocus={onFocus}
+      onBlur={onBlur}
       onClick={() => {
         if (!isDraggingRef.current) countries?.onSelect?.(null);
       }}
@@ -261,6 +268,10 @@ export function GeoGlobe<TMarker = unknown, TRoute = unknown, TLive = unknown>({
         touchAction: interactive ? "none" : "auto",
         userSelect: "none",
         cursor: interactive ? "grab" : undefined,
+        ...(theme.focus !== undefined && {
+          outline: focusVisible ? `2px solid ${theme.focus}` : "none",
+          outlineOffset: 2,
+        }),
         ...style,
       }}
     >

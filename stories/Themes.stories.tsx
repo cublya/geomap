@@ -1,16 +1,16 @@
 import * as React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, waitFor } from "storybook/test";
-import { GeoMap } from "@cublya/geo";
+import { GeoMap, presets } from "@cublya/geo";
 import { CITIES, Frame, scoreFill, world } from "./support";
 
 const meta = {
-  title: "Theming/Themes",
+  title: "Theming/Presets",
   parameters: {
     docs: {
       description: {
         component:
-          "Four theming modes, none of which require a CSS import: `\"light\"` (default) and `\"dark\"` are complete palettes whose every value is a `var(--cublya-geo-*, fallback)` hook; a partial object customizes over light; `\"unstyled\"` emits no presentation attributes so your CSS owns the stable `cublya-geo-*` class names.",
+          "Built-in visual presets — components look complete by default with zero CSS imports. `preset` picks the base (`light` is the default), `theme` overlays partial tokens, `--cublya-geo-*` CSS variables override globally, and `preset=\"none\"` is explicitly unstyled for CSS-first styling. Precedence: defaults → preset → theme → feature callbacks → element props.",
       },
     },
   },
@@ -28,12 +28,13 @@ const demoLayers = {
 };
 
 export const Light: Story = {
+  name: "Light (default)",
   render: () => (
     <Frame>
       <GeoMap
-        countries={{ data: world, fill: (c) => scoreFill(c.id) }}
+        countries={{ data: world, onSelect: () => {} }}
         {...demoLayers}
-        aria-label="Light theme"
+        aria-label="Light preset"
       />
     </Frame>
   ),
@@ -43,10 +44,10 @@ export const Dark: Story = {
   render: () => (
     <Frame dark>
       <GeoMap
-        countries={{ data: world }}
+        countries={{ data: world, onSelect: () => {} }}
         {...demoLayers}
-        theme="dark"
-        aria-label="Dark theme"
+        preset="dark"
+        aria-label="Dark preset"
       />
     </Frame>
   ),
@@ -58,21 +59,50 @@ export const Dark: Story = {
   },
 };
 
-export const Custom: Story = {
-  name: "Custom (per-instance overrides)",
+export const Minimal: Story = {
   render: () => (
     <Frame>
       <GeoMap
-        countries={{ data: world }}
+        countries={{ data: world, onSelect: () => {} }}
         {...demoLayers}
+        preset="minimal"
+        aria-label="Minimal line-art preset"
+      />
+    </Frame>
+  ),
+};
+
+export const CustomTokens: Story = {
+  name: "Custom (theme overrides)",
+  render: () => (
+    <Frame>
+      <GeoMap
+        countries={{ data: world, fill: (c) => scoreFill(c.id) }}
+        {...demoLayers}
+        preset="light"
         theme={{
-          land: "#dcefe4",
-          landStroke: "rgba(10, 80, 40, 0.25)",
-          marker: "#0a5028",
-          route: "#0a5028",
-          markerLabel: "#0a5028",
+          ocean: "oklch(0.97 0.01 200)",
+          landStroke: "oklch(0.3 0.03 200 / 0.3)",
+          marker: "oklch(0.45 0.1 200)",
+          route: "oklch(0.45 0.1 200)",
+          markerLabel: "oklch(0.35 0.05 200)",
         }}
-        aria-label="Custom green theme"
+        aria-label="Custom tokens over the light preset, with a choropleth callback on top"
+      />
+    </Frame>
+  ),
+};
+
+export const ComposedPreset: Story = {
+  name: "Custom (composing preset objects)",
+  render: () => (
+    <Frame dark>
+      <GeoMap
+        countries={{ data: world, onSelect: () => {} }}
+        {...demoLayers}
+        // Exported preset objects compose: start from dark, swap accents.
+        theme={{ ...presets.dark, route: "oklch(0.8 0.1 150)", marker: "oklch(0.8 0.1 150)" }}
+        aria-label="Dark preset composed with green accents"
       />
     </Frame>
   ),
@@ -86,14 +116,14 @@ export const CssVariables: Story = {
       <div style={
         {
           height: "100%",
-          "--cublya-geo-land": "#f3d9c4",
-          "--cublya-geo-marker": "#8a3800",
-          "--cublya-geo-route": "#8a3800",
-          "--cublya-geo-marker-label": "#8a3800",
+          "--cublya-geo-land": "oklch(0.9 0.04 80)",
+          "--cublya-geo-marker": "oklch(0.45 0.12 60)",
+          "--cublya-geo-route": "oklch(0.45 0.12 60)",
+          "--cublya-geo-marker-label": "oklch(0.4 0.08 60)",
         } as React.CSSProperties
       }>
         <GeoMap
-          countries={{ data: world }}
+          countries={{ data: world, onSelect: () => {} }}
           {...demoLayers}
           aria-label="Themed via --cublya-geo-* CSS variables"
         />
@@ -103,15 +133,16 @@ export const CssVariables: Story = {
 };
 
 const UNSTYLED_CSS = `
-  .unstyled-demo .cublya-geo-country { fill: #ece9f8; stroke: #fff; stroke-width: 0.6; }
-  .unstyled-demo .cublya-geo-country:hover { fill: #cfc4f0; }
-  .unstyled-demo .cublya-geo-country[data-selected] { fill: #7f61d3; }
-  .unstyled-demo .cublya-geo-route { stroke: #5636b8; stroke-width: 1.4; fill: none; }
-  .unstyled-demo .cublya-geo-marker circle { fill: #5636b8; }
-  .unstyled-demo .cublya-geo-label { fill: #2b1a66; font: 600 9px system-ui; }
+  .unstyled-demo .cublya-geo-country { fill: oklch(0.93 0.02 300); stroke: oklch(0.99 0 0); stroke-width: 0.6; }
+  .unstyled-demo .cublya-geo-country:hover { fill: oklch(0.82 0.06 300); }
+  .unstyled-demo .cublya-geo-country[data-selected] { fill: oklch(0.6 0.15 300); }
+  .unstyled-demo .cublya-geo-route { stroke: oklch(0.45 0.18 300); stroke-width: 1.4; fill: none; }
+  .unstyled-demo .cublya-geo-marker circle { fill: oklch(0.45 0.18 300); }
+  .unstyled-demo .cublya-geo-label { fill: oklch(0.3 0.1 300); font: 600 9px system-ui; }
+  .unstyled-demo svg:focus-visible { outline: 2px solid oklch(0.55 0.17 255); }
 `;
 
-function UnstyledDemo() {
+function NoneDemo() {
   const [selectedId, setSelectedId] = React.useState<string | null>("jp");
   return (
     <Frame>
@@ -125,16 +156,17 @@ function UnstyledDemo() {
             onSelect: (c) => setSelectedId(c?.id ?? null),
           }}
           {...demoLayers}
-          theme="unstyled"
-          aria-label="Unstyled mode, painted entirely by host CSS"
+          preset="none"
+          aria-label="Preset none: painted entirely by host CSS"
         />
       </div>
     </Frame>
   );
 }
 
-export const Unstyled: Story = {
-  render: () => <UnstyledDemo />,
+export const None: Story = {
+  name: "None (explicitly unstyled)",
+  render: () => <NoneDemo />,
   play: async ({ canvasElement }) => {
     await waitFor(() => {
       const country = canvasElement.querySelector("path[data-country]")!;

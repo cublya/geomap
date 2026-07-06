@@ -32,7 +32,7 @@ function App() {
         />
         <GeoControls camera={camera} style={{ position: "absolute", bottom: 12, right: 12 }} />
       </div>
-      <GeoGlobe countries={{ data: world }} theme="dark" aria-label="Fixture globe" />
+      <GeoGlobe countries={{ data: world }} preset="dark" aria-label="Fixture globe" />
     </div>
   );
 }

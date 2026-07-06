@@ -17,9 +17,10 @@ import {
   type FitTarget,
   type MapCamera,
 } from "../core/camera-map";
-import { cx, resolveTheme, type GeoThemeInput } from "../theme";
+import { cx, resolveTheme, type GeoPresetName, type GeoTheme } from "../theme";
 import { GeoProvider, type GeoContextValue } from "./geo-context";
 import { usePointerGestures } from "./gestures";
+import { useFocusVisible } from "./use-focus-visible";
 import { useIsomorphicLayoutEffect } from "./use-isomorphic-layout-effect";
 import {
   CountriesLayer,
@@ -50,8 +51,10 @@ export interface GeoMapProps<TMarker = unknown, TRoute = unknown, TLive = unknow
   wheelZoom?: boolean;
   keyboard?: boolean;
   graticule?: boolean;
-  /** "light" (default) | "dark" | "unstyled" | partial overrides of the light palette. */
-  theme?: GeoThemeInput;
+  /** Visual preset: "light" (default) | "dark" | "minimal" | "none" (unstyled). */
+  preset?: GeoPresetName;
+  /** Partial token overrides applied over the preset. */
+  theme?: Partial<GeoTheme>;
   /** viewBox size; the SVG itself fills its container. */
   width?: number;
   height?: number;
@@ -85,6 +88,7 @@ export function GeoMap<TMarker = unknown, TRoute = unknown, TLive = unknown>({
   wheelZoom = true,
   keyboard = true,
   graticule = false,
+  preset = "light",
   theme: themeInput,
   width = 960,
   height = 500,
@@ -100,7 +104,8 @@ export function GeoMap<TMarker = unknown, TRoute = unknown, TLive = unknown>({
   const [fallbackCamera] = React.useState<MapCamera>(() => createMapCamera());
   const camera = cameraProp ?? fallbackCamera;
 
-  const theme = React.useMemo(() => resolveTheme(themeInput), [themeInput]);
+  const theme = React.useMemo(() => resolveTheme(preset, themeInput), [preset, themeInput]);
+  const { focusVisible, onFocus, onBlur } = useFocusVisible();
 
   const projectionOptionsKey = JSON.stringify(projectionOptions ?? null);
   const projection = React.useMemo(
@@ -208,6 +213,8 @@ export function GeoMap<TMarker = unknown, TRoute = unknown, TLive = unknown>({
       aria-label={ariaLabel}
       tabIndex={interactive && keyboard ? 0 : undefined}
       onKeyDown={onKeyDown}
+      onFocus={onFocus}
+      onBlur={onBlur}
       onClick={() => {
         if (!isDraggingRef.current) countries?.onSelect?.(null);
       }}
@@ -220,6 +227,11 @@ export function GeoMap<TMarker = unknown, TRoute = unknown, TLive = unknown>({
         userSelect: "none",
         cursor: interactive ? "grab" : undefined,
         background: theme.ocean,
+        // Themed keyboard-focus ring; with no focus token the browser default stays.
+        ...(theme.focus !== undefined && {
+          outline: focusVisible ? `2px solid ${theme.focus}` : "none",
+          outlineOffset: 2,
+        }),
         ...style,
       }}
     >

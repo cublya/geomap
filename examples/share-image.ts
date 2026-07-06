@@ -30,7 +30,7 @@ export async function buildShareImage(
       data: world,
       fill: (c) => (visitedIds.has(c.id) ? palette.visited : palette.land),
     },
-    theme: { landStroke: "rgba(0,0,0,0.15)" },
+    theme: { landStroke: "oklch(0.2 0 0 / 0.15)" },
   });
 
   return {

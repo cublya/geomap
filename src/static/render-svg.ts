@@ -7,7 +7,7 @@ import {
   type FlatProjectionOptions,
   type ProjectionInput,
 } from "../core/projections";
-import { resolveTheme, type GeoThemeInput } from "../theme";
+import { resolveTheme, type GeoPresetName, type GeoTheme } from "../theme";
 
 export interface StaticMapOptions {
   width: number;
@@ -22,12 +22,14 @@ export interface StaticMapOptions {
   projection?: ProjectionInput;
   projectionOptions?: FlatProjectionOptions;
   graticule?: boolean;
+  /** Visual preset, same as the components. Default "light". */
+  preset?: GeoPresetName;
   /**
-   * "light" | "dark" | "unstyled" | partial overrides. The built-in themes use
+   * Partial token overrides over the preset. Preset values are
    * `var(--cublya-geo-*, fallback)` — standalone SVGs resolve to the fallback,
    * so exports render correctly outside any page context.
    */
-  theme?: GeoThemeInput;
+  theme?: Partial<GeoTheme>;
   /** Painted behind everything; use a concrete color for share images. */
   background?: string;
 }
@@ -59,7 +61,7 @@ export function renderStaticMapSvg(options: StaticMapOptions): string {
     graticule = false,
     background,
   } = options;
-  const theme = resolveTheme(options.theme);
+  const theme = resolveTheme(options.preset, options.theme);
   const attr = (name: string, value: string | undefined) =>
     value === undefined ? "" : ` ${name}="${escapeXml(value)}"`;
   const projection = createFlatProjection(projectionInput, { width, height }, projectionOptions);

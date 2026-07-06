@@ -1,5 +1,5 @@
 import * as React from "react";
-import { cx } from "../theme";
+import { cx, resolveTheme, type GeoPresetName, type GeoTheme } from "../theme";
 
 export interface GeoTooltipProps {
   /**
@@ -7,18 +7,31 @@ export interface GeoTooltipProps {
    * Null/undefined renders nothing.
    */
   point: [number, number] | null | undefined;
+  /** Match the map's preset; "none" renders a bare positioned div for your CSS. */
+  preset?: GeoPresetName;
+  /** Partial token overrides applied over the preset. */
+  theme?: Partial<GeoTheme>;
   children?: React.ReactNode;
   className?: string;
   style?: React.CSSProperties;
 }
 
 /**
- * Optional hover tooltip positioned above the pointer. Positioning is inline
- * (works with no CSS); visual styling comes from `@cublya/geo/styles.css` or
- * your own `.cublya-geo-tooltip` rules.
+ * Hover tooltip positioned above the pointer. Positioning is always inline;
+ * with a preset the surface (background/ink/border) is complete without any
+ * CSS import. The optional stylesheet adds only cosmetic polish (shadow).
  */
-export function GeoTooltip({ point, children, className, style }: GeoTooltipProps) {
+export function GeoTooltip({
+  point,
+  preset = "light",
+  theme,
+  children,
+  className,
+  style,
+}: GeoTooltipProps) {
+  const t = resolveTheme(preset, theme);
   if (!point || children == null) return null;
+  const styled = preset !== "none" || theme !== undefined;
   return (
     <div
       role="tooltip"
@@ -30,6 +43,15 @@ export function GeoTooltip({ point, children, className, style }: GeoTooltipProp
         transform: "translate(-50%, calc(-100% - 10px))",
         pointerEvents: "none",
         zIndex: 50,
+        ...(styled && {
+          maxWidth: 280,
+          padding: "6px 10px",
+          border: `1px solid ${t.tooltipBorder ?? "transparent"}`,
+          borderRadius: 8,
+          background: t.tooltipBg,
+          color: t.tooltipInk,
+          font: "500 13px/1.35 system-ui, sans-serif",
+        }),
         ...style,
       }}
     >
