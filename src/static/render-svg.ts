@@ -7,7 +7,7 @@ import {
   type FlatProjectionOptions,
   type ProjectionInput,
 } from "../core/projections";
-import { mergeTheme, type GeoTheme } from "../theme";
+import { resolveTheme, type GeoThemeInput } from "../theme";
 
 export interface StaticMapOptions {
   width: number;
@@ -22,7 +22,12 @@ export interface StaticMapOptions {
   projection?: ProjectionInput;
   projectionOptions?: FlatProjectionOptions;
   graticule?: boolean;
-  theme?: Partial<GeoTheme>;
+  /**
+   * "light" | "dark" | "unstyled" | partial overrides. The built-in themes use
+   * `var(--cublya-geo-*, fallback)` — standalone SVGs resolve to the fallback,
+   * so exports render correctly outside any page context.
+   */
+  theme?: GeoThemeInput;
   /** Painted behind everything; use a concrete color for share images. */
   background?: string;
 }
@@ -54,7 +59,9 @@ export function renderStaticMapSvg(options: StaticMapOptions): string {
     graticule = false,
     background,
   } = options;
-  const theme = mergeTheme(options.theme);
+  const theme = resolveTheme(options.theme);
+  const attr = (name: string, value: string | undefined) =>
+    value === undefined ? "" : ` ${name}="${escapeXml(value)}"`;
   const projection = createFlatProjection(projectionInput, { width, height }, projectionOptions);
   const path = geoPath(projection);
 
@@ -68,22 +75,18 @@ export function renderStaticMapSvg(options: StaticMapOptions): string {
   if (graticule) {
     const d = path(geoGraticule10());
     if (d) {
-      parts.push(
-        `<path d="${d}" fill="none" stroke="${escapeXml(theme.graticule)}" stroke-width="0.5"/>`,
-      );
+      parts.push(`<path d="${d}" fill="none"${attr("stroke", theme.graticule)} stroke-width="0.5"/>`);
     }
   }
   if (countries) {
-    const stroke = escapeXml(countries.stroke ?? theme.landStroke);
+    const stroke = attr("stroke", countries.stroke ?? theme.landStroke);
     for (const country of countries.data.countries) {
       const d = path(country.feature);
       if (!d) continue;
       const fill = countries.fill
         ? (countries.fill(country) ?? theme.landMuted)
         : theme.land;
-      parts.push(
-        `<path d="${d}" fill="${escapeXml(fill)}" stroke="${stroke}" stroke-width="0.5"/>`,
-      );
+      parts.push(`<path d="${d}"${attr("fill", fill)}${stroke} stroke-width="0.5"/>`);
     }
   }
   for (const route of routes) {
@@ -92,8 +95,8 @@ export function renderStaticMapSvg(options: StaticMapOptions): string {
     if (!d) continue;
     const dash = route.dashed ? ' stroke-dasharray="4 4"' : "";
     parts.push(
-      `<path d="${d}" fill="none" stroke="${escapeXml(route.color ?? theme.route)}" ` +
-        `stroke-width="${route.width ?? 1.4}" stroke-opacity="${route.opacity ?? 0.9}"` +
+      `<path d="${d}" fill="none"${attr("stroke", route.color ?? theme.route)}` +
+        ` stroke-width="${route.width ?? 1.4}" stroke-opacity="${route.opacity ?? 0.9}"` +
         `${dash} stroke-linecap="round"/>`,
     );
   }
@@ -102,12 +105,12 @@ export function renderStaticMapSvg(options: StaticMapOptions): string {
     if (!p || !p.every(Number.isFinite)) continue;
     const r = marker.size ?? 3;
     parts.push(
-      `<circle cx="${p[0]}" cy="${p[1]}" r="${r}" fill="${escapeXml(marker.color ?? theme.marker)}"/>`,
+      `<circle cx="${p[0]}" cy="${p[1]}" r="${r}"${attr("fill", marker.color ?? theme.marker)}/>`,
     );
     if (marker.label) {
       parts.push(
-        `<text x="${p[0] + r + 3}" y="${p[1] + r}" font-size="9" ` +
-          `font-family="system-ui, sans-serif" fill="${escapeXml(theme.markerLabel)}">` +
+        `<text x="${p[0] + r + 3}" y="${p[1] + r}" font-size="9"` +
+          ` font-family="system-ui, sans-serif"${attr("fill", theme.markerLabel)}>` +
           `${escapeXml(marker.label)}</text>`,
       );
     }

@@ -135,17 +135,44 @@ function Halo({ at }: { at: Coordinate }) {
 <GeoMap countries={{ data: world }}><Halo at={paris} /></GeoMap>
 ```
 
-## Theming
+## Theming & CSS
 
-A flat object of CSS color strings — design-token variables work as-is:
+The package needs **no CSS import**: everything is styled through SVG attributes.
+There is no Tailwind, no global CSS, no resets, no runtime CSS-in-JS. Four modes:
 
 ```tsx
-<GeoMap theme={{ land: "var(--muted)", route: "var(--brand)" }} />   // over defaultTheme
-<GeoMap theme={darkTheme} />                                          // bundled dark palette
+<GeoMap />                                    // "light" — complete default palette
+<GeoMap theme="dark" />                       // complete dark palette
+<GeoMap theme={{ land: "var(--muted)" }} />   // custom: overrides over light
+<GeoMap theme="unstyled" />                   // emits no colors at all — your CSS rules
 ```
+
+Every built-in value is `var(--cublya-geo-*, fallback)`, so any ancestor can
+retheme every map inside it without touching props:
+
+```css
+:root { --cublya-geo-land: #223; --cublya-geo-route: var(--brand); }
+```
+
+In `"unstyled"` mode no presentation attributes are emitted; style the stable
+class names instead — `cublya-geo-country` (`[data-selected]` when selected),
+`cublya-geo-route`, `cublya-geo-marker`, `cublya-geo-label`, `cublya-geo-live`,
+`cublya-geo-trail`, `cublya-geo-graticule`, `cublya-geo-sphere`.
 
 Non-color state encoding (colour-blind-safe, à la ) via
 `countries.pattern: (c) => "hatch" | "dots" | undefined`.
+
+### Optional controls, tooltip and stylesheet
+
+`GeoControls` (zoom in/out/reset buttons for either camera) and `GeoTooltip`
+(pointer-anchored hover tooltip) are fully functional with zero CSS. For their
+cosmetics, import the optional stylesheet — every selector is namespaced under
+`.cublya-geo-*`, so it cannot leak into the rest of your app:
+
+```tsx
+import { GeoControls, GeoTooltip } from "@cublya/geo";
+import "@cublya/geo/styles.css";   // optional; controls/tooltip looks only
+```
 
 ## Interaction & accessibility
 
@@ -187,16 +214,28 @@ helpers; popovers are yours), no bundled basemap, no border politics
 (`patchFeatures` is the hook for editorial geometry). A Canvas renderer is a
 planned escape hatch — the core emits only data, so the API won't change.
 
+## Storybook
+
+The documentation and demo site — every feature above as a live story, including
+the theming modes, keyboard/reduced-motion behaviour and a performance stress
+case — deploys from `main` to **https://cublya.github.io/geo/**. Run it locally
+with `npm run storybook`.
+
 ## Development
 
 ```sh
 npm install
-npm run test        # vitest (jsdom)
-npm run lint        # eslint
-npm run typecheck   # tsc --noEmit
-npm run build       # tsup → dist/ (ESM + d.ts)
-npm run verify      # all of the above + npm pack --dry-run
-node scripts/generate-iso.mjs   # regenerate the ISO table
+npm run test               # vitest unit tests (jsdom)
+npm run lint               # eslint (src, examples, stories)
+npm run typecheck          # tsc --noEmit
+npm run build              # tsup → dist/ (ESM + d.ts + styles.css)
+npm run verify             # lint + types + tests + build + publint + pack dry-run
+npm run storybook          # dev server on :6006
+npm run build-storybook    # static site → storybook-static/
+npm run test-storybook:ci  # interaction + axe accessibility tests (built SB)
+npm run test:e2e           # Playwright screenshot tests (build Storybook first)
+bash scripts/verify-fixtures.sh   # install packed tarball into Vite + Next.js apps
+node scripts/generate-iso.mjs     # regenerate the ISO table
 ```
 
 Examples live in [`examples/`](examples); migration guides for the four Cublya apps

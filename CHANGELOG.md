@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.2.0
+
+CSS architecture, optional UI helpers, and a Storybook documentation site.
+
+- Theme modes: `"light"` (default), `"dark"`, `"unstyled"`, or partial overrides.
+  Built-in palettes now expose `var(--cublya-geo-*, fallback)` hooks so apps can
+  retheme via CSS variables; `"unstyled"` emits no presentation attributes.
+- Stable `cublya-geo-*` class names on every rendered element (plus
+  `data-country` / `data-selected`) for CSS-driven styling.
+- New optional components: `GeoControls` (zoom/reset buttons for either camera)
+  and `GeoTooltip` (pointer-anchored tooltip). Functional without CSS; cosmetics
+  in the new optional `@cublya/geo/styles.css` export (fully namespaced, no
+  leakage, no resets).
+- Server-safe imports: the module now evaluates inside React Server Components,
+  so `prepareCountries`/`renderStaticMapSvg` work in RSC; components render in
+  client boundaries (verified by a Next.js fixture build).
+- `onMarkerClick` now also fires for markers drawn with `renderMarker`.
+- Public-surface type packages (`@types/d3-geo`, `@types/geojson`,
+  `@types/topojson-specification`) moved to dependencies so consumers get types
+  without extra installs.
+- Storybook (React + Vite) demo/docs site with interaction + axe accessibility
+  tests, Playwright screenshot tests, publint, and Vite/Next.js tarball fixture
+  builds; GitHub Pages deploy from `main`.
+- Deprecated: `defaultTheme` (alias of `lightTheme`) and `mergeTheme`
+  (use `resolveTheme`).
+
 ## 0.1.0
 
 Initial release.

@@ -4,3 +4,11 @@ coverage/
 *.tgz
 *.log
 .DS_Store
+storybook-static/
+playwright-report/
+test-results/
+fixtures/*/dist/
+fixtures/*/.next/
+fixtures/*/package-lock.json
+*storybook.log
+fixtures/next-app/next-env.d.ts

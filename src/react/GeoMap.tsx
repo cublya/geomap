@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import { geoPath } from "d3-geo";
 import type {
@@ -19,9 +17,10 @@ import {
   type FitTarget,
   type MapCamera,
 } from "../core/camera-map";
-import { mergeTheme, type GeoTheme } from "../theme";
+import { cx, resolveTheme, type GeoThemeInput } from "../theme";
 import { GeoProvider, type GeoContextValue } from "./geo-context";
 import { usePointerGestures } from "./gestures";
+import { useIsomorphicLayoutEffect } from "./use-isomorphic-layout-effect";
 import {
   CountriesLayer,
   GraticuleLayer,
@@ -51,7 +50,8 @@ export interface GeoMapProps<TMarker = unknown, TRoute = unknown, TLive = unknow
   wheelZoom?: boolean;
   keyboard?: boolean;
   graticule?: boolean;
-  theme?: Partial<GeoTheme>;
+  /** "light" (default) | "dark" | "unstyled" | partial overrides of the light palette. */
+  theme?: GeoThemeInput;
   /** viewBox size; the SVG itself fills its container. */
   width?: number;
   height?: number;
@@ -85,7 +85,7 @@ export function GeoMap<TMarker = unknown, TRoute = unknown, TLive = unknown>({
   wheelZoom = true,
   keyboard = true,
   graticule = false,
-  theme: themeOverrides,
+  theme: themeInput,
   width = 960,
   height = 500,
   className,
@@ -100,7 +100,7 @@ export function GeoMap<TMarker = unknown, TRoute = unknown, TLive = unknown>({
   const [fallbackCamera] = React.useState<MapCamera>(() => createMapCamera());
   const camera = cameraProp ?? fallbackCamera;
 
-  const theme = React.useMemo(() => mergeTheme(themeOverrides), [themeOverrides]);
+  const theme = React.useMemo(() => resolveTheme(themeInput), [themeInput]);
 
   const projectionOptionsKey = JSON.stringify(projectionOptions ?? null);
   const projection = React.useMemo(
@@ -110,7 +110,7 @@ export function GeoMap<TMarker = unknown, TRoute = unknown, TLive = unknown>({
   );
   const path = React.useMemo(() => geoPath(projection), [projection]);
 
-  React.useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     camera.attachEnv({ projection, width, height });
     return () => camera.attachEnv(null);
   }, [camera, projection, width, height]);
@@ -211,7 +211,7 @@ export function GeoMap<TMarker = unknown, TRoute = unknown, TLive = unknown>({
       onClick={() => {
         if (!isDraggingRef.current) countries?.onSelect?.(null);
       }}
-      className={className}
+      className={cx("cublya-geo", "cublya-geo-map", className)}
       style={{
         display: "block",
         width: "100%",
@@ -219,7 +219,7 @@ export function GeoMap<TMarker = unknown, TRoute = unknown, TLive = unknown>({
         touchAction: interactive ? "none" : "auto",
         userSelect: "none",
         cursor: interactive ? "grab" : undefined,
-        background: theme.ocean === "transparent" ? undefined : theme.ocean,
+        background: theme.ocean,
         ...style,
       }}
     >

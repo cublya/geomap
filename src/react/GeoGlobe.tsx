@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import { geoDistance, geoPath } from "d3-geo";
 import type {
@@ -13,7 +11,7 @@ import { toLonLat } from "../core/coords";
 import { configureGlobe, createGlobeProjection } from "../core/projections";
 import { createGlobeCamera, type GlobeCamera } from "../core/camera-globe";
 import type { FitTarget } from "../core/camera-map";
-import { mergeTheme, type GeoTheme } from "../theme";
+import { cx, resolveTheme, type GeoThemeInput } from "../theme";
 import { GeoProvider, type GeoContextValue } from "./geo-context";
 import { usePointerGestures } from "./gestures";
 import { usePrefersReducedMotion } from "./use-reduced-motion";
@@ -47,7 +45,8 @@ export interface GeoGlobeProps<TMarker = unknown, TRoute = unknown, TLive = unkn
   /** Idle spin in degrees per second; pauses while interacting. Off by default. */
   autoRotate?: number;
   graticule?: boolean;
-  theme?: Partial<GeoTheme>;
+  /** "light" (default) | "dark" | "unstyled" | partial overrides of the light palette. */
+  theme?: GeoThemeInput;
   width?: number;
   height?: number;
   className?: string;
@@ -96,7 +95,7 @@ export function GeoGlobe<TMarker = unknown, TRoute = unknown, TLive = unknown>({
   inertia = true,
   autoRotate,
   graticule = true,
-  theme: themeOverrides,
+  theme: themeInput,
   width = 960,
   height = 540,
   className,
@@ -112,7 +111,7 @@ export function GeoGlobe<TMarker = unknown, TRoute = unknown, TLive = unknown>({
   const [fallbackCamera] = React.useState<GlobeCamera>(() => createGlobeCamera());
   const camera = cameraProp ?? fallbackCamera;
 
-  const theme = React.useMemo(() => mergeTheme(themeOverrides), [themeOverrides]);
+  const theme = React.useMemo(() => resolveTheme(themeInput), [themeInput]);
 
   const globe = React.useMemo(() => createGlobeProjection({ width, height }), [width, height]);
 
@@ -254,7 +253,7 @@ export function GeoGlobe<TMarker = unknown, TRoute = unknown, TLive = unknown>({
       onClick={() => {
         if (!isDraggingRef.current) countries?.onSelect?.(null);
       }}
-      className={className}
+      className={cx("cublya-geo", "cublya-geo-globe", className)}
       style={{
         display: "block",
         width: "100%",
@@ -268,6 +267,7 @@ export function GeoGlobe<TMarker = unknown, TRoute = unknown, TLive = unknown>({
       <GeoProvider value={context}>
         <PatternDefs />
         <path
+          className="cublya-geo-sphere"
           d={sphereD}
           fill={theme.ocean}
           stroke={theme.sphere}

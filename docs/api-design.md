@@ -179,18 +179,32 @@ const { projection, path, size, project, isVisible } = useGeo();
 
 This is the documented SVG-coupled surface; everything else is renderer-agnostic.
 
-## Theming
+## Theming & CSS
 
-A flat object of CSS color strings — raw values or `var(--token)` both work, so
-Tailwind/CSS-variable apps keep their tokens and static export can pass hexes:
+No CSS import is required; no Tailwind, resets, global CSS or runtime CSS-in-JS.
+The `theme` prop takes `"light" | "dark" | "unstyled" | Partial<GeoTheme>`:
 
 ```ts
 interface GeoTheme {
   ocean; land; landStroke; landMuted; selectedStroke; graticule; sphere;
   marker; markerLabel; route; live; trail; patternInk;
 }
-defaultTheme: GeoTheme; darkTheme: GeoTheme;
+lightTheme / darkTheme: GeoTheme;        // every value: var(--cublya-geo-*, fallback)
+unstyledTheme;                            // emits no presentation attributes
+resolveTheme(input): ResolvedGeoTheme;
 ```
+
+Three styling channels, combinable:
+1. **Props** — `theme={{ land: "#223" }}` per instance (values may be `var(...)`).
+2. **CSS variables** — define `--cublya-geo-land` etc. on any ancestor.
+3. **Class names** (all modes; required in `"unstyled"`): `cublya-geo`,
+   `cublya-geo-map`/`-globe`, `cublya-geo-country` (+ `[data-country]`,
+   `[data-selected]`), `-pattern`, `-selection`, `-route`, `-marker`, `-label`,
+   `-live`, `-trail`, `-graticule`, `-sphere`.
+
+`GeoControls` and `GeoTooltip` are optional UI helpers; their functional styles
+are inline, their cosmetics live in the optional `@cublya/geo/styles.css`
+(namespaced under `.cublya-geo-*`, cannot leak).
 
 ## Static output (share images)
 

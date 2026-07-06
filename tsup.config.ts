@@ -1,3 +1,4 @@
+import { copyFileSync } from "node:fs";
 import { defineConfig } from "tsup";
 
 export default defineConfig({
@@ -8,4 +9,8 @@ export default defineConfig({
   clean: true,
   treeshake: true,
   external: ["react", "react-dom", "react/jsx-runtime"],
+  // The optional stylesheet ships verbatim (exports["./styles.css"]).
+  onSuccess: async () => {
+    copyFileSync("src/styles.css", "dist/styles.css");
+  },
 });

@@ -16,7 +16,19 @@ export type {
 } from "./types";
 
 // Theme
-export { darkTheme, defaultTheme, mergeTheme, type GeoTheme } from "./theme";
+export {
+  cx,
+  darkTheme,
+  defaultTheme,
+  lightTheme,
+  mergeTheme,
+  resolveTheme,
+  unstyledTheme,
+  type GeoTheme,
+  type GeoThemeInput,
+  type GeoThemeMode,
+  type ResolvedGeoTheme,
+} from "./theme";
 
 // Coordinates & spherical math
 export {
@@ -101,6 +113,10 @@ export {
   type RoutesLayerProps,
 } from "./react/layers";
 export { useGeo, type GeoContextValue } from "./react/geo-context";
+
+// Optional UI helpers (cosmetics live in the optional @cublya/geo/styles.css)
+export { GeoControls, type CameraControlsHandle, type GeoControlsProps } from "./react/controls";
+export { GeoTooltip, type GeoTooltipProps } from "./react/tooltip";
 
 // React hooks
 export {

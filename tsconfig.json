@@ -20,5 +20,15 @@
       "@cublya/geo": ["./src/index.ts"]
     }
   },
-  "include": ["src", "examples", "tsup.config.ts", "vitest.config.ts", "eslint.config.js"]
+  "include": [
+    "src",
+    "examples",
+    "stories",
+    ".storybook",
+    "playwright",
+    "tsup.config.ts",
+    "vitest.config.ts",
+    "playwright.config.ts",
+    "eslint.config.js"
+  ]
 }
