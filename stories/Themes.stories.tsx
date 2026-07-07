@@ -1,7 +1,7 @@
 import * as React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, waitFor } from "storybook/test";
-import { GeoMap, presets } from "@cublya/geo";
+import { GeoMap, presets } from "@cublya/geomap";
 import { CITIES, Frame, scoreFill, world } from "./support";
 
 const meta = {
@@ -10,7 +10,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Built-in visual presets let components look complete with zero CSS imports — but CSS stays fully optional, so the package defaults to `preset=\"none\"` (nothing painted; you own every pixel via the semantic class names). Pass `preset=\"light\"`, `\"dark\"` or `\"minimal\"` to opt into a complete out-of-the-box look; `theme` overlays partial tokens on top, and `--geo-*` CSS variables override globally. Precedence: defaults (none) → preset → theme → feature callbacks → element props.",
+          "Built-in visual presets let components look complete with zero CSS imports — but CSS stays fully optional, so the package defaults to `preset=\"none\"` (nothing painted; you own every pixel via the semantic class names). Pass `preset=\"light\"`, `\"dark\"` or `\"minimal\"` to opt into a complete out-of-the-box look; `theme` overlays partial tokens on top, and `--geomap-*` CSS variables override globally. Precedence: defaults (none) → preset → theme → feature callbacks → element props.",
       },
     },
   },
@@ -54,7 +54,7 @@ export const Dark: Story = {
   play: async ({ canvasElement }) => {
     await waitFor(() => {
       const country = canvasElement.querySelector("path[data-country]")!;
-      expect(country.getAttribute("fill")).toContain("var(--geo-land");
+      expect(country.getAttribute("fill")).toContain("var(--geomap-land");
     });
   },
 };
@@ -116,16 +116,16 @@ export const CssVariables: Story = {
       <div style={
         {
           height: "100%",
-          "--geo-land": "oklch(0.9 0.04 80)",
-          "--geo-marker": "oklch(0.45 0.12 60)",
-          "--geo-route": "oklch(0.45 0.12 60)",
-          "--geo-marker-label": "oklch(0.4 0.08 60)",
+          "--geomap-land": "oklch(0.9 0.04 80)",
+          "--geomap-marker": "oklch(0.45 0.12 60)",
+          "--geomap-route": "oklch(0.45 0.12 60)",
+          "--geomap-marker-label": "oklch(0.4 0.08 60)",
         } as React.CSSProperties
       }>
         <GeoMap
           countries={{ data: world, onSelect: () => {} }}
           {...demoLayers}
-          aria-label="Themed via --geo-* CSS variables"
+          aria-label="Themed via --geomap-* CSS variables"
         />
       </div>
     </Frame>
@@ -133,12 +133,12 @@ export const CssVariables: Story = {
 };
 
 const UNSTYLED_CSS = `
-  .unstyled-demo .geo-country { fill: oklch(0.93 0.02 300); stroke: oklch(0.99 0 0); stroke-width: 0.6; }
-  .unstyled-demo .geo-country:hover { fill: oklch(0.82 0.06 300); }
-  .unstyled-demo .geo-country[data-selected] { fill: oklch(0.6 0.15 300); }
-  .unstyled-demo .geo-route { stroke: oklch(0.45 0.18 300); stroke-width: 1.4; fill: none; }
-  .unstyled-demo .geo-marker circle { fill: oklch(0.45 0.18 300); }
-  .unstyled-demo .geo-label { fill: oklch(0.3 0.1 300); font: 600 9px system-ui; }
+  .unstyled-demo .geomap-country { fill: oklch(0.93 0.02 300); stroke: oklch(0.99 0 0); stroke-width: 0.6; }
+  .unstyled-demo .geomap-country:hover { fill: oklch(0.82 0.06 300); }
+  .unstyled-demo .geomap-country[data-selected] { fill: oklch(0.6 0.15 300); }
+  .unstyled-demo .geomap-route { stroke: oklch(0.45 0.18 300); stroke-width: 1.4; fill: none; }
+  .unstyled-demo .geomap-marker circle { fill: oklch(0.45 0.18 300); }
+  .unstyled-demo .geomap-label { fill: oklch(0.3 0.1 300); font: 600 9px system-ui; }
   .unstyled-demo svg:focus-visible { outline: 2px solid oklch(0.55 0.17 255); }
 `;
 

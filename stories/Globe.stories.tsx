@@ -1,8 +1,8 @@
 import * as React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, userEvent, waitFor, within } from "storybook/test";
-import { GeoControls, GeoGlobe, useGlobeCamera } from "@cublya/geo";
-import "@cublya/geo/styles.css";
+import { GeoControls, GeoGlobe, useGlobeCamera } from "@cublya/geomap";
+import "@cublya/geomap/styles.css";
 import { CITIES, Frame, scoreFill, world } from "./support";
 
 const meta = {
@@ -32,7 +32,7 @@ export const Rotatable: Story = {
   ),
   play: async ({ canvasElement }) => {
     await waitFor(() => {
-      expect(canvasElement.querySelector(".geo-sphere")).toBeTruthy();
+      expect(canvasElement.querySelector(".geomap-sphere")).toBeTruthy();
       const visible = canvasElement.querySelectorAll("path[data-country]").length;
       expect(visible).toBeGreaterThan(20);
       expect(visible).toBeLessThan(world.countries.length); // far side clipped
@@ -75,7 +75,7 @@ export const FocusAndMarkers: Story = {
     await userEvent.click(canvas.getByRole("button", { name: "Tokyo" }));
     await waitFor(
       () => {
-        const labels = [...canvasElement.querySelectorAll(".geo-label")].map(
+        const labels = [...canvasElement.querySelectorAll(".geomap-label")].map(
           (l) => l.textContent,
         );
         expect(labels).toContain("Tokyo");

@@ -1,6 +1,6 @@
-// Shared story scaffolding. Uses only public @cublya/geo exports.
+// Shared story scaffolding. Uses only public @cublya/geomap exports.
 import * as React from "react";
-import { prepareCountries } from "@cublya/geo";
+import { prepareCountries } from "@cublya/geomap";
 import type { Topology } from "topojson-specification";
 import world110 from "world-atlas/countries-110m.json";
 import world50 from "world-atlas/countries-50m.json";

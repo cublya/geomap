@@ -2,7 +2,7 @@ import * as React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, waitFor } from "storybook/test";
 import { geoCircle } from "d3-geo";
-import { GeoMap, useGeo, type Coordinate } from "@cublya/geo";
+import { GeoMap, useGeo, type Coordinate } from "@cublya/geomap";
 import { CITIES, Frame, world } from "./support";
 
 const meta = {

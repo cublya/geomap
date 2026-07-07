@@ -6,7 +6,7 @@ import {
   bearingBetween,
   interpolateGreatCircle,
   type LiveObject,
-} from "@cublya/geo";
+} from "@cublya/geomap";
 import { Frame, world } from "./support";
 
 const meta = {
@@ -91,10 +91,10 @@ export const Flights: Story = {
   render: () => <LiveFlightsDemo />,
   play: async ({ canvasElement }) => {
     await waitFor(() => {
-      expect(canvasElement.querySelectorAll(".geo-live").length).toBe(3);
+      expect(canvasElement.querySelectorAll(".geomap-live").length).toBe(3);
     });
     // Every glyph carries a heading rotation.
-    const rotated = [...canvasElement.querySelectorAll(".geo-live g g")].filter((g) =>
+    const rotated = [...canvasElement.querySelectorAll(".geomap-live g g")].filter((g) =>
       g.getAttribute("transform")?.includes("rotate("),
     );
     expect(rotated.length).toBe(3);
@@ -131,7 +131,7 @@ export const WithTrail: Story = {
   ),
   play: async ({ canvasElement }) => {
     await waitFor(() => {
-      expect(canvasElement.querySelector(".geo-trail")).toBeTruthy();
+      expect(canvasElement.querySelector(".geomap-trail")).toBeTruthy();
     });
   },
 };

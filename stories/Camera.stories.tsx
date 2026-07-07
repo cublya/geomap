@@ -1,8 +1,8 @@
 import * as React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, userEvent, waitFor, within } from "storybook/test";
-import { GeoControls, GeoMap, useMapCamera, useMapView } from "@cublya/geo";
-import "@cublya/geo/styles.css";
+import { GeoControls, GeoMap, useMapCamera, useMapView } from "@cublya/geomap";
+import "@cublya/geomap/styles.css";
 import { CITIES, Frame, scoreFill, world } from "./support";
 
 const meta = {

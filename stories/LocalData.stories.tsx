@@ -1,7 +1,7 @@
 import * as React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, waitFor } from "storybook/test";
-import { GeoMap, prepareCountries } from "@cublya/geo";
+import { GeoMap, prepareCountries } from "@cublya/geomap";
 import { Frame, scoreFill, worldDetailed } from "./support";
 
 const meta = {

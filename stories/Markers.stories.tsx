@@ -1,7 +1,7 @@
 import * as React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, userEvent, waitFor } from "storybook/test";
-import { GeoMap, type GeoMarker } from "@cublya/geo";
+import { GeoMap, type GeoMarker } from "@cublya/geomap";
 import { CITIES, Frame, world } from "./support";
 
 const meta = {
@@ -32,7 +32,7 @@ export const Cities: Story = {
   ),
   play: async ({ canvasElement }) => {
     await waitFor(() => {
-      expect(canvasElement.querySelectorAll(".geo-marker").length).toBe(CITIES.length);
+      expect(canvasElement.querySelectorAll(".geomap-marker").length).toBe(CITIES.length);
       expect(canvasElement.textContent).toContain("Tokyo");
     });
   },
@@ -89,7 +89,7 @@ export const CustomMarkers: Story = {
   render: () => <CustomMarkerDemo />,
   play: async ({ canvasElement }) => {
     const marker = await waitFor(() => {
-      const el = canvasElement.querySelector(".geo-marker");
+      const el = canvasElement.querySelector(".geomap-marker");
       expect(el).toBeTruthy();
       return el!;
     });
