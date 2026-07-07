@@ -19,7 +19,7 @@ for (const id of STORIES) {
   test(`story ${id}`, async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto(`/iframe.html?id=${id}&viewMode=story`);
-    await page.locator(".geo").waitFor();
+    await page.locator(".geomap").waitFor();
     await page.evaluate(() => document.fonts.ready);
     // One settle frame after fonts/layout.
     await page.waitForTimeout(250);
