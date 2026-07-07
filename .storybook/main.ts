@@ -12,11 +12,11 @@ const config: StorybookConfig = {
     // the demo site always tracks the working tree (same public surface).
     viteConfig.resolve.alias = [
       {
-        find: /^@cublya\/geo\/styles\.css$/,
+        find: /^@cublya\/geomap\/styles\.css$/,
         replacement: fileURLToPath(new URL("../src/styles.css", import.meta.url)),
       },
       {
-        find: /^@cublya\/geo$/,
+        find: /^@cublya\/geomap$/,
         replacement: fileURLToPath(new URL("../src/index.ts", import.meta.url)),
       },
     ];

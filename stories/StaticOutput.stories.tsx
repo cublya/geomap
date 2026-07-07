@@ -1,7 +1,7 @@
 import * as React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, waitFor } from "storybook/test";
-import { renderStaticMapSvg, svgToDataUrl, svgToPngBlob } from "@cublya/geo";
+import { renderStaticMapSvg, svgToDataUrl, svgToPngBlob } from "@cublya/geomap";
 import { CITIES, Frame, world } from "./support";
 
 const meta = {
@@ -53,7 +53,7 @@ function StaticDemo() {
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
-            a.download = "geo-share.png";
+            a.download = "geomap-share.png";
             a.click();
             URL.revokeObjectURL(url);
             setDownloaded(true);

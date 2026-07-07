@@ -1,7 +1,7 @@
 import * as React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, waitFor } from "storybook/test";
-import { GeoMap } from "@cublya/geo";
+import { GeoMap } from "@cublya/geomap";
 import { CITIES, Frame, world } from "./support";
 
 const meta = {
@@ -43,7 +43,7 @@ export const GreatCircle: Story = {
   ),
   play: async ({ canvasElement }) => {
     await waitFor(() => {
-      expect(canvasElement.querySelectorAll(".geo-route").length).toBe(2);
+      expect(canvasElement.querySelectorAll(".geomap-route").length).toBe(2);
     });
   },
 };
@@ -70,9 +70,9 @@ export const MultiStop: Story = {
   ),
   play: async ({ canvasElement }) => {
     await waitFor(() => {
-      expect(canvasElement.querySelectorAll(".geo-route").length).toBe(1);
+      expect(canvasElement.querySelectorAll(".geomap-route").length).toBe(1);
       expect(
-        canvasElement.querySelector(".geo-route")!.getAttribute("d")!.length,
+        canvasElement.querySelector(".geomap-route")!.getAttribute("d")!.length,
       ).toBeGreaterThan(100);
     });
   },

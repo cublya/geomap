@@ -8,7 +8,7 @@ import {
   type GeoMarker,
   type GeoRoute,
   type LiveObject,
-} from "@cublya/geo";
+} from "@cublya/geomap";
 import { Frame, scoreFill, worldDetailed } from "./support";
 
 const meta = {
@@ -105,8 +105,8 @@ export const Stress: Story = {
     await waitFor(
       () => {
         expect(canvasElement.querySelectorAll("path[data-country]").length).toBeGreaterThan(200);
-        expect(canvasElement.querySelectorAll(".geo-marker").length).toBe(400);
-        expect(canvasElement.querySelectorAll(".geo-live").length).toBe(24);
+        expect(canvasElement.querySelectorAll(".geomap-marker").length).toBe(400);
+        expect(canvasElement.querySelectorAll(".geomap-live").length).toBe(24);
       },
       { timeout: 10000 },
     );

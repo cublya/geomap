@@ -6,8 +6,8 @@ import {
   GeoTooltip,
   type CountryHover,
   type PreparedCountry,
-} from "@cublya/geo";
-import "@cublya/geo/styles.css";
+} from "@cublya/geomap";
+import "@cublya/geomap/styles.css";
 import { Frame, scoreFill, mockScore, world } from "./support";
 
 const meta = {
@@ -104,7 +104,7 @@ export const Patterns: Story = {
   ),
   play: async ({ canvasElement }) => {
     await waitFor(() => {
-      expect(canvasElement.querySelectorAll(".geo-pattern").length).toBe(
+      expect(canvasElement.querySelectorAll(".geomap-pattern").length).toBe(
         visited.size + wishlist.size,
       );
     });
@@ -137,10 +137,10 @@ export const Tooltip: Story = {
     });
     await userEvent.hover(australia);
     await waitFor(() => {
-      const tip = document.querySelector(".geo-tooltip");
+      const tip = document.querySelector(".geomap-tooltip");
       expect(tip?.textContent).toContain("Australia");
     });
     await userEvent.unhover(australia);
-    await waitFor(() => expect(document.querySelector(".geo-tooltip")).toBeNull());
+    await waitFor(() => expect(document.querySelector(".geomap-tooltip")).toBeNull());
   },
 };
