@@ -38,7 +38,7 @@ export function GeoTooltip({
   return (
     <div
       role="tooltip"
-      className={cx("geo-tooltip", className)}
+      className={cx("geomap-tooltip", className)}
       style={{
         position: "fixed",
         left: point[0],

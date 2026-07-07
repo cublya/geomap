@@ -109,7 +109,7 @@ export {
 } from "./react/layers";
 export { useGeo, type GeoContextValue } from "./react/geo-context";
 
-// Optional UI helpers (cosmetics live in the optional @cublya/geo/styles.css)
+// Optional UI helpers (cosmetics live in the optional @cublya/geomap/styles.css)
 export { GeoControls, type CameraControlsHandle, type GeoControlsProps } from "./react/controls";
 export { GeoTooltip, type GeoTooltipProps } from "./react/tooltip";
 

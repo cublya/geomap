@@ -17,7 +17,7 @@
     "noEmit": true,
     "types": ["vitest/globals"],
     "paths": {
-      "@cublya/geo": ["./src/index.ts"]
+      "@cublya/geomap": ["./src/index.ts"]
     }
   },
   "include": [

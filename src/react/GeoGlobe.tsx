@@ -260,7 +260,7 @@ export function GeoGlobe<TMarker = unknown, TRoute = unknown, TLive = unknown>({
       onClick={() => {
         if (!isDraggingRef.current) countries?.onSelect?.(null);
       }}
-      className={cx("geo", "geo-globe", className)}
+      className={cx("geomap", "geomap-globe", className)}
       style={{
         display: "block",
         width: "100%",
@@ -278,7 +278,7 @@ export function GeoGlobe<TMarker = unknown, TRoute = unknown, TLive = unknown>({
       <GeoProvider value={context}>
         <PatternDefs />
         <path
-          className="geo-sphere"
+          className="geomap-sphere"
           d={sphereD}
           fill={theme.ocean}
           stroke={theme.sphere}

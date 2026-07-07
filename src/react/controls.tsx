@@ -25,7 +25,7 @@ export interface GeoControlsProps {
 /**
  * Zoom-in / zoom-out / reset button cluster. With a `preset` it looks complete
  * out of the box via preset tokens (inline styles — no CSS import needed); the
- * optional `@cublya/geo/styles.css` adds hover/focus polish that attributes
+ * optional `@cublya/geomap/styles.css` adds hover/focus polish that attributes
  * can't express. Position it via `className`/`style` — it renders in normal
  * flow.
  */
@@ -67,7 +67,7 @@ export function GeoControls({
     <div
       role="group"
       aria-label="Map controls"
-      className={cx("geo-controls", className)}
+      className={cx("geomap-controls", className)}
       style={{
         ...(styled && { display: "flex", flexDirection: "column", gap: 4 }),
         ...style,
@@ -77,7 +77,7 @@ export function GeoControls({
         <button
           key={label}
           type="button"
-          className="geo-controls__button"
+          className="geomap-controls__button"
           aria-label={label}
           onClick={action}
           style={buttonStyle}

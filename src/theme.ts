@@ -12,10 +12,10 @@
  *   5. direct element props    — `marker.color`, `route.color`, `countries.stroke`, …
  *
  * The default preset is `none`: components emit no presentation attributes and
- * render exactly what you tell them to (plus the semantic `geo-*` class names
+ * render exactly what you tell them to (plus the semantic `geomap-*` class names
  * for CSS-driven styling). Pass `preset="light"` (or `"dark"` / `"minimal"`) to
  * opt into a complete out-of-the-box look — every value in those presets is a
- * `var(--geo-<token>, <fallback>)` expression, so consumers can also override
+ * `var(--geomap-<token>, <fallback>)` expression, so consumers can also override
  * globally with CSS variables instead of props.
  *
  * Palettes use OKLCH neutrals (no raw #fff/#000) with AA-contrast ink/surface
@@ -91,7 +91,7 @@ const CSS_VAR_NAMES: Record<keyof GeoTheme, string> = {
 function withVars(fallbacks: Record<keyof GeoTheme, string>): GeoTheme {
   const theme = {} as Record<keyof GeoTheme, string>;
   for (const key of Object.keys(CSS_VAR_NAMES) as (keyof GeoTheme)[]) {
-    theme[key] = `var(--geo-${CSS_VAR_NAMES[key]}, ${fallbacks[key]})`;
+    theme[key] = `var(--geomap-${CSS_VAR_NAMES[key]}, ${fallbacks[key]})`;
   }
   return theme;
 }

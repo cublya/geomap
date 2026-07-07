@@ -45,7 +45,7 @@ describe("GeoControls", () => {
     const camera = createMapCamera();
     render(<GeoControls camera={camera} preset="light" />);
     const button = screen.getByRole("button", { name: "Zoom in" });
-    expect(button.style.background).toContain("--geo-control-bg");
+    expect(button.style.background).toContain("--geomap-control-bg");
   });
 
   it("accepts custom labels", () => {
@@ -85,7 +85,7 @@ describe("GeoTooltip", () => {
       </GeoTooltip>,
     );
     const tip = screen.getByRole("tooltip");
-    expect(tip.style.background).toContain("--geo-tooltip-bg");
+    expect(tip.style.background).toContain("--geomap-tooltip-bg");
   });
 });
 
@@ -101,15 +101,15 @@ describe("presets on GeoMap", () => {
   it('preset="light" looks complete: fills land and ocean out of the box', () => {
     const { container } = render(<GeoMap countries={{ data: world }} preset="light" />);
     const de = container.querySelector('path[data-country="de"]')!;
-    expect(de.getAttribute("fill")).toMatch(/^var\(--geo-land, oklch\(.+\)\)$/);
+    expect(de.getAttribute("fill")).toMatch(/^var\(--geomap-land, oklch\(.+\)\)$/);
     const svg = container.querySelector("svg")!;
-    expect(svg.style.background).toContain("--geo-ocean");
+    expect(svg.style.background).toContain("--geomap-ocean");
   });
 
   it("dark preset emits CSS-variable fills with dark OKLCH fallbacks", () => {
     const { container } = render(<GeoMap countries={{ data: world }} preset="dark" />);
     const de = container.querySelector('path[data-country="de"]')!;
-    expect(de.getAttribute("fill")).toBe("var(--geo-land, oklch(0.33 0.008 250))");
+    expect(de.getAttribute("fill")).toBe("var(--geomap-land, oklch(0.33 0.008 250))");
   });
 
   it("theme overrides win over the preset (precedence step 3)", () => {
@@ -144,11 +144,11 @@ describe("presets on GeoMap", () => {
     );
     const de = container.querySelector('path[data-country="de"]')!;
     expect(de.getAttribute("fill")).toBeNull();
-    expect(de.getAttribute("class")).toBe("geo-country");
-    expect(container.querySelector(".geo-route")!.getAttribute("stroke")).toBeNull();
-    expect(container.querySelector(".geo-graticule")).toBeTruthy();
-    expect(container.querySelector(".geo-marker")).toBeTruthy();
-    expect(container.querySelector("svg")!.getAttribute("class")).toContain("geo-map");
+    expect(de.getAttribute("class")).toBe("geomap-country");
+    expect(container.querySelector(".geomap-route")!.getAttribute("stroke")).toBeNull();
+    expect(container.querySelector(".geomap-graticule")).toBeTruthy();
+    expect(container.querySelector(".geomap-marker")).toBeTruthy();
+    expect(container.querySelector("svg")!.getAttribute("class")).toContain("geomap-map");
   });
 
   it("marks the selected country with a data attribute for CSS targeting", () => {
@@ -156,7 +156,7 @@ describe("presets on GeoMap", () => {
       <GeoMap countries={{ data: world, selectedId: "jp" }} preset="none" />,
     );
     expect(container.querySelector('path[data-country="jp"][data-selected]')).toBeTruthy();
-    expect(container.querySelector(".geo-selection")).toBeTruthy();
+    expect(container.querySelector(".geomap-selection")).toBeTruthy();
   });
 
   it("disabled countries are dimmed and inert", () => {
@@ -169,7 +169,7 @@ describe("presets on GeoMap", () => {
     );
     const fr = container.querySelector('path[data-country="fr"]')!;
     expect(fr.getAttribute("data-disabled")).toBe("");
-    expect(fr.getAttribute("fill")).toContain("--geo-land-disabled");
+    expect(fr.getAttribute("fill")).toContain("--geomap-land-disabled");
     fireEvent.click(fr);
     expect(onSelect).not.toHaveBeenCalled();
     fireEvent.click(container.querySelector('path[data-country="de"]')!);
@@ -182,11 +182,11 @@ describe("presets on GeoMap", () => {
     );
     const br = container.querySelector('path[data-country="br"]')!;
     fireEvent.pointerEnter(br, { clientX: 10, clientY: 10 });
-    const overlay = container.querySelector(".geo-hover");
+    const overlay = container.querySelector(".geomap-hover");
     expect(overlay).toBeTruthy();
-    expect(overlay!.getAttribute("fill")).toContain("--geo-land-hover");
+    expect(overlay!.getAttribute("fill")).toContain("--geomap-land-hover");
     fireEvent.pointerLeave(br);
-    expect(container.querySelector(".geo-hover")).toBeNull();
+    expect(container.querySelector(".geomap-hover")).toBeNull();
   });
 
   it("preset none skips the hover overlay entirely (no landHover token)", () => {
@@ -195,6 +195,6 @@ describe("presets on GeoMap", () => {
     );
     const br = container.querySelector('path[data-country="br"]')!;
     fireEvent.pointerEnter(br, { clientX: 10, clientY: 10 });
-    expect(container.querySelector(".geo-hover")).toBeNull();
+    expect(container.querySelector(".geomap-hover")).toBeNull();
   });
 });
