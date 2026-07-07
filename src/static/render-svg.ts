@@ -26,7 +26,7 @@ export interface StaticMapOptions {
   preset?: GeoPresetName;
   /**
    * Partial token overrides over the preset. Preset values are
-   * `var(--geo-*, fallback)` — standalone SVGs resolve to the fallback,
+   * `var(--geomap-*, fallback)` — standalone SVGs resolve to the fallback,
    * so exports render correctly outside any page context.
    */
   theme?: Partial<GeoTheme>;

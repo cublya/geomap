@@ -43,7 +43,7 @@ export function GraticuleLayer() {
   const { path, theme } = useGeo();
   return (
     <path
-      className="geo-graticule"
+      className="geomap-graticule"
       d={path(GRATICULE) ?? undefined}
       fill="none"
       stroke={theme.graticule}
@@ -81,7 +81,7 @@ export function CountriesLayer({
   const trackHover = interactive && theme.landHover !== undefined;
 
   return (
-    <g className="geo-countries">
+    <g className="geomap-countries">
       {shapes.map(({ country, d }) => {
         const isSelected = selectedId != null && country.id === selectedId;
         const isDisabled = disabled?.(country) ?? false;
@@ -95,7 +95,7 @@ export function CountriesLayer({
         return (
           <React.Fragment key={country.id}>
             <path
-              className="geo-country"
+              className="geomap-country"
               d={d}
               fill={resolvedFill}
               stroke={isSelected ? theme.selectedStroke : (stroke ?? theme.landStroke)}
@@ -147,7 +147,7 @@ export function CountriesLayer({
             </path>
             {patternKind && (
               <path
-                className="geo-pattern"
+                className="geomap-pattern"
                 d={d}
                 fill={`url(#${patternKind === "hatch" ? patternIds.hatch : patternIds.dots})`}
                 stroke="none"
@@ -156,7 +156,7 @@ export function CountriesLayer({
             )}
             {trackHover && hoveredId === country.id && (
               <path
-                className="geo-hover"
+                className="geomap-hover"
                 d={d}
                 fill={theme.landHover}
                 stroke="none"
@@ -173,7 +173,7 @@ export function CountriesLayer({
           .map(({ country, d }) => (
             <path
               key={`${country.id}-selected`}
-              className="geo-selection"
+              className="geomap-selection"
               d={d}
               fill="none"
               stroke={theme.selectedStroke}
@@ -198,7 +198,7 @@ export interface MarkersLayerProps<T = unknown> {
 export function MarkersLayer<T>({ markers, onMarkerClick, renderMarker }: MarkersLayerProps<T>) {
   const { project, theme, counterScale, isDraggingRef } = useGeo();
   return (
-    <g className="geo-markers">
+    <g className="geomap-markers">
       {markers.map((marker) => {
         const position = project(marker.coordinates);
         if (!position) return null;
@@ -215,7 +215,7 @@ export function MarkersLayer<T>({ markers, onMarkerClick, renderMarker }: Marker
           return (
             <g
               key={marker.id}
-              className="geo-marker"
+              className="geomap-marker"
               data-kind={marker.kind}
               transform={`translate(${position[0]} ${position[1]})`}
               {...clickProps}
@@ -229,7 +229,7 @@ export function MarkersLayer<T>({ markers, onMarkerClick, renderMarker }: Marker
         return (
           <g
             key={marker.id}
-            className="geo-marker"
+            className="geomap-marker"
             data-kind={marker.kind}
             transform={`translate(${position[0]} ${position[1]})`}
             {...clickProps}
@@ -239,7 +239,7 @@ export function MarkersLayer<T>({ markers, onMarkerClick, renderMarker }: Marker
             </circle>
             {marker.label && (
               <text
-                className="geo-label"
+                className="geomap-label"
                 x={r + 3 * counterScale}
                 y={r}
                 fontSize={9 * counterScale}
@@ -263,7 +263,7 @@ export interface RoutesLayerProps<T = unknown> {
 export function RoutesLayer<T>({ routes }: RoutesLayerProps<T>) {
   const { path, theme } = useGeo();
   return (
-    <g className="geo-routes" pointerEvents="none">
+    <g className="geomap-routes" pointerEvents="none">
       {routes.map((route) => {
         if (route.stops.length < 2) return null;
         const d = path(routeLineString(route.stops));
@@ -271,7 +271,7 @@ export function RoutesLayer<T>({ routes }: RoutesLayerProps<T>) {
         return (
           <path
             key={route.id}
-            className="geo-route"
+            className="geomap-route"
             d={d}
             fill="none"
             stroke={route.color ?? theme.route}
@@ -401,7 +401,7 @@ export function LiveLayer<T>({
   );
 
   return (
-    <g className="geo-live-objects">
+    <g className="geomap-live-objects">
       {objects.map((object) => {
         const state = states.get(object.id) ?? liveTarget(object);
         const trailStops: Coordinate[] | undefined =
@@ -409,10 +409,10 @@ export function LiveLayer<T>({
         const position = project(state.position);
         const color = object.color ?? theme.live;
         return (
-          <g key={object.id} className="geo-live">
+          <g key={object.id} className="geomap-live">
             {trailStops && (
               <path
-                className="geo-trail"
+                className="geomap-trail"
                 d={path(routeLineString(trailStops)) ?? undefined}
                 fill="none"
                 stroke={object.color ?? theme.trail}
@@ -431,11 +431,11 @@ export function LiveLayer<T>({
                 <g transform={`translate(${position[0]} ${position[1]})`}>
                   <g transform={`rotate(${state.heading}) scale(${counterScale})`}>
                     {/* 's plane glyph: nose up, rotated by navigational heading. */}
-                    <path className="geo-live-icon" d="M0,-7 L4.2,6 L0,3.2 L-4.2,6 Z" fill={color} />
+                    <path className="geomap-live-icon" d="M0,-7 L4.2,6 L0,3.2 L-4.2,6 Z" fill={color} />
                   </g>
                   {object.label && (
                     <text
-                      className="geo-label"
+                      className="geomap-label"
                       x={9 * counterScale}
                       y={3 * counterScale}
                       fontSize={9 * counterScale}

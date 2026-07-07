@@ -218,7 +218,7 @@ export function GeoMap<TMarker = unknown, TRoute = unknown, TLive = unknown>({
       onClick={() => {
         if (!isDraggingRef.current) countries?.onSelect?.(null);
       }}
-      className={cx("geo", "geo-map", className)}
+      className={cx("geomap", "geomap-map", className)}
       style={{
         display: "block",
         width: "100%",
