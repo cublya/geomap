@@ -46,7 +46,7 @@ export interface GeoGlobeProps<TMarker = unknown, TRoute = unknown, TLive = unkn
   /** Idle spin in degrees per second; pauses while interacting. Off by default. */
   autoRotate?: number;
   graticule?: boolean;
-  /** Visual preset: "none" (default, unstyled) | "light" | "dark" | "minimal". */
+  /** Visual preset: "none" (default, unstyled) | "light" | "dark" | "minimal" | "crisp". */
   preset?: GeoPresetName;
   /** Partial token overrides applied over the preset. */
   theme?: Partial<GeoTheme>;
@@ -122,12 +122,18 @@ export function GeoGlobe<TMarker = unknown, TRoute = unknown, TLive = unknown>({
 
   const view = React.useSyncExternalStore(camera.subscribe, camera.getView, camera.getView);
 
-  // Round the frame so tween frames with sub-threshold deltas reuse the memoised
-  // projection/path ('s trick).
-  const lambda = Math.round(view.rotation[0] * 2) / 2;
-  const phi = Math.round(view.rotation[1] * 2) / 2;
-  const gamma = Math.round(view.rotation[2] * 2) / 2;
   const zoom = Math.round(view.zoom * 100) / 100;
+  // Snap the frame so tween/inertia frames with sub-pixel deltas reuse the
+  // memoised projection/path ('s trick). The step is derived from the
+  // on-screen pixels-per-degree — which grows with zoom — so the snap stays
+  // ~0.5px at every zoom level instead of a fixed 0.5° that visibly stepped
+  // (2.3px at zoom 1, ~14px zoomed in) and made the inertia tail freeze early.
+  const pxPerDegree = (globe.baseScale * zoom * Math.PI) / 180;
+  const rotationStep = pxPerDegree > 0 ? 0.5 / pxPerDegree : 0.5;
+  const snap = (deg: number) => Math.round(deg / rotationStep) * rotationStep;
+  const lambda = snap(view.rotation[0]);
+  const phi = snap(view.rotation[1]);
+  const gamma = snap(view.rotation[2]);
 
   const { projection, path } = React.useMemo(() => {
     const p = configureGlobe(globe, { width, height }, [lambda, phi, gamma], zoom);
