@@ -1,6 +1,6 @@
-import { geoBounds, geoCentroid } from "d3-geo";
+import { geoArea, geoBounds, geoCentroid } from "d3-geo";
 import { feature as topoFeature } from "topojson-client";
-import type { Feature, FeatureCollection, Geometry } from "geojson";
+import type { Feature, FeatureCollection, Geometry, Position } from "geojson";
 import type { GeometryCollection, Topology } from "topojson-specification";
 import type { CountrySet, GeoBounds, LonLat, PreparedCountry } from "../types";
 import { lookupIso, normalizeName, resolveCountryName, type IsoCountry } from "./iso";
@@ -41,6 +41,34 @@ function toFeatures(source: CountrySource, object: string): CountryFeature[] {
     return collection.features as CountryFeature[];
   }
   return source.features.map((f) => ({ ...f, properties: f.properties ?? {} }));
+}
+
+/**
+ * Normalize polygon winding for d3-geo. RFC 7946 GeoJSON winds exterior rings
+ * counterclockwise, but d3-geo expects the opposite: a ring enclosing more than
+ * a hemisphere (area > 2π steradians) is read as covering the whole sphere minus
+ * the intended region, which renders as a globe-filling fill. Reversing every
+ * ring of an inverted polygon flips the exterior and keeps holes opposite to it.
+ * TopoJSON output is already d3-wound, so this is a no-op there.
+ */
+function rewindPolygon(rings: Position[][]): Position[][] {
+  if (rings.length === 0) return rings;
+  const inverted = geoArea({ type: "Polygon", coordinates: rings }) > 2 * Math.PI;
+  return inverted ? rings.map((ring) => [...ring].reverse()) : rings;
+}
+
+function rewindFeature(feature: CountryFeature): CountryFeature {
+  const geometry = feature.geometry;
+  if (geometry.type === "Polygon") {
+    return { ...feature, geometry: { ...geometry, coordinates: rewindPolygon(geometry.coordinates) } };
+  }
+  if (geometry.type === "MultiPolygon") {
+    return {
+      ...feature,
+      geometry: { ...geometry, coordinates: geometry.coordinates.map(rewindPolygon) },
+    };
+  }
+  return feature;
 }
 
 function propString(props: Record<string, unknown>, keys: string[]): string | undefined {
@@ -103,7 +131,8 @@ export function prepareCountries(
       .some((v) => excludeKeys.has(normalizeName(v)));
 
   const countries: PreparedCountry[] = [];
-  for (const feature of features) {
+  for (const rawFeature of features) {
+    const feature = rewindFeature(rawFeature);
     const iso = resolveIdentity(feature);
     const name =
       iso?.name ??
