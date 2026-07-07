@@ -1,11 +1,11 @@
 # Examples
 
 Self-contained, typechecked usage examples (each mirrors one of the Cublya apps the
-package was distilled from). They import `@cublya/geo` via the repo's tsconfig path
+package was distilled from). They import `@cublya/geomap` via the repo's tsconfig path
 alias, so `npm run typecheck` keeps them honest.
 
 To run one in a real app, copy the file into any React project that has
-`@cublya/geo`, `react` and `world-atlas` installed.
+`@cublya/geomap`, `react` and `world-atlas` installed.
 
 | File | Shows |
 | --- | --- |
