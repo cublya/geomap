@@ -29,6 +29,9 @@ describe("GeoControls", () => {
     render(<GeoControls camera={camera} />);
     const button = screen.getByRole("button", { name: "Zoom in" });
     expect(button.getAttribute("style")).toBeNull();
+    // headless still exposes stable hooks for raw CSS
+    expect(button.getAttribute("data-geomap-part")).toBe("zoom-in");
+    expect(button.className).toBe("geomap-controls__button");
   });
 
   it("drives any camera and works with no stylesheet", () => {
@@ -44,14 +47,43 @@ describe("GeoControls", () => {
   it("preset styling is complete without any CSS import", () => {
     const camera = createMapCamera();
     render(<GeoControls camera={camera} preset="light" />);
-    const button = screen.getByRole("button", { name: "Zoom in" });
-    expect(button.style.background).toContain("--geomap-control-bg");
+    // the pill container carries the surface; buttons inherit ink
+    const group = screen.getByRole("group", { name: "Map controls" });
+    expect(group.style.background).toContain("--geomap-control-bg");
+    expect(screen.getByRole("button", { name: "Zoom in" }).style.color).toContain(
+      "--geomap-control-ink",
+    );
   });
 
   it("accepts custom labels", () => {
     const camera = createMapCamera();
     render(<GeoControls camera={camera} labels={{ zoomIn: "Bigger" }} />);
     expect(screen.getByRole("button", { name: "Bigger" })).toBeTruthy();
+  });
+
+  it("applies per-part classNames (Tailwind seam) after the base classes", () => {
+    const camera = createMapCamera();
+    render(
+      <GeoControls
+        camera={camera}
+        classNames={{ root: "rounded-xl", button: "size-9", reset: "text-red-500" }}
+      />,
+    );
+    expect(screen.getByRole("group", { name: "Map controls" }).className).toBe(
+      "geomap-controls rounded-xl",
+    );
+    const zoomIn = screen.getByRole("button", { name: "Zoom in" });
+    expect(zoomIn.className).toBe("geomap-controls__button size-9");
+    const reset = screen.getByRole("button", { name: "Reset view" });
+    expect(reset.className).toBe("geomap-controls__button size-9 text-red-500");
+  });
+
+  it("reflects orientation on the group for CSS targeting", () => {
+    const camera = createMapCamera();
+    render(<GeoControls camera={camera} orientation="horizontal" />);
+    expect(
+      screen.getByRole("group", { name: "Map controls" }).getAttribute("data-geomap-orientation"),
+    ).toBe("horizontal");
   });
 });
 
