@@ -8,7 +8,7 @@ import {
   prepareCountries,
   type Coordinate,
   type LiveObject,
-} from "@cublya/geo";
+} from "@cublya/geomap";
 import type { Topology } from "topojson-specification";
 import world110 from "world-atlas/countries-110m.json";
 

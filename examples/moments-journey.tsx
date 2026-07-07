@@ -1,7 +1,7 @@
 // -style: spend choropleth + journey pins + multi-stop arcs, auto-framed.
 // Wheel zoom is disabled so the surrounding page keeps scrolling (zoom buttons only).
 import * as React from "react";
-import { GeoMap, prepareCountries, useMapCamera, type Coordinate } from "@cublya/geo";
+import { GeoMap, prepareCountries, useMapCamera, type Coordinate } from "@cublya/geomap";
 import type { Topology } from "topojson-specification";
 import world110 from "world-atlas/countries-110m.json";
 
