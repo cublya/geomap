@@ -20,11 +20,17 @@ npm install world-atlas
 React ≥ 18 and `react-dom` are peer dependencies. The package is ESM-only with
 `sideEffects: false` — unused layers and helpers tree-shake away.
 
+`world-atlas` ships three resolutions; only `countries-10m.json` covers all 193
+UN member states and both non-member observer states. The 50m file drops Tuvalu;
+the 110m file drops 28 members and the Holy See — see
+[docs/basemap-coverage.md](docs/basemap-coverage.md) for the full breakdown and
+how to re-verify after a `world-atlas` upgrade.
+
 ## Quickstart
 
 ```tsx
 import { GeoMap, prepareCountries } from "@cublya/geomap";
-import world from "world-atlas/countries-110m.json";
+import world from "world-atlas/countries-10m.json";
 
 const countries = prepareCountries(world, { exclude: ["AQ"] });
 
@@ -60,8 +66,10 @@ orthographic globe with inertia:
 ## Country data and ISO identity
 
 `prepareCountries(topologyOrGeoJSON, options)` converts TopoJSON (world-atlas
-convention) or a GeoJSON FeatureCollection and resolves every feature against a
-bundled ISO 3166-1 table plus a Natural-Earth name reconciliation map:
+convention — see [docs/basemap-coverage.md](docs/basemap-coverage.md) for which
+resolution has full UN-member coverage) or a GeoJSON FeatureCollection and
+resolves every feature against a bundled ISO 3166-1 table plus a Natural-Earth
+name reconciliation map:
 
 ```ts
 const world = prepareCountries(topology, {
@@ -199,19 +207,46 @@ Non-color state encoding (colour-blind-safe, à la ) via
 
 ### Optional controls, tooltip and stylesheet
 
-`GeoControls` (zoom in/out/reset for either camera) and `GeoTooltip`
-(pointer-anchored hover tooltip) take the same `preset`/`theme` props, also
-defaulting to `preset="none"` (bare buttons/div for your own CSS). Pass the
-same preset as your map — e.g. `<GeoControls camera={camera} preset="light" />`
-— for a matching, complete look with no CSS file. The optional stylesheet only
-adds what inline styles can't express — hover/active/focus-visible states and
-a tooltip shadow — and styles nothing but these HTML helpers (all selectors
+`GeoControls` (zoom in/out/reset for either camera, rendered as a segmented
+pill with SVG icons) and `GeoTooltip` (pointer-anchored hover tooltip) take the
+same `preset`/`theme` props, also defaulting to `preset="none"`. Pass the same
+preset as your map — e.g. `<GeoControls camera={camera} preset="light" />` — for
+a matching, complete look (shadow and icons included) with no CSS file. The
+optional stylesheet only adds what inline styles can't express — hover/active/
+focus-visible states — and styles nothing but these HTML helpers (all selectors
 namespaced under `.geomap-*`, so it cannot leak):
 
 ```tsx
 import { GeoControls, GeoTooltip } from "@cublya/geomap";
 import "@cublya/geomap/styles.css";   // optional pseudo-class polish
 ```
+
+**Bring your own styles (Tailwind or raw CSS).** Every part has a stable class
+and a `data-geomap-part` hook, and `preset="none"` emits **zero** inline styles —
+so your classes never fight an inline `style`. Use the `classNames` slots to
+attach utility classes per part:
+
+```tsx
+// Tailwind — own every part
+<GeoControls
+  camera={camera}
+  classNames={{
+    root: "gap-1 rounded-xl bg-white/90 shadow-lg backdrop-blur",
+    button: "size-9 text-slate-700 hover:bg-slate-100",
+    reset: "text-rose-500",
+  }}
+/>
+
+// Raw CSS — headless; target the semantic hooks
+<GeoControls camera={camera} orientation="horizontal" />
+```
+```css
+.geomap-controls { border-radius: 12px; overflow: hidden; }
+.geomap-controls__button { width: 36px; height: 36px; }
+[data-geomap-part="reset"] { color: crimson; }
+```
+
+`GeoTooltip` exposes the same `className` / `data-geomap-part="tooltip"` hooks.
 
 ## Interaction & accessibility
 
