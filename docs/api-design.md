@@ -220,11 +220,21 @@ Consumer override channels, combinable:
   `[data-selected]`, `[data-disabled]`), `-hover`, `-pattern`, `-selection`,
   `-route`, `-marker`, `-label`, `-live`, `-trail`, `-graticule`, `-sphere`.
 
-`GeoControls` and `GeoTooltip` (optional HTML helpers) take the same
-`preset`/`theme` props, also defaulting to `"none"` (bare elements); pass the
-same preset as your map for a matching, complete look. The optional
-`@cublya/geomap/styles.css` adds only hover/active/focus-visible polish and a
-tooltip shadow — namespaced under `.geomap-*`, it styles nothing else.
+`GeoControls` (a segmented pill with SVG icons) and `GeoTooltip` (optional HTML
+helpers) take the same `preset`/`theme` props, also defaulting to `"none"`; pass
+the same preset as your map for a matching, complete look (shadow + icons
+included, no CSS file). The optional `@cublya/geomap/styles.css` adds only
+hover/active/focus-visible polish — namespaced under `.geomap-*`, it styles
+nothing else.
+
+Three styling channels, combinable — designed so utility CSS (Tailwind) and raw
+CSS both work without fighting inline styles:
+- **`preset`/`theme`** — complete inline look from tokens (default channel).
+- **`classNames` slots** — `{ root, button, zoomIn, zoomOut, reset }`, appended
+  after the base classes; the Tailwind seam.
+- **Headless (`preset="none"`)** — emits **no** inline styles, only the semantic
+  `.geomap-controls*` classes and `data-geomap-part` (`controls`/`zoom-in`/
+  `zoom-out`/`reset`/`tooltip`) + `data-geomap-orientation` hooks for raw CSS.
 
 ## Static output (share images)
 

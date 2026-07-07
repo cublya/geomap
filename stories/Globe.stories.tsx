@@ -61,7 +61,11 @@ function FocusDemo() {
           </button>
         ))}
       </div>
-      <GeoControls camera={camera} style={{ position: "absolute", bottom: 16, right: 16 }} />
+      <GeoControls
+        camera={camera}
+        preset="light"
+        style={{ position: "absolute", bottom: 16, right: 16 }}
+      />
     </Frame>
   );
 }

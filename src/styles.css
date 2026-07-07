@@ -2,27 +2,30 @@
  * Optional polish for @cublya/geomap's GeoControls and GeoTooltip — the only HTML
  * pieces of the package. The core map (SVG) takes all of its presentation from
  * presets/theme tokens and never needs CSS; the controls and tooltip already
- * look complete from those tokens too. This file adds only what inline styles
- * cannot express: hover/active/focus-visible states and a tooltip shadow.
+ * look complete from those tokens too (including their pill shadow and icons).
+ * This file adds only what inline styles cannot express: hover / active /
+ * focus-visible states.
  *
  * Every selector is namespaced under .geomap-* — importing this file cannot
  * affect anything outside package components. No resets, no element selectors,
- * no raw #fff/#000.
+ * no raw #fff/#000. The hover/active tints derive from the button's own ink
+ * (currentColor), so they follow whatever preset or override is in effect.
  */
 
+.geomap-controls__button {
+  transition: background 120ms ease;
+}
+
 .geomap-controls__button:hover {
-  filter: brightness(0.96);
+  background: color-mix(in oklch, currentColor 8%, transparent);
 }
 
 .geomap-controls__button:active {
-  filter: brightness(0.92);
+  background: color-mix(in oklch, currentColor 14%, transparent);
 }
 
+/* Inset so the ring is not clipped by the pill's overflow:hidden. */
 .geomap-controls__button:focus-visible {
   outline: 2px solid var(--geomap-focus, oklch(0.55 0.17 255));
-  outline-offset: 2px;
-}
-
-.geomap-tooltip {
-  box-shadow: 0 4px 16px oklch(0.15 0.01 250 / 0.14);
+  outline-offset: -2px;
 }
