@@ -4,9 +4,13 @@ import { prepareCountries } from "@cublya/geomap";
 import type { Topology } from "topojson-specification";
 import world110 from "world-atlas/countries-110m.json";
 import world50 from "world-atlas/countries-50m.json";
+import world10 from "world-atlas/countries-10m.json";
 
 export const world = prepareCountries(world110 as unknown as Topology, { exclude: ["AQ"] });
 export const worldDetailed = prepareCountries(world50 as unknown as Topology, {
+  exclude: ["AQ"],
+});
+export const worldComplete = prepareCountries(world10 as unknown as Topology, {
   exclude: ["AQ"],
 });
 
@@ -17,7 +21,36 @@ export function mockScore(id: string): number {
   return hash;
 }
 
-export const SCORE_BINS = ["#e8e3f7", "#c6b8ee", "#a48ce2", "#7f61d3", "#5636b8"] as const;
+/**
+ * OKLCH by default, hex fallback. A single SVG `fill` attribute can't carry a
+ * fallback, and an unparsed color makes the shape fall back to black — not the
+ * hex — so we pick the supported syntax once at runtime.
+ */
+const supportsOklch =
+  typeof CSS !== "undefined" &&
+  typeof CSS.supports === "function" &&
+  CSS.supports("color", "oklch(0.5 0.1 200)");
+
+export const paint = (oklch: string, hex: string): string => (supportsOklch ? oklch : hex);
+
+/** Sequential teal ramp with perceptually-uniform (even-lightness) OKLCH steps. */
+export const SCORE_BINS = [
+  paint("oklch(0.956 0.015 182)", "#e6f4f1"),
+  paint("oklch(0.866 0.049 182)", "#b0ded5"),
+  paint("oklch(0.765 0.077 182)", "#79c3b6"),
+  paint("oklch(0.632 0.088 187)", "#3f9b93"),
+  paint("oklch(0.503 0.083 189)", "#12736e"),
+] as const;
+
+/** Single accent for markers/routes/live objects. */
+export const ACCENT = paint("oklch(0.531 0.089 191)", "#0e7c78");
+
+/** Secondary accent (crimson) that contrasts the teal without leaning orange. */
+export const ACCENT_ALT = paint("oklch(0.551 0.186 13)", "#c62f52");
+
+/** Categorical pair for two-way splits — blue + gold stays color-blind safe. */
+export const CVD_BLUE = paint("oklch(0.542 0.142 256)", "#2f6fc0");
+export const CVD_GOLD = paint("oklch(0.805 0.143 88)", "#e6b93f");
 
 export function scoreFill(id: string): string {
   return SCORE_BINS[Math.min(SCORE_BINS.length - 1, Math.floor((mockScore(id) / 101) * SCORE_BINS.length))]!;

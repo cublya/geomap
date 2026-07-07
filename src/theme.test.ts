@@ -2,12 +2,12 @@ import { describe, expect, it } from "vitest";
 import { cx, presets, resolveTheme } from "./theme";
 
 describe("presets", () => {
-  it("exposes exactly light, dark, minimal and none", () => {
-    expect(Object.keys(presets).sort()).toEqual(["dark", "light", "minimal", "none"]);
+  it("exposes exactly light, dark, minimal, crisp and none", () => {
+    expect(Object.keys(presets).sort()).toEqual(["crisp", "dark", "light", "minimal", "none"]);
   });
 
   it("styled presets wrap every token in a --geomap-* variable with a fallback", () => {
-    for (const name of ["light", "dark", "minimal"] as const) {
+    for (const name of ["light", "dark", "minimal", "crisp"] as const) {
       const values = Object.values(presets[name]);
       expect(values.length).toBeGreaterThanOrEqual(22);
       for (const value of values) {
@@ -28,6 +28,7 @@ describe("presets", () => {
     const keys = (p: object) => Object.keys(p).sort();
     expect(keys(presets.dark)).toEqual(keys(presets.light));
     expect(keys(presets.minimal)).toEqual(keys(presets.light));
+    expect(keys(presets.crisp)).toEqual(keys(presets.light));
   });
 
   it("none is explicitly empty", () => {

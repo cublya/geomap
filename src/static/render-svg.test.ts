@@ -11,7 +11,7 @@ describe("renderStaticMapSvg", () => {
     const svg = renderStaticMapSvg({
       width: 1080,
       height: 1080,
-      background: "#ffffff",
+      background: "#f6f6f6",
       countries: {
         data: world,
         fill: (c) => (c.id === "de" ? "#3355ff" : undefined),

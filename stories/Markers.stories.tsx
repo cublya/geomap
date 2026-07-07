@@ -2,7 +2,7 @@ import * as React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, userEvent, waitFor } from "storybook/test";
 import { GeoMap, type GeoMarker } from "@cublya/geomap";
-import { CITIES, Frame, world } from "./support";
+import { ACCENT, ACCENT_ALT, CITIES, Frame, world } from "./support";
 
 const meta = {
   title: "Layers/Markers",
@@ -25,7 +25,7 @@ export const Cities: Story = {
       <GeoMap
         preset="light"
         countries={{ data: world }}
-        markers={CITIES.map((c) => ({ ...c, kind: "city", size: 3, color: "#5636b8" }))}
+        markers={CITIES.map((c) => ({ ...c, kind: "city", size: 3, color: ACCENT }))}
         aria-label="Six world cities"
       />
     </Frame>
@@ -62,7 +62,7 @@ function CustomMarkerDemo() {
               width={8 * counterScale}
               height={8 * counterScale}
               transform="rotate(45)"
-              fill="#b03a20"
+              fill={ACCENT_ALT}
               stroke="#fff"
               strokeWidth={counterScale}
             />

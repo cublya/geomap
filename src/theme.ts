@@ -61,7 +61,7 @@ export interface GeoTheme {
 /** A theme after preset resolution; `undefined` values emit no attribute. */
 export type ResolvedGeoTheme = { readonly [K in keyof GeoTheme]?: string | undefined };
 
-export type GeoPresetName = "light" | "dark" | "minimal" | "none";
+export type GeoPresetName = "light" | "dark" | "minimal" | "crisp" | "none";
 
 const CSS_VAR_NAMES: Record<keyof GeoTheme, string> = {
   ocean: "ocean",
@@ -174,6 +174,39 @@ const minimal: GeoTheme = withVars({
   tooltipBorder: "oklch(0.2 0 0 / 0.2)",
 });
 
+/**
+ * Cut-paper cartography: country borders are stroked in the ocean tone, so
+ * neighbours read as clean hairline gaps rather than dark linework, and the map
+ * dissolves into its surface with no frame. Light neutral land with a distinct
+ * no-data tone keeps choropleth accents (supplied via the `fill` callback)
+ * popping. Warm-neutral and brand-free, like `light`, but higher contrast.
+ */
+const crisp: GeoTheme = withVars({
+  ocean: "oklch(0.99 0.004 90)",
+  land: "oklch(0.925 0.006 90)",
+  landMuted: "oklch(0.95 0.004 90)",
+  landDisabled: "oklch(0.965 0.002 90)",
+  landHover: "oklch(0.25 0.01 90 / 0.1)",
+  // Borders painted in the ocean tone → countries separate as clean gaps.
+  landStroke: "oklch(0.99 0.004 90)",
+  selectedStroke: "oklch(0.32 0.02 90)",
+  graticule: "oklch(0.25 0.01 90 / 0.06)",
+  sphere: "oklch(0.25 0.01 90 / 0.22)",
+  marker: "oklch(0.35 0.015 260)",
+  markerLabel: "oklch(0.3 0.01 90)",
+  route: "oklch(0.4 0.02 260)",
+  live: "oklch(0.4 0.02 260)",
+  trail: "oklch(0.4 0.02 260 / 0.45)",
+  patternInk: "oklch(0.25 0.01 90 / 0.55)",
+  focus: "oklch(0.55 0.17 255)",
+  controlBg: "oklch(0.99 0.002 90)",
+  controlInk: "oklch(0.3 0.01 90)",
+  controlBorder: "oklch(0.25 0.01 90 / 0.16)",
+  tooltipBg: "oklch(0.99 0.002 90)",
+  tooltipInk: "oklch(0.3 0.01 90)",
+  tooltipBorder: "oklch(0.25 0.01 90 / 0.14)",
+});
+
 /** Explicitly unstyled: no presentation attributes; your CSS owns everything. */
 const none: ResolvedGeoTheme = {};
 
@@ -182,6 +215,7 @@ export const presets: Record<GeoPresetName, ResolvedGeoTheme> = {
   light,
   dark,
   minimal,
+  crisp,
   none,
 };
 

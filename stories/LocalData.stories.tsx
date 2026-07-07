@@ -2,7 +2,7 @@ import * as React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, waitFor } from "storybook/test";
 import { GeoMap, prepareCountries } from "@cublya/geomap";
-import { Frame, scoreFill, worldDetailed } from "./support";
+import { Frame, scoreFill, worldComplete, ACCENT, CVD_GOLD } from "./support";
 
 const meta = {
   title: "Data/Local geodata",
@@ -10,7 +10,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "The package ships no basemap. `prepareCountries()` accepts any TopoJSON topology (world-atlas 110m/50m shown across these stories) or a plain GeoJSON FeatureCollection — identity resolves via numeric ids, ISO properties, then names.",
+          "The package ships no basemap. `prepareCountries()` accepts any TopoJSON topology (world-atlas 10m shown here for complete UN-member coverage) or a plain GeoJSON FeatureCollection — identity resolves via numeric ids, ISO properties, then names.",
       },
     },
   },
@@ -20,14 +20,14 @@ export default meta;
 type Story = StoryObj;
 
 export const HighResolutionTopoJSON: Story = {
-  name: "world-atlas 50m TopoJSON",
+  name: "world-atlas 10m TopoJSON (all UN members)",
   render: () => (
     <Frame>
       <GeoMap
         preset="light"
-        countries={{ data: worldDetailed, fill: (c) => scoreFill(c.id) }}
-        fit={worldDetailed.get("NO")!}
-        aria-label="Norwegian coastline at 50m resolution"
+        countries={{ data: worldComplete, fill: (c) => scoreFill(c.id) }}
+        fit={worldComplete.get("NO")!}
+        aria-label="Norwegian coastline at 10m resolution"
       />
     </Frame>
   ),
@@ -79,10 +79,10 @@ export const CustomGeoJSON: Story = {
         preset="light"
         countries={{
           data: customSet,
-          fill: (c) => (c.alpha2 ? "#7f61d3" : "#e0a832"),
+          fill: (c) => (c.alpha2 ? ACCENT : CVD_GOLD),
         }}
         fit={[[-32, 28], [17, 57]]}
-        aria-label="Three custom polygons; ISO-resolved ones purple, unknown amber"
+        aria-label="Three custom polygons; ISO-resolved ones teal, unknown gold"
       />
     </Frame>
   ),

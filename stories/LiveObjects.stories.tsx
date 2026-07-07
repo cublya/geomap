@@ -7,7 +7,7 @@ import {
   interpolateGreatCircle,
   type LiveObject,
 } from "@cublya/geomap";
-import { Frame, world } from "./support";
+import { ACCENT, Frame, world } from "./support";
 
 const meta = {
   title: "Layers/Live objects",
@@ -57,7 +57,7 @@ function toLiveObject(flight: (typeof FLIGHTS)[number], progress: number): LiveO
     coordinates: position,
     heading: bearingBetween(position, ahead),
     label: flight.id,
-    color: "#5636b8",
+    color: ACCENT,
   };
 }
 

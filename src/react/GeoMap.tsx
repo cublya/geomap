@@ -51,7 +51,7 @@ export interface GeoMapProps<TMarker = unknown, TRoute = unknown, TLive = unknow
   wheelZoom?: boolean;
   keyboard?: boolean;
   graticule?: boolean;
-  /** Visual preset: "none" (default, unstyled) | "light" | "dark" | "minimal". */
+  /** Visual preset: "none" (default, unstyled) | "light" | "dark" | "minimal" | "crisp". */
   preset?: GeoPresetName;
   /** Partial token overrides applied over the preset. */
   theme?: Partial<GeoTheme>;

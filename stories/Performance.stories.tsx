@@ -9,7 +9,7 @@ import {
   type GeoRoute,
   type LiveObject,
 } from "@cublya/geomap";
-import { Frame, scoreFill, worldDetailed } from "./support";
+import { ACCENT, Frame, scoreFill, worldDetailed } from "./support";
 
 const meta = {
   title: "Advanced/Performance stress",
@@ -44,7 +44,7 @@ const MARKERS: GeoMarker[] = Array.from({ length: 400 }, (_, i) => ({
   id: `m${i}`,
   coordinates: point(),
   size: 1.6,
-  color: "#5636b8",
+  color: ACCENT,
 }));
 
 const ROUTES: GeoRoute[] = Array.from({ length: 60 }, (_, i) => ({
