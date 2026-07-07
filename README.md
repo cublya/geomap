@@ -1,4 +1,4 @@
-# @cublya/geo
+# @cublya/geomap
 
 Composable React map primitives on [d3-geo](https://github.com/d3/d3-geo): country
 choropleths with real ISO identity, rotatable orthographic globes, markers,
@@ -12,7 +12,7 @@ apps (see [docs/feature-matrix.md](docs/feature-matrix.md) and the
 ## Install
 
 ```sh
-npm install @cublya/geo
+npm install @cublya/geomap
 # recommended basemap (the package deliberately ships none):
 npm install world-atlas
 ```
@@ -23,7 +23,7 @@ React ≥ 18 and `react-dom` are peer dependencies. The package is ESM-only with
 ## Quickstart
 
 ```tsx
-import { GeoMap, prepareCountries } from "@cublya/geo";
+import { GeoMap, prepareCountries } from "@cublya/geomap";
 import world from "world-atlas/countries-110m.json";
 
 const countries = prepareCountries(world, { exclude: ["AQ"] });
@@ -82,7 +82,7 @@ Identity helpers are exported standalone: `lookupIso("DEU")`,
 ## Cameras
 
 ```tsx
-import { GeoMap, useMapCamera } from "@cublya/geo";
+import { GeoMap, useMapCamera } from "@cublya/geomap";
 
 const camera = useMapCamera({ maxZoom: 8 });
 
@@ -176,22 +176,22 @@ optional controls/tooltip.
 <GeoMap preset="dark" theme={{ route: "oklch(0.8 0.1 150)" }} />
 
 // exported preset objects compose:
-import { presets } from "@cublya/geo";
+import { presets } from "@cublya/geomap";
 <GeoMap theme={{ ...presets.dark, marker: "var(--brand)" }} />
 ```
 
-Every preset value is `var(--geo-*, fallback)`, so any ancestor can
+Every preset value is `var(--geomap-*, fallback)`, so any ancestor can
 retheme every map inside it with plain CSS variables — no props needed:
 
 ```css
-:root { --geo-land: oklch(0.9 0.02 150); --geo-route: var(--brand); }
+:root { --geomap-land: oklch(0.9 0.02 150); --geomap-route: var(--brand); }
 ```
 
 With `preset="none"` no presentation attributes are emitted; start from scratch
-against the semantic class names — `geo-country` (plus `[data-country]`,
-`[data-selected]`, `[data-disabled]`), `geo-route`, `geo-marker`,
-`geo-label`, `geo-live`, `geo-trail`,
-`geo-graticule`, `geo-sphere`, `geo-hover`.
+against the semantic class names — `geomap-country` (plus `[data-country]`,
+`[data-selected]`, `[data-disabled]`), `geomap-route`, `geomap-marker`,
+`geomap-label`, `geomap-live`, `geomap-trail`,
+`geomap-graticule`, `geomap-sphere`, `geomap-hover`.
 
 Non-color state encoding (colour-blind-safe, à la ) via
 `countries.pattern: (c) => "hatch" | "dots" | undefined`; inert countries via
@@ -206,11 +206,11 @@ same preset as your map — e.g. `<GeoControls camera={camera} preset="light" />
 — for a matching, complete look with no CSS file. The optional stylesheet only
 adds what inline styles can't express — hover/active/focus-visible states and
 a tooltip shadow — and styles nothing but these HTML helpers (all selectors
-namespaced under `.geo-*`, so it cannot leak):
+namespaced under `.geomap-*`, so it cannot leak):
 
 ```tsx
-import { GeoControls, GeoTooltip } from "@cublya/geo";
-import "@cublya/geo/styles.css";   // optional pseudo-class polish
+import { GeoControls, GeoTooltip } from "@cublya/geomap";
+import "@cublya/geomap/styles.css";   // optional pseudo-class polish
 ```
 
 ## Interaction & accessibility
@@ -224,7 +224,7 @@ country carries a native `<title>`.
 ## Static share images
 
 ```ts
-import { renderStaticMapSvg, svgToPngBlob } from "@cublya/geo";
+import { renderStaticMapSvg, svgToPngBlob } from "@cublya/geomap";
 
 const svg = renderStaticMapSvg({
   width: 1080, height: 1080,
@@ -279,6 +279,11 @@ node scripts/generate-iso.mjs     # regenerate the ISO table
 
 Examples live in [`examples/`](examples); migration guides for the four Cublya apps
 in [`docs/migrations/`](docs/migrations).
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, the pre-PR check list, and
+conventions.
 
 ## License
 

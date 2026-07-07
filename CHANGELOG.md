@@ -1,10 +1,14 @@
 # Changelog
 
-## 0.1.0 (unreleased)
+All notable changes to this package are documented in this file.
 
-Initial release.
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this package adheres to [Semantic Versioning](https://semver.org/). It is
+currently pre-1.0 (`0.1.0`, unreleased), so the public API may still change.
 
-### Components & core
+## [Unreleased]
+
+### Added
 
 - `<GeoMap>` (Mercator / Natural Earth / Equal Earth / custom d3 projection) and
   `<GeoGlobe>` (orthographic, drag-rotate with inertia, optional auto-rotate).
@@ -24,31 +28,26 @@ Initial release.
 - Custom SVG layers via `useGeo()`; static `renderStaticMapSvg()` +
   `svgToPngBlob()` share images; server-safe imports (usable in React Server
   Components).
-
-### Styling
-
 - Built-in visual presets — complete looks with zero CSS imports, via SVG
   attributes and theme objects: `light`, `dark`, `minimal`, and `none`
   (**the default** — fully unstyled; pass `preset="light"` etc. to opt into a
   polished look with no CSS file). OKLCH neutral palettes, AA contrast, no raw
-  #fff/#000, no product branding.
+  `#fff`/`#000`, no product branding.
 - `preset` prop + `theme` partial token overrides + exported `presets` objects
-  for composition + `--geo-*` CSS variables for global overrides +
-  semantic `geo-*` class names (with `data-country` / `data-selected` /
+  for composition + `--geomap-*` CSS variables for global overrides +
+  semantic `geomap-*` class names (with `data-country` / `data-selected` /
   `data-disabled`), always present regardless of preset.
-- Style precedence: package defaults (`none`) → selected preset → theme
-  overrides → per-feature callbacks → direct element props.
-- Tokens cover ocean/background, default/hover/selected/disabled countries,
-  borders, markers, routes, live objects, focus indicators, and the optional
-  controls/tooltip surfaces.
 - Optional `GeoControls` and `GeoTooltip` HTML helpers, also defaulting to
   `preset="none"`; pass a preset for a complete out-of-the-box look. The
-  optional `@cublya/geo/styles.css` adds only pseudo-class polish for them
+  optional `@cublya/geomap/styles.css` adds only pseudo-class polish for them
   (namespaced, cannot leak).
-
-### Tooling
-
 - Vitest unit suite; Storybook (React + Vite) demo/docs site with interaction +
   axe accessibility tests; Playwright screenshot tests; publint; Vite and
   Next.js fixture apps built from the packed tarball; GitHub Pages deploy of
   Storybook from `main`.
+
+### Changed
+
+- Renamed the package from `@cublya/geo` to `@cublya/geomap` (CSS/class prefix
+  `geo-*` → `geomap-*`, CSS variables `--geo-*` → `--geomap-*`) for a more
+  literal, obvious name.

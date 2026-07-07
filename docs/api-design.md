@@ -1,6 +1,6 @@
 # API design
 
-`@cublya/geo` is a React + TypeScript + d3-geo library of map primitives. It owns
+`@cublya/geomap` is a React + TypeScript + d3-geo library of map primitives. It owns
 geometry, projection, camera and interaction; it never owns product data, business
 rules, basemap files or copy. Everything is exported from the package root, ESM-only,
 `sideEffects: false`, so unused layers tree-shake away.
@@ -213,18 +213,18 @@ Style precedence (lowest → highest):
 
 Consumer override channels, combinable:
 - **Props** — `preset="dark"`, `theme={{ land: "…" }}` (values may be `var(...)`).
-- **CSS variables** — every preset value is `var(--geo-*, fallback)`;
+- **CSS variables** — every preset value is `var(--geomap-*, fallback)`;
   define the variables on any ancestor.
-- **Class names** (always present, all presets included `"none"`): `geo`,
-  `geo-map`/`-globe`, `geo-country` (+ `[data-country]`,
+- **Class names** (always present, all presets included `"none"`): `geomap`,
+  `geomap-map`/`-globe`, `geomap-country` (+ `[data-country]`,
   `[data-selected]`, `[data-disabled]`), `-hover`, `-pattern`, `-selection`,
   `-route`, `-marker`, `-label`, `-live`, `-trail`, `-graticule`, `-sphere`.
 
 `GeoControls` and `GeoTooltip` (optional HTML helpers) take the same
 `preset`/`theme` props, also defaulting to `"none"` (bare elements); pass the
 same preset as your map for a matching, complete look. The optional
-`@cublya/geo/styles.css` adds only hover/active/focus-visible polish and a
-tooltip shadow — namespaced under `.geo-*`, it styles nothing else.
+`@cublya/geomap/styles.css` adds only hover/active/focus-visible polish and a
+tooltip shadow — namespaced under `.geomap-*`, it styles nothing else.
 
 ## Static output (share images)
 
