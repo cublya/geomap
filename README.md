@@ -31,6 +31,7 @@ const countries = prepareCountries(world, { exclude: ["AQ"] });
 export function SpendMap() {
   return (
     <GeoMap
+      preset="light"   // optional — omit for preset="none" (fully unstyled); no CSS import either way
       countries={{
         data: countries,
         fill: (c) => spendColor(c.alpha2),     // undefined → muted "no data" tone
@@ -44,6 +45,10 @@ export function SpendMap() {
   );
 }
 ```
+
+See [Presets & theming](#presets--theming) below for the full story: four
+built-in presets, `theme` overrides, CSS variables, and the class-name-only
+`"none"` path.
 
 Swap `GeoMap` for `GeoGlobe` and the same props render a drag-rotatable
 orthographic globe with inertia:
@@ -137,16 +142,20 @@ function Halo({ at }: { at: Coordinate }) {
 
 ## Presets & theming
 
-Components look complete by default — **no CSS import required**, ever. All
-presentation flows through SVG attributes and theme objects. There is no
-Tailwind, no global CSS, no resets, no runtime CSS-in-JS.
+**No CSS import is ever required.** By default the package paints nothing
+extra — `<GeoMap />` with no `preset` renders exactly the layers you configure,
+with no forced colors. That's `preset="none"`. When you *do* want a complete,
+polished look with zero setup, pick a built-in preset — one prop, no CSS file:
 
 ```tsx
-<GeoMap />                    // "light" — the default preset
+<GeoMap />                    // preset="none" — the default: unstyled, your call
+<GeoMap preset="light" />     // complete light palette, ready to ship
 <GeoMap preset="dark" />      // complete dark palette
 <GeoMap preset="minimal" />   // hue-less line-art look
-<GeoMap preset="none" />      // explicitly unstyled — your CSS owns everything
 ```
+
+All presentation flows through SVG attributes and theme objects — no
+Tailwind, no global CSS, no resets, no runtime CSS-in-JS, ever, in any mode.
 
 Presets are generic, accessible (AA ink/surface contrast, visible focus
 indicators) OKLCH neutral palettes with no raw `#fff`/`#000` and no product
@@ -156,8 +165,8 @@ optional controls/tooltip.
 
 **Style precedence** (lowest → highest):
 
-1. package defaults (the `light` preset)
-2. selected `preset`
+1. package defaults (`preset="none"` — nothing painted)
+2. selected `preset` (`"light"` / `"dark"` / `"minimal"`, if you opt in)
 3. `theme` token overrides
 4. per-feature callbacks (`countries.fill` / `pattern` / `disabled`, `renderMarker`, …)
 5. direct element props (`marker.color`, `route.color`, `countries.stroke`, …)
@@ -171,18 +180,18 @@ import { presets } from "@cublya/geo";
 <GeoMap theme={{ ...presets.dark, marker: "var(--brand)" }} />
 ```
 
-Every preset value is `var(--cublya-geo-*, fallback)`, so any ancestor can
+Every preset value is `var(--geo-*, fallback)`, so any ancestor can
 retheme every map inside it with plain CSS variables — no props needed:
 
 ```css
-:root { --cublya-geo-land: oklch(0.9 0.02 150); --cublya-geo-route: var(--brand); }
+:root { --geo-land: oklch(0.9 0.02 150); --geo-route: var(--brand); }
 ```
 
 With `preset="none"` no presentation attributes are emitted; start from scratch
-against the semantic class names — `cublya-geo-country` (plus `[data-country]`,
-`[data-selected]`, `[data-disabled]`), `cublya-geo-route`, `cublya-geo-marker`,
-`cublya-geo-label`, `cublya-geo-live`, `cublya-geo-trail`,
-`cublya-geo-graticule`, `cublya-geo-sphere`, `cublya-geo-hover`.
+against the semantic class names — `geo-country` (plus `[data-country]`,
+`[data-selected]`, `[data-disabled]`), `geo-route`, `geo-marker`,
+`geo-label`, `geo-live`, `geo-trail`,
+`geo-graticule`, `geo-sphere`, `geo-hover`.
 
 Non-color state encoding (colour-blind-safe, à la ) via
 `countries.pattern: (c) => "hatch" | "dots" | undefined`; inert countries via
@@ -191,11 +200,13 @@ Non-color state encoding (colour-blind-safe, à la ) via
 ### Optional controls, tooltip and stylesheet
 
 `GeoControls` (zoom in/out/reset for either camera) and `GeoTooltip`
-(pointer-anchored hover tooltip) take the same `preset`/`theme` props and look
-complete out of the box. The optional stylesheet only adds what inline styles
-can't express — hover/active/focus-visible states and a tooltip shadow — and
-styles nothing but these HTML helpers (all selectors namespaced under
-`.cublya-geo-*`, so it cannot leak):
+(pointer-anchored hover tooltip) take the same `preset`/`theme` props, also
+defaulting to `preset="none"` (bare buttons/div for your own CSS). Pass the
+same preset as your map — e.g. `<GeoControls camera={camera} preset="light" />`
+— for a matching, complete look with no CSS file. The optional stylesheet only
+adds what inline styles can't express — hover/active/focus-visible states and
+a tooltip shadow — and styles nothing but these HTML helpers (all selectors
+namespaced under `.geo-*`, so it cannot leak):
 
 ```tsx
 import { GeoControls, GeoTooltip } from "@cublya/geo";

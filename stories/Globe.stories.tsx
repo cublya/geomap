@@ -24,6 +24,7 @@ export const Rotatable: Story = {
   render: () => (
     <Frame>
       <GeoGlobe
+        preset="light"
         countries={{ data: world, fill: (c) => scoreFill(c.id) }}
         aria-label="Drag to rotate the globe"
       />
@@ -31,7 +32,7 @@ export const Rotatable: Story = {
   ),
   play: async ({ canvasElement }) => {
     await waitFor(() => {
-      expect(canvasElement.querySelector(".cublya-geo-sphere")).toBeTruthy();
+      expect(canvasElement.querySelector(".geo-sphere")).toBeTruthy();
       const visible = canvasElement.querySelectorAll("path[data-country]").length;
       expect(visible).toBeGreaterThan(20);
       expect(visible).toBeLessThan(world.countries.length); // far side clipped
@@ -44,6 +45,7 @@ function FocusDemo() {
   return (
     <Frame>
       <GeoGlobe
+        preset="light"
         camera={camera}
         countries={{ data: world, fill: (c) => scoreFill(c.id) }}
         markers={CITIES.map((c) => ({ ...c, size: 3.5, color: "#131515" }))}
@@ -73,7 +75,7 @@ export const FocusAndMarkers: Story = {
     await userEvent.click(canvas.getByRole("button", { name: "Tokyo" }));
     await waitFor(
       () => {
-        const labels = [...canvasElement.querySelectorAll(".cublya-geo-label")].map(
+        const labels = [...canvasElement.querySelectorAll(".geo-label")].map(
           (l) => l.textContent,
         );
         expect(labels).toContain("Tokyo");
@@ -87,6 +89,7 @@ export const AutoRotate: Story = {
   render: () => (
     <Frame>
       <GeoGlobe
+        preset="light"
         countries={{ data: world, fill: (c) => scoreFill(c.id) }}
         autoRotate={6}
         aria-label="Slowly spinning globe"

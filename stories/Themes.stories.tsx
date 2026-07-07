@@ -10,7 +10,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Built-in visual presets — components look complete by default with zero CSS imports. `preset` picks the base (`light` is the default), `theme` overlays partial tokens, `--cublya-geo-*` CSS variables override globally, and `preset=\"none\"` is explicitly unstyled for CSS-first styling. Precedence: defaults → preset → theme → feature callbacks → element props.",
+          "Built-in visual presets let components look complete with zero CSS imports — but CSS stays fully optional, so the package defaults to `preset=\"none\"` (nothing painted; you own every pixel via the semantic class names). Pass `preset=\"light\"`, `\"dark\"` or `\"minimal\"` to opt into a complete out-of-the-box look; `theme` overlays partial tokens on top, and `--geo-*` CSS variables override globally. Precedence: defaults (none) → preset → theme → feature callbacks → element props.",
       },
     },
   },
@@ -28,10 +28,10 @@ const demoLayers = {
 };
 
 export const Light: Story = {
-  name: "Light (default)",
   render: () => (
     <Frame>
       <GeoMap
+        preset="light"
         countries={{ data: world, onSelect: () => {} }}
         {...demoLayers}
         aria-label="Light preset"
@@ -54,7 +54,7 @@ export const Dark: Story = {
   play: async ({ canvasElement }) => {
     await waitFor(() => {
       const country = canvasElement.querySelector("path[data-country]")!;
-      expect(country.getAttribute("fill")).toContain("var(--cublya-geo-land");
+      expect(country.getAttribute("fill")).toContain("var(--geo-land");
     });
   },
 };
@@ -116,16 +116,16 @@ export const CssVariables: Story = {
       <div style={
         {
           height: "100%",
-          "--cublya-geo-land": "oklch(0.9 0.04 80)",
-          "--cublya-geo-marker": "oklch(0.45 0.12 60)",
-          "--cublya-geo-route": "oklch(0.45 0.12 60)",
-          "--cublya-geo-marker-label": "oklch(0.4 0.08 60)",
+          "--geo-land": "oklch(0.9 0.04 80)",
+          "--geo-marker": "oklch(0.45 0.12 60)",
+          "--geo-route": "oklch(0.45 0.12 60)",
+          "--geo-marker-label": "oklch(0.4 0.08 60)",
         } as React.CSSProperties
       }>
         <GeoMap
           countries={{ data: world, onSelect: () => {} }}
           {...demoLayers}
-          aria-label="Themed via --cublya-geo-* CSS variables"
+          aria-label="Themed via --geo-* CSS variables"
         />
       </div>
     </Frame>
@@ -133,12 +133,12 @@ export const CssVariables: Story = {
 };
 
 const UNSTYLED_CSS = `
-  .unstyled-demo .cublya-geo-country { fill: oklch(0.93 0.02 300); stroke: oklch(0.99 0 0); stroke-width: 0.6; }
-  .unstyled-demo .cublya-geo-country:hover { fill: oklch(0.82 0.06 300); }
-  .unstyled-demo .cublya-geo-country[data-selected] { fill: oklch(0.6 0.15 300); }
-  .unstyled-demo .cublya-geo-route { stroke: oklch(0.45 0.18 300); stroke-width: 1.4; fill: none; }
-  .unstyled-demo .cublya-geo-marker circle { fill: oklch(0.45 0.18 300); }
-  .unstyled-demo .cublya-geo-label { fill: oklch(0.3 0.1 300); font: 600 9px system-ui; }
+  .unstyled-demo .geo-country { fill: oklch(0.93 0.02 300); stroke: oklch(0.99 0 0); stroke-width: 0.6; }
+  .unstyled-demo .geo-country:hover { fill: oklch(0.82 0.06 300); }
+  .unstyled-demo .geo-country[data-selected] { fill: oklch(0.6 0.15 300); }
+  .unstyled-demo .geo-route { stroke: oklch(0.45 0.18 300); stroke-width: 1.4; fill: none; }
+  .unstyled-demo .geo-marker circle { fill: oklch(0.45 0.18 300); }
+  .unstyled-demo .geo-label { fill: oklch(0.3 0.1 300); font: 600 9px system-ui; }
   .unstyled-demo svg:focus-visible { outline: 2px solid oklch(0.55 0.17 255); }
 `;
 
@@ -165,7 +165,7 @@ function NoneDemo() {
 }
 
 export const None: Story = {
-  name: "None (explicitly unstyled)",
+  name: "None (the default)",
   render: () => <NoneDemo />,
   play: async ({ canvasElement }) => {
     await waitFor(() => {

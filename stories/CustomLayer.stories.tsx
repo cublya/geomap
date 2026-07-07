@@ -64,6 +64,7 @@ export const RangeRingsFromVienna: Story = {
   render: () => (
     <Frame>
       <GeoMap
+        preset="light"
         countries={{ data: world }}
         markers={[CITIES[0]!]}
         aria-label="Range rings drawn by a custom d3 layer around Vienna"

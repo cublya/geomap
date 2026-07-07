@@ -73,6 +73,7 @@ function LiveFlightsDemo() {
   return (
     <Frame>
       <GeoMap
+        preset="light"
         countries={{ data: world }}
         routes={FLIGHTS.map((f) => ({
           id: f.id,
@@ -90,10 +91,10 @@ export const Flights: Story = {
   render: () => <LiveFlightsDemo />,
   play: async ({ canvasElement }) => {
     await waitFor(() => {
-      expect(canvasElement.querySelectorAll(".cublya-geo-live").length).toBe(3);
+      expect(canvasElement.querySelectorAll(".geo-live").length).toBe(3);
     });
     // Every glyph carries a heading rotation.
-    const rotated = [...canvasElement.querySelectorAll(".cublya-geo-live g g")].filter((g) =>
+    const rotated = [...canvasElement.querySelectorAll(".geo-live g g")].filter((g) =>
       g.getAttribute("transform")?.includes("rotate("),
     );
     expect(rotated.length).toBe(3);
@@ -104,6 +105,7 @@ export const WithTrail: Story = {
   render: () => (
     <Frame>
       <GeoMap
+        preset="light"
         countries={{ data: world }}
         live={{
           objects: [
@@ -129,7 +131,7 @@ export const WithTrail: Story = {
   ),
   play: async ({ canvasElement }) => {
     await waitFor(() => {
-      expect(canvasElement.querySelector(".cublya-geo-trail")).toBeTruthy();
+      expect(canvasElement.querySelector(".geo-trail")).toBeTruthy();
     });
   },
 };

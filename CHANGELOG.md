@@ -28,21 +28,23 @@ Initial release.
 ### Styling
 
 - Built-in visual presets — complete looks with zero CSS imports, via SVG
-  attributes and theme objects: `light` (default), `dark`, `minimal`, and
-  `none` (explicitly unstyled). OKLCH neutral palettes, AA contrast, no raw
+  attributes and theme objects: `light`, `dark`, `minimal`, and `none`
+  (**the default** — fully unstyled; pass `preset="light"` etc. to opt into a
+  polished look with no CSS file). OKLCH neutral palettes, AA contrast, no raw
   #fff/#000, no product branding.
 - `preset` prop + `theme` partial token overrides + exported `presets` objects
-  for composition + `--cublya-geo-*` CSS variables for global overrides +
-  semantic `cublya-geo-*` class names (with `data-country` / `data-selected` /
-  `data-disabled`).
-- Style precedence: package defaults → preset → theme overrides → per-feature
-  callbacks → direct element props.
+  for composition + `--geo-*` CSS variables for global overrides +
+  semantic `geo-*` class names (with `data-country` / `data-selected` /
+  `data-disabled`), always present regardless of preset.
+- Style precedence: package defaults (`none`) → selected preset → theme
+  overrides → per-feature callbacks → direct element props.
 - Tokens cover ocean/background, default/hover/selected/disabled countries,
   borders, markers, routes, live objects, focus indicators, and the optional
   controls/tooltip surfaces.
-- Optional `GeoControls` and `GeoTooltip` HTML helpers, complete out of the box
-  from preset tokens; the optional `@cublya/geo/styles.css` adds only
-  pseudo-class polish for them (namespaced, cannot leak).
+- Optional `GeoControls` and `GeoTooltip` HTML helpers, also defaulting to
+  `preset="none"`; pass a preset for a complete out-of-the-box look. The
+  optional `@cublya/geo/styles.css` adds only pseudo-class polish for them
+  (namespaced, cannot leak).
 
 ### Tooling
 

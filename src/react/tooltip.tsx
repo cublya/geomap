@@ -7,7 +7,10 @@ export interface GeoTooltipProps {
    * Null/undefined renders nothing.
    */
   point: [number, number] | null | undefined;
-  /** Match the map's preset; "none" renders a bare positioned div for your CSS. */
+  /**
+   * Match the map's preset for a consistent look; default "none" renders a
+   * bare positioned div for your CSS.
+   */
   preset?: GeoPresetName;
   /** Partial token overrides applied over the preset. */
   theme?: Partial<GeoTheme>;
@@ -23,7 +26,7 @@ export interface GeoTooltipProps {
  */
 export function GeoTooltip({
   point,
-  preset = "light",
+  preset = "none",
   theme,
   children,
   className,
@@ -35,7 +38,7 @@ export function GeoTooltip({
   return (
     <div
       role="tooltip"
-      className={cx("cublya-geo-tooltip", className)}
+      className={cx("geo-tooltip", className)}
       style={{
         position: "fixed",
         left: point[0],

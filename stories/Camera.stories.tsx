@@ -26,6 +26,7 @@ function CameraDemo() {
   return (
     <Frame>
       <GeoMap
+        preset="light"
         camera={camera}
         countries={{ data: world, fill: (c) => scoreFill(c.id) }}
         aria-label="Camera playground"
@@ -85,6 +86,7 @@ export const DeclarativeFit: Story = {
   render: () => (
     <Frame>
       <GeoMap
+        preset="light"
         countries={{ data: world, fill: (c) => scoreFill(c.id) }}
         fit={world.get("BR")!}
         aria-label="Framed on Brazil via the fit prop"

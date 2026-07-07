@@ -46,7 +46,7 @@ export interface GeoGlobeProps<TMarker = unknown, TRoute = unknown, TLive = unkn
   /** Idle spin in degrees per second; pauses while interacting. Off by default. */
   autoRotate?: number;
   graticule?: boolean;
-  /** Visual preset: "light" (default) | "dark" | "minimal" | "none" (unstyled). */
+  /** Visual preset: "none" (default, unstyled) | "light" | "dark" | "minimal". */
   preset?: GeoPresetName;
   /** Partial token overrides applied over the preset. */
   theme?: Partial<GeoTheme>;
@@ -98,7 +98,7 @@ export function GeoGlobe<TMarker = unknown, TRoute = unknown, TLive = unknown>({
   inertia = true,
   autoRotate,
   graticule = true,
-  preset = "light",
+  preset = "none",
   theme: themeInput,
   width = 960,
   height = 540,
@@ -260,7 +260,7 @@ export function GeoGlobe<TMarker = unknown, TRoute = unknown, TLive = unknown>({
       onClick={() => {
         if (!isDraggingRef.current) countries?.onSelect?.(null);
       }}
-      className={cx("cublya-geo", "cublya-geo-globe", className)}
+      className={cx("geo", "geo-globe", className)}
       style={{
         display: "block",
         width: "100%",
@@ -278,7 +278,7 @@ export function GeoGlobe<TMarker = unknown, TRoute = unknown, TLive = unknown>({
       <GeoProvider value={context}>
         <PatternDefs />
         <path
-          className="cublya-geo-sphere"
+          className="geo-sphere"
           d={sphereD}
           fill={theme.ocean}
           stroke={theme.sphere}

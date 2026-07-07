@@ -23,6 +23,7 @@ export const Cities: Story = {
   render: () => (
     <Frame>
       <GeoMap
+        preset="light"
         countries={{ data: world }}
         markers={CITIES.map((c) => ({ ...c, kind: "city", size: 3, color: "#5636b8" }))}
         aria-label="Six world cities"
@@ -31,7 +32,7 @@ export const Cities: Story = {
   ),
   play: async ({ canvasElement }) => {
     await waitFor(() => {
-      expect(canvasElement.querySelectorAll(".cublya-geo-marker").length).toBe(CITIES.length);
+      expect(canvasElement.querySelectorAll(".geo-marker").length).toBe(CITIES.length);
       expect(canvasElement.textContent).toContain("Tokyo");
     });
   },
@@ -48,6 +49,7 @@ function CustomMarkerDemo() {
   return (
     <Frame>
       <GeoMap
+        preset="light"
         countries={{ data: world }}
         markers={AIRPORTS}
         onMarkerClick={(m) => setPicked(m.label ?? m.id)}
@@ -87,7 +89,7 @@ export const CustomMarkers: Story = {
   render: () => <CustomMarkerDemo />,
   play: async ({ canvasElement }) => {
     const marker = await waitFor(() => {
-      const el = canvasElement.querySelector(".cublya-geo-marker");
+      const el = canvasElement.querySelector(".geo-marker");
       expect(el).toBeTruthy();
       return el!;
     });

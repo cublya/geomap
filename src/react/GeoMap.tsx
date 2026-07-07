@@ -51,7 +51,7 @@ export interface GeoMapProps<TMarker = unknown, TRoute = unknown, TLive = unknow
   wheelZoom?: boolean;
   keyboard?: boolean;
   graticule?: boolean;
-  /** Visual preset: "light" (default) | "dark" | "minimal" | "none" (unstyled). */
+  /** Visual preset: "none" (default, unstyled) | "light" | "dark" | "minimal". */
   preset?: GeoPresetName;
   /** Partial token overrides applied over the preset. */
   theme?: Partial<GeoTheme>;
@@ -88,7 +88,7 @@ export function GeoMap<TMarker = unknown, TRoute = unknown, TLive = unknown>({
   wheelZoom = true,
   keyboard = true,
   graticule = false,
-  preset = "light",
+  preset = "none",
   theme: themeInput,
   width = 960,
   height = 500,
@@ -218,7 +218,7 @@ export function GeoMap<TMarker = unknown, TRoute = unknown, TLive = unknown>({
       onClick={() => {
         if (!isDraggingRef.current) countries?.onSelect?.(null);
       }}
-      className={cx("cublya-geo", "cublya-geo-map", className)}
+      className={cx("geo", "geo-map", className)}
       style={{
         display: "block",
         width: "100%",

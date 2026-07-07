@@ -30,6 +30,7 @@ export function MomentsJourney({
   return (
     <div style={{ position: "relative", height: "100%" }}>
       <GeoMap
+        preset="light"
         camera={camera}
         wheelZoom={false}
         fit={coordinates.length > 0 ? coordinates : "world"}

@@ -24,14 +24,28 @@ beforeAll(() => {
 afterEach(cleanup);
 
 describe("GeoControls", () => {
-  it("drives any camera and works with no stylesheet", () => {
+  it("defaults to preset none: bare buttons with no inline presentation styles", () => {
     const camera = createMapCamera();
     render(<GeoControls camera={camera} />);
+    const button = screen.getByRole("button", { name: "Zoom in" });
+    expect(button.getAttribute("style")).toBeNull();
+  });
+
+  it("drives any camera and works with no stylesheet", () => {
+    const camera = createMapCamera();
+    render(<GeoControls camera={camera} preset="light" />);
     fireEvent.click(screen.getByRole("button", { name: "Zoom in" }));
     expect(camera.view.zoom).toBeGreaterThan(1);
     fireEvent.click(screen.getByRole("button", { name: "Reset view" }));
     expect(camera.view.zoom).toBeCloseTo(1, 5);
     expect(screen.getByRole("group", { name: "Map controls" })).toBeTruthy();
+  });
+
+  it("preset styling is complete without any CSS import", () => {
+    const camera = createMapCamera();
+    render(<GeoControls camera={camera} preset="light" />);
+    const button = screen.getByRole("button", { name: "Zoom in" });
+    expect(button.style.background).toContain("--geo-control-bg");
   });
 
   it("accepts custom labels", () => {
@@ -57,21 +71,45 @@ describe("GeoTooltip", () => {
     expect(tip.style.top).toBe("80px");
     expect(tip.textContent).toBe("Japan · 87");
   });
+
+  it("defaults to preset none: positioned, but no surface styling", () => {
+    render(<GeoTooltip point={[0, 0]}>hi</GeoTooltip>);
+    const tip = screen.getByRole("tooltip");
+    expect(tip.style.background).toBe("");
+  });
+
+  it('preset="light" adds a complete surface (background/ink/border) without CSS', () => {
+    render(
+      <GeoTooltip point={[0, 0]} preset="light">
+        hi
+      </GeoTooltip>,
+    );
+    const tip = screen.getByRole("tooltip");
+    expect(tip.style.background).toContain("--geo-tooltip-bg");
+  });
 });
 
 describe("presets on GeoMap", () => {
-  it("looks complete by default: light preset fills land and ocean out of the box", () => {
+  it("defaults to preset none: no fill/stroke/background without opting in", () => {
     const { container } = render(<GeoMap countries={{ data: world }} />);
     const de = container.querySelector('path[data-country="de"]')!;
-    expect(de.getAttribute("fill")).toMatch(/^var\(--cublya-geo-land, oklch\(.+\)\)$/);
+    expect(de.getAttribute("fill")).toBeNull();
     const svg = container.querySelector("svg")!;
-    expect(svg.style.background).toContain("--cublya-geo-ocean");
+    expect(svg.style.background).toBe("");
+  });
+
+  it('preset="light" looks complete: fills land and ocean out of the box', () => {
+    const { container } = render(<GeoMap countries={{ data: world }} preset="light" />);
+    const de = container.querySelector('path[data-country="de"]')!;
+    expect(de.getAttribute("fill")).toMatch(/^var\(--geo-land, oklch\(.+\)\)$/);
+    const svg = container.querySelector("svg")!;
+    expect(svg.style.background).toContain("--geo-ocean");
   });
 
   it("dark preset emits CSS-variable fills with dark OKLCH fallbacks", () => {
     const { container } = render(<GeoMap countries={{ data: world }} preset="dark" />);
     const de = container.querySelector('path[data-country="de"]')!;
-    expect(de.getAttribute("fill")).toBe("var(--cublya-geo-land, oklch(0.33 0.008 250))");
+    expect(de.getAttribute("fill")).toBe("var(--geo-land, oklch(0.33 0.008 250))");
   });
 
   it("theme overrides win over the preset (precedence step 3)", () => {
@@ -106,11 +144,11 @@ describe("presets on GeoMap", () => {
     );
     const de = container.querySelector('path[data-country="de"]')!;
     expect(de.getAttribute("fill")).toBeNull();
-    expect(de.getAttribute("class")).toBe("cublya-geo-country");
-    expect(container.querySelector(".cublya-geo-route")!.getAttribute("stroke")).toBeNull();
-    expect(container.querySelector(".cublya-geo-graticule")).toBeTruthy();
-    expect(container.querySelector(".cublya-geo-marker")).toBeTruthy();
-    expect(container.querySelector("svg")!.getAttribute("class")).toContain("cublya-geo-map");
+    expect(de.getAttribute("class")).toBe("geo-country");
+    expect(container.querySelector(".geo-route")!.getAttribute("stroke")).toBeNull();
+    expect(container.querySelector(".geo-graticule")).toBeTruthy();
+    expect(container.querySelector(".geo-marker")).toBeTruthy();
+    expect(container.querySelector("svg")!.getAttribute("class")).toContain("geo-map");
   });
 
   it("marks the selected country with a data attribute for CSS targeting", () => {
@@ -118,35 +156,45 @@ describe("presets on GeoMap", () => {
       <GeoMap countries={{ data: world, selectedId: "jp" }} preset="none" />,
     );
     expect(container.querySelector('path[data-country="jp"][data-selected]')).toBeTruthy();
-    expect(container.querySelector(".cublya-geo-selection")).toBeTruthy();
+    expect(container.querySelector(".geo-selection")).toBeTruthy();
   });
 
   it("disabled countries are dimmed and inert", () => {
     const onSelect = vi.fn();
     const { container } = render(
       <GeoMap
+        preset="light"
         countries={{ data: world, onSelect, disabled: (c) => c.id === "fr" }}
       />,
     );
     const fr = container.querySelector('path[data-country="fr"]')!;
     expect(fr.getAttribute("data-disabled")).toBe("");
-    expect(fr.getAttribute("fill")).toContain("--cublya-geo-land-disabled");
+    expect(fr.getAttribute("fill")).toContain("--geo-land-disabled");
     fireEvent.click(fr);
     expect(onSelect).not.toHaveBeenCalled();
     fireEvent.click(container.querySelector('path[data-country="de"]')!);
     expect(onSelect).toHaveBeenCalledTimes(1);
   });
 
-  it("hovering an interactive country paints the landHover overlay", () => {
+  it("hovering an interactive country paints the landHover overlay (styled presets)", () => {
+    const { container } = render(
+      <GeoMap preset="light" countries={{ data: world, onSelect: () => {} }} />,
+    );
+    const br = container.querySelector('path[data-country="br"]')!;
+    fireEvent.pointerEnter(br, { clientX: 10, clientY: 10 });
+    const overlay = container.querySelector(".geo-hover");
+    expect(overlay).toBeTruthy();
+    expect(overlay!.getAttribute("fill")).toContain("--geo-land-hover");
+    fireEvent.pointerLeave(br);
+    expect(container.querySelector(".geo-hover")).toBeNull();
+  });
+
+  it("preset none skips the hover overlay entirely (no landHover token)", () => {
     const { container } = render(
       <GeoMap countries={{ data: world, onSelect: () => {} }} />,
     );
     const br = container.querySelector('path[data-country="br"]')!;
     fireEvent.pointerEnter(br, { clientX: 10, clientY: 10 });
-    const overlay = container.querySelector(".cublya-geo-hover");
-    expect(overlay).toBeTruthy();
-    expect(overlay!.getAttribute("fill")).toContain("--cublya-geo-land-hover");
-    fireEvent.pointerLeave(br);
-    expect(container.querySelector(".cublya-geo-hover")).toBeNull();
+    expect(container.querySelector(".geo-hover")).toBeNull();
   });
 });
