@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, waitFor } from "storybook/test";
 import { geoCircle } from "d3-geo";
 import { GeoMap, useGeo, type Coordinate } from "@cublya/geomap";
-import { CITIES, Frame, world } from "./support";
+import { ACCENT_ALT, CITIES, Frame, world } from "./support";
 
 const meta = {
   title: "Advanced/Custom D3 layer",
@@ -37,7 +37,7 @@ function RangeRings({ center, radiiKm }: { center: Coordinate; radiiKm: number[]
             data-ring={km}
             d={path(ring) ?? undefined}
             fill="none"
-            stroke="#b03a20"
+            stroke={ACCENT_ALT}
             strokeWidth={0.8}
             strokeDasharray="2 3"
             vectorEffect="non-scaling-stroke"
@@ -51,7 +51,7 @@ function RangeRings({ center, radiiKm }: { center: Coordinate; radiiKm: number[]
           textAnchor="middle"
           fontSize={9 * counterScale}
           fontFamily="system-ui"
-          fill="#b03a20"
+          fill={ACCENT_ALT}
         >
           1000 / 2500 / 5000 km
         </text>

@@ -8,7 +8,7 @@ import {
   type PreparedCountry,
 } from "@cublya/geomap";
 import "@cublya/geomap/styles.css";
-import { Frame, scoreFill, mockScore, world } from "./support";
+import { Frame, scoreFill, mockScore, world, CVD_BLUE, CVD_GOLD } from "./support";
 
 const meta = {
   title: "Maps/Choropleth",
@@ -29,7 +29,7 @@ export const Basic: Story = {
   render: () => (
     <Frame>
       <GeoMap
-        preset="light"
+        preset="crisp"
         countries={{ data: world, fill: (c) => scoreFill(c.id) }}
         aria-label="Mock score by country"
       />
@@ -95,7 +95,7 @@ export const Patterns: Story = {
         countries={{
           data: world,
           fill: (c) =>
-            visited.has(c.id) ? "#7f61d3" : wishlist.has(c.id) ? "#e0a832" : undefined,
+            visited.has(c.id) ? CVD_BLUE : wishlist.has(c.id) ? CVD_GOLD : undefined,
           pattern: (c) => (visited.has(c.id) ? "hatch" : wishlist.has(c.id) ? "dots" : undefined),
         }}
         aria-label="Visited (hatched) and wishlist (dotted) countries"

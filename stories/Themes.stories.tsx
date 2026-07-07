@@ -10,7 +10,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Built-in visual presets let components look complete with zero CSS imports — but CSS stays fully optional, so the package defaults to `preset=\"none\"` (nothing painted; you own every pixel via the semantic class names). Pass `preset=\"light\"`, `\"dark\"` or `\"minimal\"` to opt into a complete out-of-the-box look; `theme` overlays partial tokens on top, and `--geomap-*` CSS variables override globally. Precedence: defaults (none) → preset → theme → feature callbacks → element props.",
+          "Built-in visual presets let components look complete with zero CSS imports — but CSS stays fully optional, so the package defaults to `preset=\"none\"` (nothing painted; you own every pixel via the semantic class names). Pass `preset=\"light\"`, `\"dark\"`, `\"minimal\"` or `\"crisp\"` (cut-paper look: borders in the ocean tone) to opt into a complete out-of-the-box look; `theme` overlays partial tokens on top, and `--geomap-*` CSS variables override globally. Precedence: defaults (none) → preset → theme → feature callbacks → element props.",
       },
     },
   },
@@ -67,6 +67,21 @@ export const Minimal: Story = {
         {...demoLayers}
         preset="minimal"
         aria-label="Minimal line-art preset"
+      />
+    </Frame>
+  ),
+};
+
+export const Crisp: Story = {
+  render: () => (
+    <Frame>
+      {/* A choropleth shows off the look: borders are painted in the ocean
+          tone, so countries read as clean cut-paper gaps and the fills pop. */}
+      <GeoMap
+        preset="crisp"
+        countries={{ data: world, fill: (c) => scoreFill(c.id), onSelect: () => {} }}
+        {...demoLayers}
+        aria-label="Crisp preset — ocean-tone gap borders"
       />
     </Frame>
   ),

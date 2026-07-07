@@ -2,7 +2,7 @@ import * as React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, waitFor } from "storybook/test";
 import { GeoMap } from "@cublya/geomap";
-import { CITIES, Frame, world } from "./support";
+import { ACCENT, ACCENT_ALT, CITIES, Frame, world } from "./support";
 
 const meta = {
   title: "Layers/Routes",
@@ -29,11 +29,11 @@ export const GreatCircle: Story = {
         countries={{ data: world }}
         markers={[vie!, nyc!, tyo!]}
         routes={[
-          { id: "vie-nyc", stops: [vie!.coordinates, nyc!.coordinates], color: "#5636b8" },
+          { id: "vie-nyc", stops: [vie!.coordinates, nyc!.coordinates], color: ACCENT },
           {
             id: "nyc-tyo",
             stops: [nyc!.coordinates, tyo!.coordinates],
-            color: "#b03a20",
+            color: ACCENT_ALT,
             dashed: true,
           },
         ]}

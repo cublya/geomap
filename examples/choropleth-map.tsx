@@ -12,7 +12,21 @@ import world110 from "world-atlas/countries-110m.json";
 const world = prepareCountries(world110 as unknown as Topology, { exclude: ["AQ"] });
 
 // Your product owns scores and the color scale; the map only asks for a fill.
-const BINS = ["#fde5d8", "#f6b99a", "#ea8a62", "#d55d39", "#b03a20"];
+// OKLCH by default for perceptually-even steps, with a hex fallback for
+// browsers that can't parse it (a bad color paints the shape black, not the hex).
+const supportsOklch =
+  typeof CSS !== "undefined" &&
+  typeof CSS.supports === "function" &&
+  CSS.supports("color", "oklch(0.5 0.1 200)");
+const paint = (oklch: string, hex: string): string => (supportsOklch ? oklch : hex);
+
+const BINS = [
+  paint("oklch(0.956 0.015 182)", "#e6f4f1"),
+  paint("oklch(0.866 0.049 182)", "#b0ded5"),
+  paint("oklch(0.765 0.077 182)", "#79c3b6"),
+  paint("oklch(0.632 0.088 187)", "#3f9b93"),
+  paint("oklch(0.503 0.083 189)", "#12736e"),
+];
 declare function scoreOf(alpha2: string | null): number | null; // 0–100, from your data
 
 function fillFor(alpha2: string | null): string | undefined {
