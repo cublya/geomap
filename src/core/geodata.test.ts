@@ -100,6 +100,41 @@ describe("prepareCountries (GeoJSON input)", () => {
     expect(world.get("DE")?.alpha3).toBe("DEU");
   });
 
+  it("normalizes RFC 7946 counterclockwise winding so d3-geo reads the intended region", () => {
+    // Exterior ring wound counterclockwise per the GeoJSON spec; d3-geo would
+    // otherwise treat this as the whole sphere minus the box.
+    const world = prepareCountries({
+      type: "FeatureCollection",
+      features: [
+        {
+          type: "Feature",
+          properties: { name: "Atlantis" }, // unresolvable → keeps its geometry as authored
+          geometry: {
+            type: "Polygon",
+            coordinates: [
+              [
+                [-30, 30],
+                [-24, 30],
+                [-24, 36],
+                [-30, 36],
+                [-30, 30],
+              ],
+            ],
+          },
+        },
+      ],
+    });
+    const atlantis = world.countries[0]!;
+    const [[west, south], [east, north]] = atlantis.bounds;
+    expect(west).toBeCloseTo(-30, 1);
+    expect(south).toBeCloseTo(30, 1);
+    expect(east).toBeCloseTo(-24, 1);
+    expect(north).toBeCloseTo(36, 1);
+    // A non-inverted centroid sits inside the box, not at the antipode.
+    expect(atlantis.centroid[0]).toBeGreaterThan(-30);
+    expect(atlantis.centroid[0]).toBeLessThan(-24);
+  });
+
   it("throws a helpful error for a missing topology object", () => {
     expect(() => prepareCountries(topo110, { object: "nope" })).toThrow(/no object "nope"/);
   });
