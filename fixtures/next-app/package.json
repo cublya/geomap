@@ -1,5 +1,5 @@
 {
-  "name": "cublya-geo-fixture-next",
+  "name": "cublya-geomap-fixture-next",
   "private": true,
   "scripts": {
     "build": "next build"

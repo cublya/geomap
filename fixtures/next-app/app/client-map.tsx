@@ -4,7 +4,7 @@
 // ships no "use client" directive by design (its core is server-safe), so the
 // boundary lives here in the app.
 import * as React from "react";
-import { GeoControls, GeoMap, prepareCountries, useMapCamera } from "@cublya/geo";
+import { GeoControls, GeoMap, prepareCountries, useMapCamera } from "@cublya/geomap";
 import world110 from "world-atlas/countries-110m.json";
 
 const world = prepareCountries(

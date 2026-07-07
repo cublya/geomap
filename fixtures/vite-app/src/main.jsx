@@ -9,8 +9,8 @@ import {
   prepareCountries,
   renderStaticMapSvg,
   useMapCamera,
-} from "@cublya/geo";
-import "@cublya/geo/styles.css";
+} from "@cublya/geomap";
+import "@cublya/geomap/styles.css";
 import world110 from "world-atlas/countries-110m.json";
 
 const world = prepareCountries(world110, { exclude: ["AQ"] });

@@ -1,6 +1,6 @@
 // Server Component: the core (prepareCountries, renderStaticMapSvg) runs during
 // SSR/prerender with no client boundary — proving the package is server-safe.
-import { prepareCountries, renderStaticMapSvg } from "@cublya/geo";
+import { prepareCountries, renderStaticMapSvg } from "@cublya/geomap";
 import world110 from "world-atlas/countries-110m.json";
 import { ClientMap } from "./client-map";
 
@@ -17,7 +17,7 @@ const staticSvg = renderStaticMapSvg({
 export default function Page() {
   return (
     <main style={{ display: "grid", gap: 16, padding: 16 }}>
-      <h1>@cublya/geo Next.js fixture</h1>
+      <h1>@cublya/geomap Next.js fixture</h1>
       <section aria-label="Server-rendered static map">
         {/* Rendered on the server as a plain string. */}
         <div dangerouslySetInnerHTML={{ __html: staticSvg }} />
