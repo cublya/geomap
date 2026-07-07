@@ -41,6 +41,10 @@ currently pre-1.0 (`0.1.0`, unreleased), so the public API may still change.
   `preset="none"`; pass a preset for a complete out-of-the-box look. The
   optional `@cublya/geomap/styles.css` adds only pseudo-class polish for them
   (namespaced, cannot leak).
+- `GeoControls` per-part `classNames` slots (`root`/`button`/`zoomIn`/`zoomOut`/
+  `reset`) and an `orientation` prop; `GeoControls`/`GeoTooltip` carry
+  `data-geomap-part` (+ `data-geomap-orientation`) hooks. With `preset="none"`
+  no inline styles are emitted, so Tailwind/raw CSS own the look outright.
 - Vitest unit suite; Storybook (React + Vite) demo/docs site with interaction +
   axe accessibility tests; Playwright screenshot tests; publint; Vite and
   Next.js fixture apps built from the packed tarball; GitHub Pages deploy of
@@ -51,3 +55,15 @@ currently pre-1.0 (`0.1.0`, unreleased), so the public API may still change.
 - Renamed the package from `@cublya/geo` to `@cublya/geomap` (CSS/class prefix
   `geo-*` → `geomap-*`, CSS variables `--geo-*` → `--geomap-*`) for a more
   literal, obvious name.
+- `GeoControls` now renders as a single segmented "pill" (hairline dividers,
+  soft shadow) with crisp inline SVG icons instead of loose text-glyph buttons;
+  its preset surface (background/border/shadow) sits on the container and the
+  buttons inherit ink. `GeoTooltip` gained an inline shadow so its styled preset
+  looks complete without the CSS file.
+- README Quickstart now imports `world-atlas/countries-10m.json` instead of
+  `countries-110m.json` — the only bundled resolution with full coverage of all
+  193 UN members and both observer states (`110m` silently drops 28 members and
+  the Holy See; `50m` drops Tuvalu). See
+  [docs/basemap-coverage.md](docs/basemap-coverage.md) (added, last verified
+  2026-07-08 against `world-atlas@2.0.2`) for the full per-resolution matrix
+  and a re-verification script.
