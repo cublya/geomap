@@ -83,6 +83,7 @@ function StressDemo() {
   return (
     <Frame height={560}>
       <GeoMap
+        preset="light"
         countries={{ data: worldDetailed, fill: (c) => scoreFill(c.id) }}
         markers={MARKERS}
         routes={ROUTES}
@@ -104,8 +105,8 @@ export const Stress: Story = {
     await waitFor(
       () => {
         expect(canvasElement.querySelectorAll("path[data-country]").length).toBeGreaterThan(200);
-        expect(canvasElement.querySelectorAll(".cublya-geo-marker").length).toBe(400);
-        expect(canvasElement.querySelectorAll(".cublya-geo-live").length).toBe(24);
+        expect(canvasElement.querySelectorAll(".geo-marker").length).toBe(400);
+        expect(canvasElement.querySelectorAll(".geo-live").length).toBe(24);
       },
       { timeout: 10000 },
     );

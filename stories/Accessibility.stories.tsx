@@ -25,6 +25,7 @@ function KeyboardDemo() {
   return (
     <Frame>
       <GeoMap
+        preset="light"
         camera={camera}
         countries={{ data: world, fill: (c) => scoreFill(c.id) }}
         aria-label="Keyboard-operable map: arrows pan, plus and minus zoom, Home resets"
@@ -67,6 +68,7 @@ export const KeyboardGlobe: Story = {
   render: () => (
     <Frame>
       <GeoGlobe
+        preset="light"
         countries={{ data: world, fill: (c) => scoreFill(c.id) }}
         aria-label="Keyboard-operable globe: arrows rotate, plus and minus zoom, Home resets"
       />
@@ -79,6 +81,7 @@ function ReducedMotionDemo() {
   return (
     <Frame>
       <GeoGlobe
+        preset="light"
         countries={{ data: world, fill: (c) => scoreFill(c.id) }}
         autoRotate={6}
         aria-label="Globe that respects reduced motion"

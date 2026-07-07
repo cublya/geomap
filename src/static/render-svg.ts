@@ -22,11 +22,11 @@ export interface StaticMapOptions {
   projection?: ProjectionInput;
   projectionOptions?: FlatProjectionOptions;
   graticule?: boolean;
-  /** Visual preset, same as the components. Default "light". */
+  /** Visual preset, same as the components. Default "none" (unstyled). */
   preset?: GeoPresetName;
   /**
    * Partial token overrides over the preset. Preset values are
-   * `var(--cublya-geo-*, fallback)` — standalone SVGs resolve to the fallback,
+   * `var(--geo-*, fallback)` — standalone SVGs resolve to the fallback,
    * so exports render correctly outside any page context.
    */
   theme?: Partial<GeoTheme>;

@@ -39,6 +39,7 @@ export function LiveFlightMap({ flights, focusId }: { flights: Flight[]; focusId
   const focused = flights.find((f) => f.id === focusId);
   return (
     <GeoMap
+      preset="light"
       projection="naturalEarth1"
       graticule
       countries={{ data: world }}

@@ -5,16 +5,18 @@
  * driven entirely by SVG attributes and inline props resolved from these
  * tokens. Style precedence (lowest → highest):
  *
- *   1. package defaults        — the `light` preset
- *   2. selected preset         — `preset="dark" | "minimal" | "none"`
+ *   1. package defaults        — the `none` preset (fully unstyled)
+ *   2. selected preset         — `preset="light" | "dark" | "minimal"`
  *   3. theme overrides         — `theme={{ land: "…" }}` (partial tokens)
  *   4. per-feature callbacks   — `countries.fill/pattern/disabled`, `renderMarker`, …
  *   5. direct element props    — `marker.color`, `route.color`, `countries.stroke`, …
  *
- * Every preset value is a `var(--cublya-geo-<token>, <fallback>)` expression, so
- * consumers can also override globally with CSS variables — no props required.
- * The `none` preset emits no presentation attributes at all: start from a blank
- * slate and style the semantic `cublya-geo-*` class names yourself.
+ * The default preset is `none`: components emit no presentation attributes and
+ * render exactly what you tell them to (plus the semantic `geo-*` class names
+ * for CSS-driven styling). Pass `preset="light"` (or `"dark"` / `"minimal"`) to
+ * opt into a complete out-of-the-box look — every value in those presets is a
+ * `var(--geo-<token>, <fallback>)` expression, so consumers can also override
+ * globally with CSS variables instead of props.
  *
  * Palettes use OKLCH neutrals (no raw #fff/#000) with AA-contrast ink/surface
  * pairs, and are deliberately generic: no brand colors, no product semantics.
@@ -89,7 +91,7 @@ const CSS_VAR_NAMES: Record<keyof GeoTheme, string> = {
 function withVars(fallbacks: Record<keyof GeoTheme, string>): GeoTheme {
   const theme = {} as Record<keyof GeoTheme, string>;
   for (const key of Object.keys(CSS_VAR_NAMES) as (keyof GeoTheme)[]) {
-    theme[key] = `var(--cublya-geo-${CSS_VAR_NAMES[key]}, ${fallbacks[key]})`;
+    theme[key] = `var(--geo-${CSS_VAR_NAMES[key]}, ${fallbacks[key]})`;
   }
   return theme;
 }
@@ -183,9 +185,9 @@ export const presets: Record<GeoPresetName, ResolvedGeoTheme> = {
   none,
 };
 
-/** Apply the precedence chain steps 1–3: defaults → preset → theme overrides. */
+/** Apply the precedence chain steps 1–3: defaults (none) → preset → theme overrides. */
 export function resolveTheme(
-  preset: GeoPresetName = "light",
+  preset: GeoPresetName = "none",
   overrides?: Partial<GeoTheme>,
 ): ResolvedGeoTheme {
   const base = presets[preset];

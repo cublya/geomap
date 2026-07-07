@@ -6,12 +6,12 @@ describe("presets", () => {
     expect(Object.keys(presets).sort()).toEqual(["dark", "light", "minimal", "none"]);
   });
 
-  it("styled presets wrap every token in a --cublya-geo-* variable with a fallback", () => {
+  it("styled presets wrap every token in a --geo-* variable with a fallback", () => {
     for (const name of ["light", "dark", "minimal"] as const) {
       const values = Object.values(presets[name]);
       expect(values.length).toBeGreaterThanOrEqual(22);
       for (const value of values) {
-        expect(value, name).toMatch(/^var\(--cublya-geo-[a-z-]+, .+\)$/);
+        expect(value, name).toMatch(/^var\(--geo-[a-z-]+, .+\)$/);
       }
     }
   });
@@ -36,8 +36,9 @@ describe("presets", () => {
 });
 
 describe("resolveTheme", () => {
-  it("defaults to the light preset", () => {
-    expect(resolveTheme()).toBe(presets.light);
+  it("defaults to the none preset (unstyled)", () => {
+    expect(resolveTheme()).toBe(presets.none);
+    expect(resolveTheme("light")).toBe(presets.light);
     expect(resolveTheme("dark")).toBe(presets.dark);
     expect(resolveTheme("none")).toBe(presets.none);
   });

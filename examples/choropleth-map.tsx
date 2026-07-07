@@ -29,6 +29,9 @@ export function ChoroplethMap() {
   return (
     <div style={{ position: "relative", height: "100%" }}>
       <GeoMap
+        // The package defaults to preset="none" (nothing painted); opt into a
+        // complete out-of-the-box look with one prop.
+        preset="light"
         projection="mercator"
         // Move the antimeridian seam into the Bering Sea so Russia renders whole.
         projectionOptions={{ rotate: [-12, 0, 0] }}

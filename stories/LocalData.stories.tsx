@@ -24,6 +24,7 @@ export const HighResolutionTopoJSON: Story = {
   render: () => (
     <Frame>
       <GeoMap
+        preset="light"
         countries={{ data: worldDetailed, fill: (c) => scoreFill(c.id) }}
         fit={worldDetailed.get("NO")!}
         aria-label="Norwegian coastline at 50m resolution"
@@ -75,6 +76,7 @@ export const CustomGeoJSON: Story = {
   render: () => (
     <Frame>
       <GeoMap
+        preset="light"
         countries={{
           data: customSet,
           fill: (c) => (c.alpha2 ? "#7f61d3" : "#e0a832"),

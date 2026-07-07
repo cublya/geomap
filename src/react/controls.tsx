@@ -10,7 +10,10 @@ export interface CameraControlsHandle {
 
 export interface GeoControlsProps {
   camera: CameraControlsHandle;
-  /** Match the map's preset; "none" renders bare buttons for your own CSS. */
+  /**
+   * Match the map's preset for a consistent look; default "none" renders bare
+   * buttons for your own CSS.
+   */
   preset?: GeoPresetName;
   /** Partial token overrides applied over the preset. */
   theme?: Partial<GeoTheme>;
@@ -20,14 +23,15 @@ export interface GeoControlsProps {
 }
 
 /**
- * Zoom-in / zoom-out / reset button cluster. Looks complete out of the box via
- * preset tokens (inline styles — no CSS import needed); the optional
- * `@cublya/geo/styles.css` adds hover/focus polish that attributes can't
- * express. Position it via `className`/`style` — it renders in normal flow.
+ * Zoom-in / zoom-out / reset button cluster. With a `preset` it looks complete
+ * out of the box via preset tokens (inline styles — no CSS import needed); the
+ * optional `@cublya/geo/styles.css` adds hover/focus polish that attributes
+ * can't express. Position it via `className`/`style` — it renders in normal
+ * flow.
  */
 export function GeoControls({
   camera,
-  preset = "light",
+  preset = "none",
   theme,
   className,
   style,
@@ -63,7 +67,7 @@ export function GeoControls({
     <div
       role="group"
       aria-label="Map controls"
-      className={cx("cublya-geo-controls", className)}
+      className={cx("geo-controls", className)}
       style={{
         ...(styled && { display: "flex", flexDirection: "column", gap: 4 }),
         ...style,
@@ -73,7 +77,7 @@ export function GeoControls({
         <button
           key={label}
           type="button"
-          className="cublya-geo-controls__button"
+          className="geo-controls__button"
           aria-label={label}
           onClick={action}
           style={buttonStyle}

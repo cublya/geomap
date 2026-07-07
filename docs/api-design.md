@@ -181,8 +181,11 @@ This is the documented SVG-coupled surface; everything else is renderer-agnostic
 
 ## Presets, theming & CSS
 
-Components look complete by default with zero CSS imports; no Tailwind, resets,
-global CSS or runtime CSS-in-JS. Presentation = SVG attributes + theme objects.
+No CSS import is ever required; no Tailwind, resets, global CSS or runtime
+CSS-in-JS in any mode. Presentation = SVG attributes + theme objects. The
+package defaults to **fully unstyled** (`preset="none"`) — it never forces a
+look on you — but built-in presets let you opt into a complete, polished
+appearance with one prop and no CSS file.
 
 ```ts
 type GeoPresetName = "light" | "dark" | "minimal" | "none";
@@ -192,33 +195,36 @@ interface GeoTheme {
   focus; controlBg; controlInk; controlBorder; tooltipBg; tooltipInk; tooltipBorder;
 }
 presets: Record<GeoPresetName, ResolvedGeoTheme>;   // exported for composition
-resolveTheme(preset?, overrides?): ResolvedGeoTheme;
+resolveTheme(preset?, overrides?): ResolvedGeoTheme; // preset defaults to "none"
 ```
 
 Palettes are OKLCH neutrals (no raw #fff/#000), AA ink/surface contrast, themed
 `:focus-visible` rings, and deliberately generic — no brand colors, no metric
-scales, no visited-country semantics. `"none"` emits no presentation attributes.
+scales, no visited-country semantics. `"none"` emits no presentation attributes
+at all — it's the literal default parameter value, not just one option among
+equals.
 
 Style precedence (lowest → highest):
-1. package defaults — the `light` preset
-2. selected `preset`
+1. package defaults — `preset="none"` (nothing painted)
+2. selected `preset` — `"light"` / `"dark"` / `"minimal"`, when you opt in
 3. `theme` partial token overrides
 4. per-feature callbacks — `countries.fill`/`pattern`/`disabled`, `renderMarker`, `renderObject`
 5. direct element props — `marker.color`, `route.color`, `countries.stroke`, …
 
 Consumer override channels, combinable:
 - **Props** — `preset="dark"`, `theme={{ land: "…" }}` (values may be `var(...)`).
-- **CSS variables** — every preset value is `var(--cublya-geo-*, fallback)`;
+- **CSS variables** — every preset value is `var(--geo-*, fallback)`;
   define the variables on any ancestor.
-- **Class names** (all presets; the whole story under `"none"`): `cublya-geo`,
-  `cublya-geo-map`/`-globe`, `cublya-geo-country` (+ `[data-country]`,
+- **Class names** (always present, all presets included `"none"`): `geo`,
+  `geo-map`/`-globe`, `geo-country` (+ `[data-country]`,
   `[data-selected]`, `[data-disabled]`), `-hover`, `-pattern`, `-selection`,
   `-route`, `-marker`, `-label`, `-live`, `-trail`, `-graticule`, `-sphere`.
 
 `GeoControls` and `GeoTooltip` (optional HTML helpers) take the same
-`preset`/`theme` props and are complete without CSS; the optional
+`preset`/`theme` props, also defaulting to `"none"` (bare elements); pass the
+same preset as your map for a matching, complete look. The optional
 `@cublya/geo/styles.css` adds only hover/active/focus-visible polish and a
-tooltip shadow — namespaced under `.cublya-geo-*`, it styles nothing else.
+tooltip shadow — namespaced under `.geo-*`, it styles nothing else.
 
 ## Static output (share images)
 

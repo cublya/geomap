@@ -21,6 +21,9 @@ export function PassportGlobe({
     <GeoGlobe
       camera={camera}
       inertia
+      // Start from the light preset (complete: ocean, borders, graticule, …),
+      // then override just the tokens that should follow the app's brand.
+      preset="light"
       theme={{
         land: "var(--muted)",
         selectedStroke: "var(--brand-strong)",

@@ -25,6 +25,7 @@ export const GreatCircle: Story = {
   render: () => (
     <Frame>
       <GeoMap
+        preset="light"
         countries={{ data: world }}
         markers={[vie!, nyc!, tyo!]}
         routes={[
@@ -42,7 +43,7 @@ export const GreatCircle: Story = {
   ),
   play: async ({ canvasElement }) => {
     await waitFor(() => {
-      expect(canvasElement.querySelectorAll(".cublya-geo-route").length).toBe(2);
+      expect(canvasElement.querySelectorAll(".geo-route").length).toBe(2);
     });
   },
 };
@@ -51,6 +52,7 @@ export const MultiStop: Story = {
   render: () => (
     <Frame>
       <GeoMap
+        preset="light"
         countries={{ data: world }}
         markers={CITIES}
         routes={[
@@ -68,9 +70,9 @@ export const MultiStop: Story = {
   ),
   play: async ({ canvasElement }) => {
     await waitFor(() => {
-      expect(canvasElement.querySelectorAll(".cublya-geo-route").length).toBe(1);
+      expect(canvasElement.querySelectorAll(".geo-route").length).toBe(1);
       expect(
-        canvasElement.querySelector(".cublya-geo-route")!.getAttribute("d")!.length,
+        canvasElement.querySelector(".geo-route")!.getAttribute("d")!.length,
       ).toBeGreaterThan(100);
     });
   },
