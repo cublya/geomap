@@ -15,11 +15,19 @@ immediately without a build step.
 - `npm run dev` — watch build (`tsup --watch`).
 - `npm run storybook` — dev server on `:6006`; add or update a story under
   `stories/` for any new component or prop surface.
+- `npm run docs:dev` — VitePress dev server for the long-form documentation.
+- `npm run build-site` — build Storybook and the documentation into the single
+  GitHub Pages artifact (`storybook-static/`, with docs under `docs/`).
 - Add or update a Vitest test under the matching `src/**/*.test.ts(x)` for any
   logic change.
 - If you change the public API, update `docs/api-design.md` and, if it
   affects how one of the four consuming apps (, , ,
   ) would adopt the package, the relevant guide in `docs/migrations/`.
+
+The [documentation index](docs/README.md) maps each change type to the guides
+that must stay in sync. In particular, update `docs/api-reference.md` for public
+surface changes and the architecture, data, theming, testing, or troubleshooting
+guide when behavior in that area changes.
 
 ## Before opening a PR
 
@@ -32,6 +40,7 @@ npm run test
 npm run build
 npx publint
 npm run build-storybook
+npm run docs:build
 npm run test-storybook:ci
 npm run test:e2e
 bash scripts/verify-fixtures.sh

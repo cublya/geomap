@@ -14,23 +14,25 @@ apps (see [docs/feature-matrix.md](docs/feature-matrix.md) and the
 ```sh
 npm install @cublya/geomap
 # recommended basemap (the package deliberately ships none):
-npm install world-atlas
+npm install @cublya/world-atlas
 ```
 
 React ≥ 18 and `react-dom` are peer dependencies. The package is ESM-only with
 `sideEffects: false` — unused layers and helpers tree-shake away.
 
-`world-atlas` ships three resolutions; only `countries-10m.json` covers all 193
-UN member states and both non-member observer states. The 50m file drops Tuvalu;
-the 110m file drops 28 members and the Holy See — see
+`@cublya/world-atlas` ships three resolutions. The default `countries-*.json`
+files use its UN-style boundary view: Crimea resolves to Ukraine, Kosovo to
+Serbia, Northern Cyprus to Cyprus, and Somaliland to Somalia. The 10m and 50m
+files cover all 193 UN member states and both non-member observer states; the
+110m file drops 28 members and the Holy See — see
 [docs/basemap-coverage.md](docs/basemap-coverage.md) for the full breakdown and
-how to re-verify after a `world-atlas` upgrade.
+how to re-verify after a `@cublya/world-atlas` upgrade.
 
 ## Quickstart
 
 ```tsx
 import { GeoMap, prepareCountries } from "@cublya/geomap";
-import world from "world-atlas/countries-10m.json";
+import world from "@cublya/world-atlas/countries-10m.json";
 
 const countries = prepareCountries(world, { exclude: ["AQ"] });
 
@@ -52,9 +54,9 @@ export function SpendMap() {
 }
 ```
 
-See [Presets & theming](#presets--theming) below for the full story: four
-built-in presets, `theme` overrides, CSS variables, and the class-name-only
-`"none"` path.
+See [Presets & theming](#presets--theming) below for the full story: the
+`preset` × `palette` × `outline` axes, `theme` overrides, CSS variables, and the
+class-name-only `"none"` path.
 
 Swap `GeoMap` for `GeoGlobe` and the same props render a drag-rotatable
 orthographic globe with inertia:
@@ -63,9 +65,28 @@ orthographic globe with inertia:
 <GeoGlobe countries={{ data: countries, fill }} markers={pins} routes={arcs} autoRotate={4} />
 ```
 
+Or hand the choice to the user: `GeoView` is one component that flips between the
+two surfaces via a built-in segmented toggle (a `GeoViewToggle`: map | globe,
+top-left) plus the zoom cluster (bottom-right). The same shared props apply, and
+the geographic centre (plus range-scaled zoom) carries across the switch, so
+flipping stays put instead of snapping home:
+
+```tsx
+import { GeoView } from "@cublya/geomap";
+
+// Uncontrolled — a map with a map⇄globe toggle top-left:
+<GeoView preset="light" defaultMode="map" countries={{ data: countries, fill }} markers={pins} />
+
+// Or controlled from your own state:
+<GeoView preset="light" mode={mode} onModeChange={setMode} countries={{ data: countries, fill }} />
+```
+
+Use `<GeoViewToggle mode onModeChange />` standalone to drive your own swap, and
+`toggle={false}` / `controls={false}` on `GeoView` to drop either overlay.
+
 ## Country data and ISO identity
 
-`prepareCountries(topologyOrGeoJSON, options)` converts TopoJSON (world-atlas
+`prepareCountries(topologyOrGeoJSON, options)` converts TopoJSON (`@cublya/world-atlas`
 convention — see [docs/basemap-coverage.md](docs/basemap-coverage.md) for which
 resolution has full UN-member coverage) or a GeoJSON FeatureCollection and
 resolves every feature against a bundled ISO 3166-1 table plus a Natural-Earth
@@ -155,12 +176,38 @@ extra — `<GeoMap />` with no `preset` renders exactly the layers you configure
 with no forced colors. That's `preset="none"`. When you *do* want a complete,
 polished look with zero setup, pick a built-in preset — one prop, no CSS file:
 
+Theming is three orthogonal axes: **`preset`** picks the colour mode,
+**`palette`** picks the fill palette, and **`countries.outline`** picks
+the border behaviour — independently, so you don't need a preset per combination.
+
 ```tsx
-<GeoMap />                    // preset="none" — the default: unstyled, your call
-<GeoMap preset="light" />     // complete light palette, ready to ship
-<GeoMap preset="dark" />      // complete dark palette
-<GeoMap preset="minimal" />   // hue-less line-art look
+<GeoMap />                                        // preset="none" — the default: unstyled, your call
+<GeoMap preset="light" />                         // complete light palette, ready to ship
+<GeoMap preset="dark" />                          // complete dark palette
+<GeoMap preset="light" palette="minimal" /> // hue-less line-art palette
+<GeoMap preset="light" countries={{ data, outline: "gap" }} />    // cut-paper: borders in the ocean tone
+<GeoMap preset="light" countries={{ data, outline: "raised" }} /> // raised land with a soft shadow
 ```
+
+`palette` — the **fill palette** (defaults to `"default"`):
+
+| variant     | look                                                |
+| ----------- | --------------------------------------------------- |
+| `"default"` | plain filled land                                   |
+| `"minimal"` | hue-less line-art — transparent ocean, faint fills  |
+
+`countries.outline` — the **border behaviour** (a mode, an `{ mode, color, width, dash, elevation }`
+style, or a `(country) => …` callback for per-feature borders; defaults to `"line"`):
+
+| outline    | look                                                                    |
+| ---------- | ----------------------------------------------------------------------- |
+| `"line"`   | contrast hairline (the classic ink-on-paper divider)                    |
+| `"gap"`    | borders painted in the ocean tone so countries read as clean gaps       |
+| `"raised"` | `gap` plus a soft drop shadow lifting the land off the ocean            |
+| `"none"`   | no border                                                               |
+
+The old bundled presets are palette × outline: `crisp` = `default` + `outline="gap"`,
+`chalk` = `minimal` + `outline="gap"`, `relief` = `default` + `outline="raised"`.
 
 All presentation flows through SVG attributes and theme objects — no
 Tailwind, no global CSS, no resets, no runtime CSS-in-JS, ever, in any mode.
@@ -174,18 +221,18 @@ optional controls/tooltip.
 **Style precedence** (lowest → highest):
 
 1. package defaults (`preset="none"` — nothing painted)
-2. selected `preset` (`"light"` / `"dark"` / `"minimal"`, if you opt in)
+2. selected `preset` + `palette` (`"light"`/`"dark"` × `"default"`/`"minimal"`, if you opt in)
 3. `theme` token overrides
-4. per-feature callbacks (`countries.fill` / `pattern` / `disabled`, `renderMarker`, …)
-5. direct element props (`marker.color`, `route.color`, `countries.stroke`, …)
+4. per-feature callbacks (`countries.fill` / `pattern` / `disabled` / `outline`, `renderMarker`, …)
+5. direct element props (`marker.color`, `route.color`, `countries.outline`, …)
 
 ```tsx
 // 3 — partial tokens over any preset:
 <GeoMap preset="dark" theme={{ route: "oklch(0.8 0.1 150)" }} />
 
-// exported preset objects compose:
+// exported preset objects compose — index by mode then palette:
 import { presets } from "@cublya/geomap";
-<GeoMap theme={{ ...presets.dark, marker: "var(--brand)" }} />
+<GeoMap theme={{ ...presets.dark.minimal, marker: "var(--brand)" }} />
 ```
 
 Every preset value is `var(--geomap-*, fallback)`, so any ancestor can
@@ -247,6 +294,16 @@ attach utility classes per part:
 ```
 
 `GeoTooltip` exposes the same `className` / `data-geomap-part="tooltip"` hooks.
+`GeoControls` (and the segmented `GeoViewToggle`) also take an `icons` slot to
+replace any built-in glyph with your own node — the package ships **no** icon
+dependency, so you bring the nodes:
+
+```tsx
+import { Plus, Minus, Map, Globe } from "lucide-react";
+
+<GeoControls camera={camera} icons={{ zoomIn: <Plus size={15} />, zoomOut: <Minus size={15} /> }} />
+<GeoViewToggle mode={mode} onModeChange={setMode} icons={{ map: <Map size={15} />, globe: <Globe size={15} /> }} />
+```
 
 ## Interaction & accessibility
 
@@ -290,10 +347,18 @@ planned escape hatch — the core emits only data, so the API won't change.
 
 ## Storybook
 
-The documentation and demo site — every feature above as a live story, including
-the theming modes, keyboard/reduced-motion behaviour and a performance stress
-case — deploys from `main` to **https://cublya.github.io/geo/**. Run it locally
-with `npm run storybook`.
+The hosted project site deploys from `main` to **https://cublya.github.io/geo/**.
+Storybook is at the site root and the long-form documentation is under
+[`/geo/docs/`](https://cublya.github.io/geo/docs/). Run Storybook locally with
+`npm run storybook` or the documentation site with `npm run docs:dev`.
+
+## Documentation
+
+Storybook is the interactive catalogue, not the complete project documentation.
+The [documentation index](docs/README.md) links the getting-started guide, public
+API reference, architecture, data and rendering concepts, theming and
+accessibility, testing and releases, troubleshooting, migration guides, and
+basemap coverage notes.
 
 ## Development
 
@@ -306,6 +371,8 @@ npm run build              # tsup → dist/ (ESM + d.ts + styles.css)
 npm run verify             # lint + types + tests + build + publint + pack dry-run
 npm run storybook          # dev server on :6006
 npm run build-storybook    # static site → storybook-static/
+npm run docs:dev           # long-form documentation dev server
+npm run build-site         # Storybook + docs → one deployable Pages artifact
 npm run test-storybook:ci  # interaction + axe accessibility tests (built SB)
 npm run test:e2e           # Playwright screenshot tests (build Storybook first)
 bash scripts/verify-fixtures.sh   # install packed tarball into Vite + Next.js apps

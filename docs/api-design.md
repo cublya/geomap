@@ -41,7 +41,7 @@ consumable directly by SVG `rotate()`).
 ## Country data & ISO identity
 
 The package ships **no basemap**. Feed it any TopoJSON/GeoJSON (typically
-`world-atlas`):
+`@cublya/world-atlas`):
 
 ```ts
 const world = prepareCountries(topology, {
@@ -82,7 +82,7 @@ Low-level identity helpers are exported too: `lookupIso(code)`, `resolveCountryN
   countries={{
     data: world,
     fill: (c) => spendColor(c.id),      // undefined → theme.land
-    stroke?: string,
+    outline?: Outline | ((c) => Outline | undefined), // border behaviour, per-feature if a fn
     pattern: (c) => "hatch" | "dots" | undefined,  // non-color state encoding
     selectedId?: string | null,
     onSelect?: (c: PreparedCountry | null) => void, // null = ocean click
@@ -109,6 +109,28 @@ Low-level identity helpers are exported too: `lookupIso(code)`, `resolveCountryN
 `inertia` (default true) and `autoRotate?: number` (deg/s, pauses on interaction,
 disabled under reduced motion). Orthographic, `clipAngle(90)`, drag-to-rotate with
 zoom-scaled degrees-per-pixel and latitude clamped at the poles ('s model).
+
+`<GeoView>` wraps both behind one surface with a built-in map⇄globe toggle:
+
+```tsx
+<GeoView
+  {...sharedProps}                       // countries/markers/routes/live/theming
+  mode="map" onModeChange={setMode}      // controlled; or defaultMode="map" uncontrolled
+  projection projectionOptions           // map-only, ignored on the globe
+  inertia autoRotate                     // globe-only, ignored on the map
+  toggle                                 // true (default, top-left) | false | Partial<GeoViewToggleProps>
+  controls                               // zoom cluster: true (default, bottom-right) | false | Partial<GeoControlsProps>
+/>
+```
+
+It holds a `MapCamera` and a `GlobeCamera` (or accepts `mapCamera`/`globeCamera`)
+and bridges the view on each switch: the flat centre `[lon, lat]` maps to the globe
+facing `[-lon, -lat, 0]` (and back), with zoom remapped between the two cameras'
+ranges — so flipping stays put instead of resetting.
+
+The switch itself is `<GeoViewToggle mode onModeChange />` — a segmented ARIA
+`radiogroup` of two always-visible options (flat map / globe) with the active one
+highlighted. Usable standalone to drive your own `GeoMap`/`GeoGlobe` swap.
 
 Marker / route / live shapes (all generic over `data`):
 
@@ -187,16 +209,39 @@ package defaults to **fully unstyled** (`preset="none"`) — it never forces a
 look on you — but built-in presets let you opt into a complete, polished
 appearance with one prop and no CSS file.
 
+Theming is three orthogonal axes: `preset` (colour mode), `palette`
+(fill palette), and `countries.outline` (border behaviour — see below).
+
 ```ts
-type GeoPresetName = "light" | "dark" | "minimal" | "none";
+type GeoPreset = "light" | "dark" | "none";           // colour mode
+type GeoPalette = "default" | "minimal";        // fill palette
+type OutlineMode = "line" | "gap" | "raised" | "none";        // border behaviour
+type Outline = OutlineMode | {
+  mode?; color?; width?; dash?; elevation?;            // full style
+};
 interface GeoTheme {
-  ocean; land; landMuted; landDisabled; landHover; landStroke; selectedStroke;
-  graticule; sphere; marker; markerLabel; route; live; trail; patternInk;
-  focus; controlBg; controlInk; controlBorder; tooltipBg; tooltipInk; tooltipBorder;
+  ocean; land; landMuted; landDisabled; landHover; landStroke; landShadow;
+  selectedStroke; graticule; sphere; marker; markerLabel; route; live; trail;
+  patternInk; focus; controlBg; controlInk; controlBorder;
+  tooltipBg; tooltipInk; tooltipBorder;
 }
-presets: Record<GeoPresetName, ResolvedGeoTheme>;   // exported for composition
-resolveTheme(preset?, overrides?): ResolvedGeoTheme; // preset defaults to "none"
+// exported for composition — index by mode then palette, e.g. presets.dark.minimal
+presets: { light: Record<GeoPalette, GeoTheme>;
+           dark: Record<GeoPalette, GeoTheme>;
+           none: ResolvedGeoTheme };
+resolveTheme(preset?, variant?, overrides?): ResolvedGeoTheme; // preset defaults to "none"
+resolveOutline(outline?, theme): ResolvedOutline;    // layer-agnostic border resolver
 ```
+
+Palettes, both in light and dark: `default` (plain filled land) and `minimal`
+(hue-less line-art — transparent ocean, faint fills). **Border behaviour is the
+separate `countries.outline` axis** — a bare mode, a full style object, or a
+`(country) => Outline | undefined` callback for per-feature borders: `line`
+(hairline), `gap` (ocean-tone gaps so choropleth fills carry the map), `raised`
+(`gap` + a soft `landShadow` drop shadow lifting the land), `none`. The old
+bundled presets are palette × outline: crisp = `default` + `gap`, chalk =
+`minimal` + `gap`, relief = `default` + `raised`. `resolveOutline` is
+layer-agnostic so future region/coastline layers reuse it.
 
 Palettes are OKLCH neutrals (no raw #fff/#000), AA ink/surface contrast, themed
 `:focus-visible` rings, and deliberately generic — no brand colors, no metric
@@ -206,10 +251,10 @@ equals.
 
 Style precedence (lowest → highest):
 1. package defaults — `preset="none"` (nothing painted)
-2. selected `preset` — `"light"` / `"dark"` / `"minimal"`, when you opt in
+2. selected `preset` + `palette` — `"light"`/`"dark"` × `"default"`/`"minimal"`, when you opt in
 3. `theme` partial token overrides
-4. per-feature callbacks — `countries.fill`/`pattern`/`disabled`, `renderMarker`, `renderObject`
-5. direct element props — `marker.color`, `route.color`, `countries.stroke`, …
+4. per-feature callbacks — `countries.fill`/`pattern`/`disabled`/`outline`, `renderMarker`, `renderObject`
+5. direct element props — `marker.color`, `route.color`, `countries.outline`, …
 
 Consumer override channels, combinable:
 - **Props** — `preset="dark"`, `theme={{ land: "…" }}` (values may be `var(...)`).
@@ -220,21 +265,28 @@ Consumer override channels, combinable:
   `[data-selected]`, `[data-disabled]`), `-hover`, `-pattern`, `-selection`,
   `-route`, `-marker`, `-label`, `-live`, `-trail`, `-graticule`, `-sphere`.
 
-`GeoControls` (a segmented pill with SVG icons) and `GeoTooltip` (optional HTML
-helpers) take the same `preset`/`theme` props, also defaulting to `"none"`; pass
-the same preset as your map for a matching, complete look (shadow + icons
-included, no CSS file). The optional `@cublya/geomap/styles.css` adds only
-hover/active/focus-visible polish — namespaced under `.geomap-*`, it styles
-nothing else.
+`GeoControls` (zoom in/out/reset as SVG-icon buttons — `separate` rounded tiles
+by default, or `layout="segmented"` for one hairline-divider pill) and
+`GeoTooltip` (optional HTML helpers) take the same `preset`/`theme` props, also
+defaulting to `"none"`; pass the same preset as your map for a matching, complete
+look (shadow + icons included, no CSS file). Pass `fullscreen={ref}` (the map
+wrapper's element/ref) to append a Fullscreen-API toggle button. The separate
+`GeoViewToggle` (a segmented map⇄globe `radiogroup`, what `<GeoView>` wires up)
+shares the same styling channels. Every built-in glyph is swappable via an
+`icons` slot — the package ships no icon dependency. The optional
+`@cublya/geomap/styles.css` adds only hover/active/focus-visible polish —
+namespaced under `.geomap-*`, it styles nothing else.
 
 Three styling channels, combinable — designed so utility CSS (Tailwind) and raw
 CSS both work without fighting inline styles:
 - **`preset`/`theme`** — complete inline look from tokens (default channel).
-- **`classNames` slots** — `{ root, button, zoomIn, zoomOut, reset }`, appended
-  after the base classes; the Tailwind seam.
+- **`classNames` slots** — `{ root, button, zoomIn, zoomOut, reset, fullscreen }`
+  (and `{ root, option, map, globe }` on `GeoViewToggle`), appended after the base
+  classes; the Tailwind seam.
 - **Headless (`preset="none"`)** — emits **no** inline styles, only the semantic
   `.geomap-controls*` classes and `data-geomap-part` (`controls`/`zoom-in`/
-  `zoom-out`/`reset`/`tooltip`) + `data-geomap-orientation` hooks for raw CSS.
+  `zoom-out`/`reset`/`fullscreen`/`tooltip`) + `data-geomap-orientation` /
+  `data-geomap-layout` hooks for raw CSS.
 
 ## Static output (share images)
 
