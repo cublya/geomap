@@ -1,7 +1,7 @@
 # Basemap coverage
 
 `@cublya/geomap` ships no basemap (see
-[README § Install](https://github.com/cublya/geo#install)).
+[README § Install](https://github.com/cublya/geomap#install)).
 This tracks which `@cublya/world-atlas` resolution covers the 193 UN member
 states and the two non-member observer states (the Holy See and State of
 Palestine), so picking one isn't guesswork.
