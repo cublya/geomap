@@ -10,15 +10,15 @@ import type {
 import { toLonLat } from "../core/coords";
 import { configureGlobe, createGlobeProjection } from "../core/projections";
 import { createGlobeCamera, type GlobeCamera } from "../core/camera-globe";
-import type { FitTarget } from "../core/camera-map";
+import { fitKey, type FitTarget } from "../core/camera-map";
 import {
   cx,
   resolveTheme,
-  type GeoPreset,
-  type GeoPalette,
+  GeoPreset,
+  GeoPalette,
   type GeoTheme,
 } from "../theme";
-import { resolveOutline } from "../core/outline";
+import { resolveLandShadow } from "../core/outline";
 import { GeoProvider, type GeoContextValue } from "./geo-context";
 import { usePointerGestures } from "./gestures";
 import { useFocusVisible } from "./use-focus-visible";
@@ -72,7 +72,7 @@ const KEYBOARD_ROTATE_DEG = 12;
 function fitCoordinates(target: FitTarget): Coordinate[] {
   if (typeof target === "string") return [];
   if (Array.isArray(target)) {
-    // GeoBounds is [[w,s],[e,n]] — treat both shapes as coordinate lists.
+    // GeoBounds is [[w,s],[e,n]]; treat both shapes as coordinate lists.
     return target as Coordinate[];
   }
   const [[west, south], [east, north]] = target.bounds;
@@ -83,13 +83,6 @@ function fitCoordinates(target: FitTarget): Coordinate[] {
     [east, north],
     [west, north],
   ];
-}
-
-function fitKey(fit: FitTarget | undefined): string {
-  if (fit === undefined) return "";
-  if (typeof fit === "string") return fit;
-  if (Array.isArray(fit)) return JSON.stringify(fit);
-  return `country:${fit.id}`;
 }
 
 export function GeoGlobe<TMarker = unknown, TRoute = unknown, TLive = unknown>({
@@ -107,8 +100,8 @@ export function GeoGlobe<TMarker = unknown, TRoute = unknown, TLive = unknown>({
   inertia = true,
   autoRotate,
   graticule = true,
-  preset = "none",
-  palette = "default",
+  preset = GeoPreset.None,
+  palette = GeoPalette.Default,
   theme: themeInput,
   width = 960,
   height = 540,
@@ -137,8 +130,8 @@ export function GeoGlobe<TMarker = unknown, TRoute = unknown, TLive = unknown>({
 
   const zoom = Math.round(view.zoom * 100) / 100;
   // Snap the frame so tween/inertia frames with sub-pixel deltas reuse the
-  // memoised projection/path ('s trick). The step is derived from the
-  // on-screen pixels-per-degree — which grows with zoom — so the snap stays
+  // memoised projection/path. The step is derived from the
+  // on-screen pixels-per-degree, which grows with zoom, so the snap stays
   // ~0.5px at every zoom level instead of a fixed 0.5° that visibly stepped
   // (2.3px at zoom 1, ~14px zoomed in) and made the inertia tail freeze early.
   const pxPerDegree = (globe.baseScale * zoom * Math.PI) / 180;
@@ -249,14 +242,11 @@ export function GeoGlobe<TMarker = unknown, TRoute = unknown, TLive = unknown>({
     [projection, isVisible],
   );
 
-  // The raised drop shadow lifts the whole landmass, so it keys off the
-  // layer-level outline (a static value); a per-country `outline` callback
-  // can't drive a single group filter.
-  const layerOutline = typeof countries?.outline === "function" ? undefined : countries?.outline;
-  const resolvedLand = resolveOutline(layerOutline, theme);
-  const raised = resolvedLand.raised && theme.landShadow !== undefined;
-  const landFilterId = raised ? `${patternBase}relief` : undefined;
-  const landShadowElevation = resolvedLand.elevation;
+  const landShadow = React.useMemo(
+    () => resolveLandShadow(countries?.outline, theme),
+    [countries?.outline, theme],
+  );
+  const landFilterId = landShadow ? `${patternBase}relief` : undefined;
 
   const context: GeoContextValue = React.useMemo(
     () => ({
@@ -270,9 +260,9 @@ export function GeoGlobe<TMarker = unknown, TRoute = unknown, TLive = unknown>({
       isDraggingRef,
       patternIds: { hatch: `${patternBase}hatch`, dots: `${patternBase}dots` },
       landFilterId,
-      landShadowElevation,
+      landShadow,
     }),
-    [projection, path, width, height, project, isVisible, theme, patternBase, landFilterId, landShadowElevation],
+    [projection, path, width, height, project, isVisible, theme, patternBase, landFilterId, landShadow],
   );
 
   const sphereD = path({ type: "Sphere" }) ?? undefined;

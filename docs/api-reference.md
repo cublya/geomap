@@ -12,14 +12,14 @@ Renders an interactive flat SVG map.
 
 | Prop | Type | Default | Notes |
 | --- | --- | --- | --- |
-| `countries` | `CountriesLayerProps` | — | Prepared country layer and callbacks |
-| `markers` | `GeoMarker<T>[]` | — | Projected markers |
-| `routes` | `GeoRoute<T>[]` | — | Great-circle, multi-stop routes |
-| `live` | `LiveLayerComponentProps<T>` | — | Prop-driven moving objects |
+| `countries` | `CountriesLayerProps` | - | Prepared country layer and callbacks |
+| `markers` | `GeoMarker<T>[]` | - | Projected markers |
+| `routes` | `GeoRoute<T>[]` | - | Great-circle, multi-stop routes |
+| `live` | `LiveLayerComponentProps<T>` | - | Prop-driven moving objects |
 | `projection` | `ProjectionInput` | `naturalEarth1` | Named projection or factory |
-| `projectionOptions` | `FlatProjectionOptions` | — | Projection tuning |
+| `projectionOptions` | `FlatProjectionOptions` | - | Projection tuning |
 | `camera` | `MapCamera` | internal | External camera store |
-| `fit` | `FitTarget` | — | Reframe when target changes |
+| `fit` | `FitTarget` | - | Reframe when target changes |
 | `fitCurve` | `arc \| linear` | `arc` | Declarative fit animation path |
 | `interactive` | `boolean` | `true` | Enables pointer interaction |
 | `wheelZoom` | `boolean` | `true` | Enables wheel zoom |
@@ -27,10 +27,10 @@ Renders an interactive flat SVG map.
 | `graticule` | `boolean` | `false` | Draw coordinate grid |
 | `preset` | `GeoPreset` | `none` | `none`, `light`, or `dark` |
 | `palette` | `GeoPalette` | `default` | `default` or `minimal` |
-| `theme` | `Partial<GeoTheme>` | — | Token overrides |
+| `theme` | `Partial<GeoTheme>` | - | Token overrides |
 | `width`, `height` | `number` | `960`, `500` | SVG viewBox dimensions |
 | `aria-label` | `string` | `Interactive map` | Use a data-specific label |
-| `children` | `ReactNode` | — | Custom projected SVG layers |
+| `children` | `ReactNode` | - | Custom projected SVG layers |
 
 `onMarkerClick` receives the typed marker. `renderMarker(marker, context)` can
 replace the default marker; context contains projected `position` and
@@ -44,9 +44,9 @@ children props match `GeoMap`. Globe-specific props are:
 | Prop | Type | Default | Notes |
 | --- | --- | --- | --- |
 | `camera` | `GlobeCamera` | internal | External globe camera |
-| `fit` | `FitTarget` | — | Reset or frame coordinates/country |
+| `fit` | `FitTarget` | - | Reset or frame coordinates/country |
 | `inertia` | `boolean` | `true` | Post-drag decay |
-| `autoRotate` | `number` | — | Idle degrees per second |
+| `autoRotate` | `number` | - | Idle degrees per second |
 | `graticule` | `boolean` | `true` | Coordinate grid |
 | `width`, `height` | `number` | `960`, `540` | SVG viewBox dimensions |
 

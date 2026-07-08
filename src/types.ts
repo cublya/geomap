@@ -18,7 +18,7 @@ export type Rotation = [number, number, number];
 
 /**
  * A renderable geographic feature, independent of what it represents. The unit
- * of styling for map layers — countries today, but regions, subregions, or
+ * of styling for map layers: countries today, but regions, subregions, or
  * custom geometry can extend this so layers and callbacks stay reusable.
  */
 export interface PreparedFeature {
@@ -76,7 +76,11 @@ export interface LiveObject<T = unknown> {
   data?: T;
 }
 
-export type CountryPattern = "hatch" | "dots";
+export const CountryPattern = {
+  Hatch: "hatch",
+  Dots: "dots",
+} as const;
+export type CountryPattern = (typeof CountryPattern)[keyof typeof CountryPattern];
 
 export interface CountryHover {
   country: PreparedCountry;
@@ -102,7 +106,7 @@ export interface CountriesLayerProps {
   /**
    * Country border behaviour: a bare mode (`"line" | "gap" | "raised" | "none"`),
    * a full {@link Outline} style, or a per-country callback returning one
-   * (`undefined` → the layer default `"line"`). Orthogonal to the colour preset —
+   * (`undefined` → the layer default `"line"`). Orthogonal to the colour preset;
    * `outline="gap"` gives cut-paper borders, `outline="raised"` lifts the land.
    * The `raised` drop shadow applies at the layer level (a static value), not
    * per country.
@@ -127,7 +131,7 @@ export interface CountriesLayerProps {
   hover?: CountryHoverAnimation | false;
   /**
    * Emit a native SVG `<title>` per country (the browser's built-in hover
-   * tooltip). Defaults to `true` — except when `onHover` is set, where it
+   * tooltip). Defaults to `true`, except when `onHover` is set, where it
    * defaults to `false` so the browser's tooltip doesn't double up with your
    * own `GeoTooltip`. Set explicitly to force either way.
    */
@@ -140,4 +144,9 @@ export interface LiveLayerProps<T = unknown> {
   transitionMs?: number;
 }
 
-export type FlatProjectionKind = "naturalEarth1" | "mercator" | "equalEarth";
+export const FlatProjectionKind = {
+  NaturalEarth1: "naturalEarth1",
+  Mercator: "mercator",
+  EqualEarth: "equalEarth",
+} as const;
+export type FlatProjectionKind = (typeof FlatProjectionKind)[keyof typeof FlatProjectionKind];

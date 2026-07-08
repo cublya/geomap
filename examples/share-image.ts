@@ -1,6 +1,6 @@
-// -style share image: render the map to a standalone SVG string, preview it
+// Share image: render the map to a standalone SVG string, preview it
 // as a data URL, then rasterize to a PNG blob for download. Colors must be
-// concrete here — CSS variables can't resolve outside a page.
+// concrete here; CSS variables can't resolve outside a page.
 import {
   prepareCountries,
   renderStaticMapSvg,

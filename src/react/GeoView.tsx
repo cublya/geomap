@@ -5,23 +5,23 @@ import { createGlobeCamera, type GlobeCamera } from "../core/camera-globe";
 import type { FlatProjectionOptions, ProjectionInput } from "../core/projections";
 import {
   cx,
-  type GeoPreset,
-  type GeoPalette,
+  GeoPreset,
+  GeoPalette,
   type GeoTheme,
 } from "../theme";
 import { GeoMap } from "./GeoMap";
 import { GeoGlobe } from "./GeoGlobe";
 import {
   GeoControls,
+  GeoViewMode,
   GeoViewToggle,
   type GeoControlsProps,
-  type GeoViewMode,
   type GeoViewToggleProps,
 } from "./controls";
 import { useIsomorphicLayoutEffect } from "./use-isomorphic-layout-effect";
 import type { LiveLayerComponentProps, MarkersLayerProps } from "./layers";
 
-export type { GeoViewMode } from "./controls";
+export { GeoViewMode } from "./controls";
 
 /** Linearly remap a zoom level from one camera's range to another's. */
 function remapZoom(v: number, inMin: number, inMax: number, outMin: number, outMax: number): number {
@@ -106,7 +106,7 @@ export function GeoView<TMarker = unknown, TRoute = unknown, TLive = unknown>({
   routes,
   live,
   mode,
-  defaultMode = "map",
+  defaultMode = GeoViewMode.Map,
   onModeChange,
   mapCamera,
   globeCamera,
@@ -119,8 +119,8 @@ export function GeoView<TMarker = unknown, TRoute = unknown, TLive = unknown>({
   projectionOptions,
   inertia,
   autoRotate,
-  preset = "none",
-  palette = "default",
+  preset = GeoPreset.None,
+  palette = GeoPalette.Default,
   theme,
   width,
   height,
@@ -150,13 +150,13 @@ export function GeoView<TMarker = unknown, TRoute = unknown, TLive = unknown>({
 
   // Carry the view across the switch. Run before paint (and before the incoming
   // surface's own layout effects settle) so the new camera is already framed on
-  // the same place the old one showed — no home-snap flash. `set()` is instant.
+  // the same place the old one showed (no home-snap flash). `set()` is instant.
   const prevModeRef = React.useRef(currentMode);
   useIsomorphicLayoutEffect(() => {
     const prev = prevModeRef.current;
     if (prev === currentMode) return;
     prevModeRef.current = currentMode;
-    if (currentMode === "globe") {
+    if (currentMode === GeoViewMode.Globe) {
       const { center, zoom } = map.getView();
       globe.set({
         rotation: [-center[0], -center[1], 0],
@@ -180,10 +180,10 @@ export function GeoView<TMarker = unknown, TRoute = unknown, TLive = unknown>({
       data-geomap-view={currentMode}
       className={cx("geomap-view", className)}
       // Fill the container so the child SVG (height:100%) has a height to resolve
-      // against — otherwise the wrapper collapses and the map renders clipped.
+      // against; otherwise the wrapper collapses and the map renders clipped.
       style={{ position: "relative", width: "100%", height: "100%", ...style }}
     >
-      {currentMode === "map" ? (
+      {currentMode === GeoViewMode.Map ? (
         <GeoMap
           camera={map}
           countries={countries}
@@ -251,7 +251,7 @@ export function GeoView<TMarker = unknown, TRoute = unknown, TLive = unknown>({
           palette={palette}
           theme={theme}
           {...controlsObj}
-          camera={currentMode === "map" ? map : globe}
+          camera={currentMode === GeoViewMode.Map ? map : globe}
           style={{ position: "absolute", right: 12, bottom: 12, ...controlsObj?.style }}
         />
       )}

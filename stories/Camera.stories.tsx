@@ -90,7 +90,7 @@ const FIT_REGIONS: { label: string; fit: FitTarget; highlightId?: string }[] = [
   { label: "Japan", fit: worldComplete.get("JP")! },
   { label: "Egypt", fit: worldComplete.get("EG")! },
   // AU's real bounds reach Macquarie Island (~55°S, 159°E), which would frame a
-  // huge empty Southern Ocean — so fit the mainland + Tasmania box instead, but
+  // huge empty Southern Ocean, so fit the mainland + Tasmania box instead, but
   // still highlight the whole AU shape.
   {
     label: "Australia",

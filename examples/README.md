@@ -9,8 +9,8 @@ To run one in a real app, copy the file into any React project that has
 
 | File | Shows |
 | --- | --- |
-| [`choropleth-map.tsx`](choropleth-map.tsx) | Metric choropleth, hover tooltip data, selection, fly-to, zoom buttons () |
-| [`passport-globe.tsx`](passport-globe.tsx) | Visited/wishlist state fills + colour-blind-safe patterns, globe with inertia () |
-| [`live-flights.tsx`](live-flights.tsx) | Great-circle routes, animated planes with heading, camera fit to route () |
-| [`moments-journey.tsx`](moments-journey.tsx) | Spend ramp choropleth, journey pins + multi-stop arcs, auto-fit () |
-| [`share-image.ts`](share-image.ts) | Static SVG + PNG share-image generation ('s share editor) |
+| [`choropleth-map.tsx`](choropleth-map.tsx) | Metric choropleth, hover tooltip data, selection, fly-to, zoom buttons |
+| [`passport-globe.tsx`](passport-globe.tsx) | Visited/wishlist state fills + colour-blind-safe patterns, globe with inertia |
+| [`live-flights.tsx`](live-flights.tsx) | Great-circle routes, animated planes with heading, camera fit to route |
+| [`moments-journey.tsx`](moments-journey.tsx) | Spend ramp choropleth, journey pins + multi-stop arcs, auto-fit |
+| [`share-image.ts`](share-image.ts) | Static SVG + PNG share-image generation (share editor) |

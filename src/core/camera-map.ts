@@ -17,12 +17,16 @@ export interface MapCameraOptions {
 
 /**
  * How a fly/fit animates between two views:
- * - `"arc"` (default) — Van Wijk smooth zoom-and-pan: far jumps zoom out, travel,
+ * - `"arc"` (default): Van Wijk smooth zoom-and-pan: far jumps zoom out, travel,
  *   then zoom back in, so you never slide across the world at full zoom.
- * - `"linear"` — a direct path: pan the centre straight to the target while the
+ * - `"linear"`: a direct path: pan the centre straight to the target while the
  *   zoom eases along a geometric (perceptually even) ramp.
  */
-export type FlyCurve = "arc" | "linear";
+export const FlyCurve = {
+  Arc: "arc",
+  Linear: "linear",
+} as const;
+export type FlyCurve = (typeof FlyCurve)[keyof typeof FlyCurve];
 
 export interface FlyToOptions {
   durationMs?: number;
@@ -41,6 +45,17 @@ export type FitTarget =
   | Coordinate[]
   | GeoBounds
   | PreparedCountry;
+
+/**
+ * Stable string key for a {@link FitTarget}, for change-detection on the
+ * declarative `fit` prop so a refit effect fires only when the target changes.
+ */
+export function fitKey(fit: FitTarget | undefined): string {
+  if (fit === undefined) return "";
+  if (typeof fit === "string") return fit;
+  if (Array.isArray(fit)) return JSON.stringify(fit);
+  return `country:${fit.id}`;
+}
 
 export interface MapCameraEnv {
   projection: GeoProjection;
@@ -100,7 +115,7 @@ const tanh = (x: number) => {
 
 /**
  * Van Wijk & Nuij smooth zoom-and-pan. Interpolates between two views expressed
- * as `[cx, cy, w]` — centre in projected pixels and `w` the viewport width in
+ * as `[cx, cy, w]`, centre in projected pixels and `w` the viewport width in
  * those same pixels. A far pan arcs outward (the camera zooms out, travels, then
  * zooms back in) instead of sliding across the world at full zoom; a pure zoom
  * (identical centre) just eases the scale in place. Mirrors `d3.interpolateZoom`
@@ -119,7 +134,7 @@ function zoomPanInterpolator(
   const dy = uy1 - uy0;
   const d2 = dx * dx + dy * dy;
 
-  // Concentric case (no pan): an exponential — perceptually even — zoom ramp.
+  // Concentric case (no pan): an exponential (perceptually even) zoom ramp.
   if (d2 < 1e-12) {
     const S = Math.log(w1 / w0) / rho;
     return (t) => [ux0 + t * dx, uy0 + t * dy, w0 * Math.exp(rho * t * S)];
@@ -206,7 +221,7 @@ export function createMapCamera(options: MapCameraOptions = {}): MapCamera {
     // linear tween below.
     const resolved = env;
     let arc: ((t: number) => MapView) | null = null;
-    if ((opts.curve ?? "arc") === "arc" && resolved?.projection.invert) {
+    if ((opts.curve ?? FlyCurve.Arc) === FlyCurve.Arc && resolved?.projection.invert) {
       const p0 = resolved.projection(from.center);
       const p1 = resolved.projection(to.center);
       const invert = resolved.projection.invert;

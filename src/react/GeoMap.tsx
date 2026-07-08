@@ -1,5 +1,6 @@
 import * as React from "react";
 import { geoPath } from "d3-geo";
+import { FlatProjectionKind } from "../types";
 import type {
   CountriesLayerProps,
   Coordinate,
@@ -14,6 +15,7 @@ import {
 } from "../core/projections";
 import {
   createMapCamera,
+  fitKey,
   type FitTarget,
   type FlyCurve,
   type MapCamera,
@@ -21,11 +23,11 @@ import {
 import {
   cx,
   resolveTheme,
-  type GeoPreset,
-  type GeoPalette,
+  GeoPreset,
+  GeoPalette,
   type GeoTheme,
 } from "../theme";
-import { resolveOutline } from "../core/outline";
+import { resolveLandShadow } from "../core/outline";
 import { GeoProvider, type GeoContextValue } from "./geo-context";
 import { usePointerGestures } from "./gestures";
 import { useFocusVisible } from "./use-focus-visible";
@@ -76,13 +78,6 @@ export interface GeoMapProps<TMarker = unknown, TRoute = unknown, TLive = unknow
   children?: React.ReactNode;
 }
 
-function fitKey(fit: FitTarget | undefined): string {
-  if (fit === undefined) return "";
-  if (typeof fit === "string") return fit;
-  if (Array.isArray(fit)) return JSON.stringify(fit);
-  return `country:${fit.id}`;
-}
-
 const KEYBOARD_PAN_PX = 40;
 
 export function GeoMap<TMarker = unknown, TRoute = unknown, TLive = unknown>({
@@ -92,7 +87,7 @@ export function GeoMap<TMarker = unknown, TRoute = unknown, TLive = unknown>({
   renderMarker,
   routes,
   live,
-  projection: projectionInput = "naturalEarth1",
+  projection: projectionInput = FlatProjectionKind.NaturalEarth1,
   projectionOptions,
   camera: cameraProp,
   fit,
@@ -101,8 +96,8 @@ export function GeoMap<TMarker = unknown, TRoute = unknown, TLive = unknown>({
   wheelZoom = true,
   keyboard = true,
   graticule = false,
-  preset = "none",
-  palette = "default",
+  preset = GeoPreset.None,
+  palette = GeoPalette.Default,
   theme: themeInput,
   width = 960,
   height = 500,
@@ -204,14 +199,11 @@ export function GeoMap<TMarker = unknown, TRoute = unknown, TLive = unknown>({
     [projection],
   );
 
-  // The raised drop shadow lifts the whole landmass, so it keys off the
-  // layer-level outline (a static value); a per-country `outline` callback
-  // can't drive a single group filter.
-  const layerOutline = typeof countries?.outline === "function" ? undefined : countries?.outline;
-  const resolvedLand = resolveOutline(layerOutline, theme);
-  const raised = resolvedLand.raised && theme.landShadow !== undefined;
-  const landFilterId = raised ? `${patternBase}relief` : undefined;
-  const landShadowElevation = resolvedLand.elevation;
+  const landShadow = React.useMemo(
+    () => resolveLandShadow(countries?.outline, theme),
+    [countries?.outline, theme],
+  );
+  const landFilterId = landShadow ? `${patternBase}relief` : undefined;
 
   const context: GeoContextValue = React.useMemo(
     () => ({
@@ -225,9 +217,9 @@ export function GeoMap<TMarker = unknown, TRoute = unknown, TLive = unknown>({
       isDraggingRef,
       patternIds: { hatch: `${patternBase}hatch`, dots: `${patternBase}dots` },
       landFilterId,
-      landShadowElevation,
+      landShadow,
     }),
-    [projection, path, width, height, project, view.zoom, theme, patternBase, landFilterId, landShadowElevation],
+    [projection, path, width, height, project, view.zoom, theme, patternBase, landFilterId, landShadow],
   );
 
   // Transform is derived directly from the projection so the first paint is

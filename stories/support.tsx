@@ -23,8 +23,8 @@ export function mockScore(id: string): number {
 
 /**
  * OKLCH by default, hex fallback. A single SVG `fill` attribute can't carry a
- * fallback, and an unparsed color makes the shape fall back to black — not the
- * hex — so we pick the supported syntax once at runtime.
+ * fallback, and an unparsed color makes the shape fall back to black, not the
+ * hex, so we pick the supported syntax once at runtime.
  */
 const supportsOklch =
   typeof CSS !== "undefined" &&
@@ -50,13 +50,13 @@ export const SCORE_BINS = [
 export const ACCENT = paint("oklch(0.531 0.089 191)", "#0e7c78");
 
 /**
- * Secondary accent — a color-blind-safe vermillion (the Okabe-Ito red stand-in)
+ * Secondary accent: a color-blind-safe vermillion (the Okabe-Ito red stand-in)
  * that keeps red's attention-grabbing warmth while staying distinguishable from
  * the teal primary under the common forms of color vision deficiency.
  */
 export const ACCENT_ALT = paint("oklch(0.6 0.17 42)", "#d05418");
 
-/** Categorical pair for two-way splits — blue + gold stays color-blind safe. */
+/** Categorical pair for two-way splits: blue + gold stays color-blind safe. */
 export const CVD_BLUE = paint("oklch(0.542 0.142 256)", "#2f6fc0");
 export const CVD_GOLD = paint("oklch(0.805 0.143 88)", "#e6b93f");
 

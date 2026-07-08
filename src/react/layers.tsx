@@ -1,8 +1,8 @@
 import * as React from "react";
 import { geoGraticule10 } from "d3-geo";
+import { CountryPattern } from "../types";
 import type {
   CountriesLayerProps,
-  Coordinate,
   GeoMarker,
   GeoRoute,
   LiveObject,
@@ -15,13 +15,14 @@ import {
 } from "../core/coords";
 import { routeLineString } from "../core/routes";
 import { resolveOutline } from "../core/outline";
+import { MARKER_DEFAULTS, ROUTE_DEFAULTS } from "../core/overlay-defaults";
 import { useGeo } from "./geo-context";
 import { usePrefersReducedMotion } from "./use-reduced-motion";
 
 const GRATICULE = geoGraticule10();
 
 export function PatternDefs() {
-  const { patternIds, theme, landFilterId, landShadowElevation = 1 } = useGeo();
+  const { patternIds, theme, landFilterId, landShadow } = useGeo();
   return (
     <defs>
       <pattern
@@ -36,15 +37,15 @@ export function PatternDefs() {
       <pattern id={patternIds.dots} width={7} height={7} patternUnits="userSpaceOnUse">
         <circle cx={2} cy={2} r={1.1} fill={theme.patternInk} />
       </pattern>
-      {landFilterId && (
+      {landFilterId && landShadow && (
         // Soft drop shadow that lifts the whole landmass silhouette off the
-        // ocean for `outline="raised"`. Offsets are in viewBox units, scaled by
-        // the outline's elevation.
+        // ocean for `outline="raised"`. Geometry (in viewBox units) is resolved
+        // by `resolveLandShadow` so it matches the static SVG export.
         <filter id={landFilterId} x="-10%" y="-10%" width="120%" height="120%">
           <feDropShadow
             dx={0}
-            dy={0.7 * landShadowElevation}
-            stdDeviation={0.9 * landShadowElevation}
+            dy={landShadow.dy}
+            stdDeviation={landShadow.stdDeviation}
             floodColor={theme.landShadow}
             floodOpacity={1}
           />
@@ -56,10 +57,13 @@ export function PatternDefs() {
 
 export function GraticuleLayer() {
   const { path, theme } = useGeo();
+  // The graticule geometry is fixed; only re-path when the projection changes
+  // (not on every pan/zoom frame, which leaves `path` stable).
+  const d = React.useMemo(() => path(GRATICULE) ?? undefined, [path]);
   return (
     <path
       className="geomap-graticule"
-      d={path(GRATICULE) ?? undefined}
+      d={d}
       fill="none"
       stroke={theme.graticule}
       strokeWidth={0.5}
@@ -197,7 +201,7 @@ export function CountriesLayer({
               <path
                 className="geomap-pattern"
                 d={d}
-                fill={`url(#${patternKind === "hatch" ? patternIds.hatch : patternIds.dots})`}
+                fill={`url(#${patternKind === CountryPattern.Hatch ? patternIds.hatch : patternIds.dots})`}
                 stroke="none"
                 pointerEvents="none"
               />
@@ -258,10 +262,17 @@ export interface MarkersLayerProps<T = unknown> {
 
 export function MarkersLayer<T>({ markers, onMarkerClick, renderMarker }: MarkersLayerProps<T>) {
   const { project, theme, counterScale, isDraggingRef } = useGeo();
+  // Projection is the expensive step; recompute it only when markers or the
+  // projection change, not on every pan/zoom frame (counterScale sizing below
+  // is cheap and stays inline).
+  const positions = React.useMemo(
+    () => markers.map((marker) => project(marker.coordinates)),
+    [markers, project],
+  );
   return (
     <g className="geomap-markers">
-      {markers.map((marker) => {
-        const position = project(marker.coordinates);
+      {markers.map((marker, i) => {
+        const position = positions[i];
         if (!position) return null;
         const clickProps = onMarkerClick
           ? {
@@ -285,7 +296,7 @@ export function MarkersLayer<T>({ markers, onMarkerClick, renderMarker }: Marker
             </g>
           );
         }
-        const r = (marker.size ?? 3) * counterScale;
+        const r = (marker.size ?? MARKER_DEFAULTS.radius) * counterScale;
         const color = marker.color ?? theme.marker;
         return (
           <g
@@ -299,7 +310,7 @@ export function MarkersLayer<T>({ markers, onMarkerClick, renderMarker }: Marker
               r={r}
               fill={color}
               stroke={theme.halo}
-              strokeWidth={theme.halo ? 1.5 * counterScale : undefined}
+              strokeWidth={theme.halo ? MARKER_DEFAULTS.haloWidth * counterScale : undefined}
               paintOrder="stroke"
             >
               {marker.label && <title>{marker.label}</title>}
@@ -307,12 +318,12 @@ export function MarkersLayer<T>({ markers, onMarkerClick, renderMarker }: Marker
             {marker.label && (
               <text
                 className="geomap-label"
-                x={r + 3 * counterScale}
+                x={r + MARKER_DEFAULTS.labelGap * counterScale}
                 y={r}
-                fontSize={9 * counterScale}
+                fontSize={MARKER_DEFAULTS.labelFontSize * counterScale}
                 fill={theme.markerLabel}
                 stroke={theme.halo}
-                strokeWidth={theme.halo ? 3 * counterScale : undefined}
+                strokeWidth={theme.halo ? MARKER_DEFAULTS.labelHaloWidth * counterScale : undefined}
                 paintOrder="stroke"
                 strokeLinejoin="round"
                 pointerEvents="none"
@@ -333,11 +344,19 @@ export interface RoutesLayerProps<T = unknown> {
 
 export function RoutesLayer<T>({ routes }: RoutesLayerProps<T>) {
   const { path, theme } = useGeo();
+  // Great-circle re-sampling + path building is the costly step; recompute it
+  // only when the routes or projection change, not on every pan/zoom frame.
+  const paths = React.useMemo(
+    () =>
+      routes.map((route) =>
+        route.stops.length < 2 ? null : path(routeLineString(route.stops)) || null,
+      ),
+    [routes, path],
+  );
   return (
     <g className="geomap-routes" pointerEvents="none">
-      {routes.map((route) => {
-        if (route.stops.length < 2) return null;
-        const d = path(routeLineString(route.stops));
+      {routes.map((route, i) => {
+        const d = paths[i];
         if (!d) return null;
         return (
           <path
@@ -346,9 +365,9 @@ export function RoutesLayer<T>({ routes }: RoutesLayerProps<T>) {
             d={d}
             fill="none"
             stroke={route.color ?? theme.route}
-            strokeWidth={route.width ?? 1.4}
-            strokeOpacity={route.opacity ?? 0.9}
-            strokeDasharray={route.dashed ? "4 4" : undefined}
+            strokeWidth={route.width ?? ROUTE_DEFAULTS.width}
+            strokeOpacity={route.opacity ?? ROUTE_DEFAULTS.opacity}
+            strokeDasharray={route.dashed ? ROUTE_DEFAULTS.dash : undefined}
             strokeLinecap="round"
             vectorEffect="non-scaling-stroke"
           />
@@ -391,6 +410,18 @@ export function LiveLayer<T>({
 }: LiveLayerComponentProps<T>) {
   const { project, path, theme, counterScale } = useGeo();
   const reducedMotion = usePrefersReducedMotion();
+
+  // A trail only changes when its object's `trail` data does, not while the
+  // object's position tweens each frame, so re-densify it only on those.
+  const trailPaths = React.useMemo(() => {
+    const map = new Map<string, string | undefined>();
+    for (const object of objects) {
+      if (object.trail && object.trail.length >= 2) {
+        map.set(object.id, path(routeLineString(object.trail)) ?? undefined);
+      }
+    }
+    return map;
+  }, [objects, path]);
 
   const [states, setStates] = React.useState<ReadonlyMap<string, LiveState>>(new Map());
   const animsRef = React.useRef(new Map<string, LiveAnimation>());
@@ -475,43 +506,38 @@ export function LiveLayer<T>({
     <g className="geomap-live-objects">
       {objects.map((object) => {
         const state = states.get(object.id) ?? liveTarget(object);
-        const trailStops: Coordinate[] | undefined =
-          object.trail && object.trail.length >= 2 ? object.trail : undefined;
+        const trailD = trailPaths.get(object.id);
         const position = project(state.position);
         const color = object.color ?? theme.live;
         return (
           <g key={object.id} className="geomap-live">
-            {trailStops &&
-              (() => {
-                const trailD = path(routeLineString(trailStops)) ?? undefined;
-                return (
-                  <>
-                    {theme.halo && (
-                      // Casing: a wider halo-colored line under the trail so it
-                      // reads over dark land as well as the ocean.
-                      <path
-                        className="geomap-trail-casing"
-                        d={trailD}
-                        fill="none"
-                        stroke={theme.halo}
-                        strokeWidth={2.5}
-                        vectorEffect="non-scaling-stroke"
-                        pointerEvents="none"
-                      />
-                    )}
-                    <path
-                      className="geomap-trail"
-                      d={trailD}
-                      fill="none"
-                      stroke={object.color ?? theme.trail}
-                      strokeWidth={1}
-                      strokeOpacity={0.6}
-                      vectorEffect="non-scaling-stroke"
-                      pointerEvents="none"
-                    />
-                  </>
-                );
-              })()}
+            {trailD && (
+              <>
+                {theme.halo && (
+                  // Casing: a wider halo-colored line under the trail so it
+                  // reads over dark land as well as the ocean.
+                  <path
+                    className="geomap-trail-casing"
+                    d={trailD}
+                    fill="none"
+                    stroke={theme.halo}
+                    strokeWidth={2.5}
+                    vectorEffect="non-scaling-stroke"
+                    pointerEvents="none"
+                  />
+                )}
+                <path
+                  className="geomap-trail"
+                  d={trailD}
+                  fill="none"
+                  stroke={object.color ?? theme.trail}
+                  strokeWidth={1}
+                  strokeOpacity={0.6}
+                  vectorEffect="non-scaling-stroke"
+                  pointerEvents="none"
+                />
+              </>
+            )}
             {position &&
               (renderObject ? (
                 <g transform={`translate(${position[0]} ${position[1]})`}>
@@ -520,7 +546,7 @@ export function LiveLayer<T>({
               ) : (
                 <g transform={`translate(${position[0]} ${position[1]})`}>
                   <g transform={`rotate(${state.heading}) scale(${counterScale})`}>
-                    {/* 's plane glyph: nose up, rotated by navigational heading.
+                    {/* Plane glyph: nose up, rotated by navigational heading.
                         A halo casing keeps it legible on dark land. */}
                     <path
                       className="geomap-live-icon"
@@ -537,10 +563,10 @@ export function LiveLayer<T>({
                       className="geomap-label"
                       x={9 * counterScale}
                       y={3 * counterScale}
-                      fontSize={9 * counterScale}
+                      fontSize={MARKER_DEFAULTS.labelFontSize * counterScale}
                       fill={theme.markerLabel}
                       stroke={theme.halo}
-                      strokeWidth={theme.halo ? 3 * counterScale : undefined}
+                      strokeWidth={theme.halo ? MARKER_DEFAULTS.labelHaloWidth * counterScale : undefined}
                       paintOrder="stroke"
                       strokeLinejoin="round"
                       pointerEvents="none"

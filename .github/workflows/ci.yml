@@ -30,14 +30,14 @@ jobs:
         run: npm run test-storybook:ci
 
       - name: Playwright screenshot tests
-        # "missing" bootstraps baselines for a platform that has none committed
-        # (snapshots are platform-suffixed) and compares against existing ones.
-        run: npx playwright test --update-snapshots=missing
+        run: npx playwright test
       - uses: actions/upload-artifact@v7
         if: failure()
         with:
-          name: playwright-report
-          path: playwright-report
+          name: playwright-artifacts
+          path: |
+            playwright-report
+            test-results
           retention-days: 7
 
       - name: Fixture installs (Vite + Next.js) from packed tarball

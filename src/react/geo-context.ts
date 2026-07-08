@@ -2,11 +2,12 @@ import * as React from "react";
 import type { RefObject } from "react";
 import type { GeoPath, GeoProjection } from "d3-geo";
 import type { Coordinate } from "../types";
+import type { LandShadow } from "../core/outline";
 import type { ResolvedGeoTheme } from "../theme";
 
 export interface GeoContextValue {
   projection: GeoProjection;
-  /** d3 geoPath bound to the projection — `path(featureOrGeometry)` → SVG `d`. */
+  /** d3 geoPath bound to the projection: `path(featureOrGeometry)` → SVG `d`. */
   path: GeoPath;
   size: { width: number; height: number };
   /**
@@ -21,7 +22,7 @@ export interface GeoContextValue {
    */
   counterScale: number;
   theme: ResolvedGeoTheme;
-  /** True while a pan/rotate drag is in progress — used to suppress hover. */
+  /** True while a pan/rotate drag is in progress; used to suppress hover. */
   isDraggingRef: RefObject<boolean>;
   patternIds: { hatch: string; dots: string };
   /**
@@ -29,13 +30,13 @@ export interface GeoContextValue {
    * undefined. `PatternDefs` emits the filter; `CountriesLayer` applies it.
    */
   landFilterId?: string;
-  /** Drop-shadow strength for the raised-land filter (scales offset + blur). Default 1. */
-  landShadowElevation?: number;
+  /** Drop-shadow geometry for the raised-land filter, or undefined for none. */
+  landShadow?: LandShadow;
 }
 
 // Guarded so importing the package in a React Server Component works: the
 // react-server build of React has no createContext, but server code only needs
-// the core exports (prepareCountries, renderStaticMapSvg, …) — the components
+// the core exports (prepareCountries, renderStaticMapSvg, …); the components
 // themselves must render inside a client boundary anyway.
 const GeoContext =
   typeof React.createContext === "function"

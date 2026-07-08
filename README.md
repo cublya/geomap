@@ -2,12 +2,10 @@
 
 Composable React map primitives on [d3-geo](https://github.com/d3/d3-geo): country
 choropleths with real ISO identity, rotatable orthographic globes, markers,
-great-circle routes, animated live objects, and a camera with fit / focus / fly-to —
-all SVG, all tree-shakeable, no basemap or product data bundled.
+great-circle routes, animated live objects, and a camera with fit / focus / fly-to
+(all SVG, all tree-shakeable, no basemap or product data bundled).
 
-Built to subsume the hand-rolled maps in Cublya's , ,  and 
-apps (see [docs/feature-matrix.md](docs/feature-matrix.md) and the
-[migration guides](docs/migrations)).
+Built to subsume the hand-rolled maps in several Cublya apps.
 
 ## Install
 
@@ -18,13 +16,13 @@ npm install @cublya/world-atlas
 ```
 
 React ≥ 18 and `react-dom` are peer dependencies. The package is ESM-only with
-`sideEffects: false` — unused layers and helpers tree-shake away.
+`sideEffects: false`; unused layers and helpers tree-shake away.
 
 `@cublya/world-atlas` ships three resolutions. The default `countries-*.json`
 files use its UN-style boundary view: Crimea resolves to Ukraine, Kosovo to
 Serbia, Northern Cyprus to Cyprus, and Somaliland to Somalia. The 10m and 50m
 files cover all 193 UN member states and both non-member observer states; the
-110m file drops 28 members and the Holy See — see
+110m file drops 28 members and the Holy See; see
 [docs/basemap-coverage.md](docs/basemap-coverage.md) for the full breakdown and
 how to re-verify after a `@cublya/world-atlas` upgrade.
 
@@ -39,7 +37,7 @@ const countries = prepareCountries(world, { exclude: ["AQ"] });
 export function SpendMap() {
   return (
     <GeoMap
-      preset="light"   // optional — omit for preset="none" (fully unstyled); no CSS import either way
+      preset="light"   // optional: omit for preset="none" (fully unstyled); no CSS import either way
       countries={{
         data: countries,
         fill: (c) => spendColor(c.alpha2),     // undefined → muted "no data" tone
@@ -74,7 +72,7 @@ flipping stays put instead of snapping home:
 ```tsx
 import { GeoView } from "@cublya/geomap";
 
-// Uncontrolled — a map with a map⇄globe toggle top-left:
+// Uncontrolled: a map with a map⇄globe toggle top-left:
 <GeoView preset="light" defaultMode="map" countries={{ data: countries, fill }} markers={pins} />
 
 // Or controlled from your own state:
@@ -87,7 +85,7 @@ Use `<GeoViewToggle mode onModeChange />` standalone to drive your own swap, and
 ## Country data and ISO identity
 
 `prepareCountries(topologyOrGeoJSON, options)` converts TopoJSON (`@cublya/world-atlas`
-convention — see [docs/basemap-coverage.md](docs/basemap-coverage.md) for which
+convention; see [docs/basemap-coverage.md](docs/basemap-coverage.md) for which
 resolution has full UN-member coverage) or a GeoJSON FeatureCollection and
 resolves every feature against a bundled ISO 3166-1 table plus a Natural-Earth
 name reconciliation map:
@@ -127,7 +125,7 @@ face the camera, taking the short way around) and a spherical-cap `fitTo(coords)
 `useMapView(camera)` / `useGlobeView(camera)` give reactive reads. Both cameras are
 plain framework-free stores (`createMapCamera()` / `createGlobeCamera()`) if you
 need them outside React. The declarative `fit` prop refits whenever its value
-changes — handy for "frame the selection" flows.
+changes, handy for "frame the selection" flows.
 
 All tweens and inertia honour `prefers-reduced-motion` by jumping to the target.
 
@@ -172,16 +170,16 @@ function Halo({ at }: { at: Coordinate }) {
 ## Presets & theming
 
 **No CSS import is ever required.** By default the package paints nothing
-extra — `<GeoMap />` with no `preset` renders exactly the layers you configure,
+extra; `<GeoMap />` with no `preset` renders exactly the layers you configure,
 with no forced colors. That's `preset="none"`. When you *do* want a complete,
-polished look with zero setup, pick a built-in preset — one prop, no CSS file:
+polished look with zero setup, pick a built-in preset, one prop, no CSS file:
 
 Theming is three orthogonal axes: **`preset`** picks the colour mode,
 **`palette`** picks the fill palette, and **`countries.outline`** picks
-the border behaviour — independently, so you don't need a preset per combination.
+the border behaviour, independently, so you don't need a preset per combination.
 
 ```tsx
-<GeoMap />                                        // preset="none" — the default: unstyled, your call
+<GeoMap />                                        // preset="none", the default: unstyled, your call
 <GeoMap preset="light" />                         // complete light palette, ready to ship
 <GeoMap preset="dark" />                          // complete dark palette
 <GeoMap preset="light" palette="minimal" /> // hue-less line-art palette
@@ -189,14 +187,14 @@ the border behaviour — independently, so you don't need a preset per combinati
 <GeoMap preset="light" countries={{ data, outline: "raised" }} /> // raised land with a soft shadow
 ```
 
-`palette` — the **fill palette** (defaults to `"default"`):
+`palette`: the **fill palette** (defaults to `"default"`):
 
 | variant     | look                                                |
 | ----------- | --------------------------------------------------- |
 | `"default"` | plain filled land                                   |
-| `"minimal"` | hue-less line-art — transparent ocean, faint fills  |
+| `"minimal"` | hue-less line-art: transparent ocean, faint fills  |
 
-`countries.outline` — the **border behaviour** (a mode, an `{ mode, color, width, dash, elevation }`
+`countries.outline`: the **border behaviour** (a mode, an `{ mode, color, width, dash, elevation }`
 style, or a `(country) => …` callback for per-feature borders; defaults to `"line"`):
 
 | outline    | look                                                                    |
@@ -209,7 +207,7 @@ style, or a `(country) => …` callback for per-feature borders; defaults to `"l
 The old bundled presets are palette × outline: `crisp` = `default` + `outline="gap"`,
 `chalk` = `minimal` + `outline="gap"`, `relief` = `default` + `outline="raised"`.
 
-All presentation flows through SVG attributes and theme objects — no
+All presentation flows through SVG attributes and theme objects: no
 Tailwind, no global CSS, no resets, no runtime CSS-in-JS, ever, in any mode.
 
 Presets are generic, accessible (AA ink/surface contrast, visible focus
@@ -220,35 +218,35 @@ optional controls/tooltip.
 
 **Style precedence** (lowest → highest):
 
-1. package defaults (`preset="none"` — nothing painted)
+1. package defaults (`preset="none"`, nothing painted)
 2. selected `preset` + `palette` (`"light"`/`"dark"` × `"default"`/`"minimal"`, if you opt in)
 3. `theme` token overrides
 4. per-feature callbacks (`countries.fill` / `pattern` / `disabled` / `outline`, `renderMarker`, …)
 5. direct element props (`marker.color`, `route.color`, `countries.outline`, …)
 
 ```tsx
-// 3 — partial tokens over any preset:
+// 3, partial tokens over any preset:
 <GeoMap preset="dark" theme={{ route: "oklch(0.8 0.1 150)" }} />
 
-// exported preset objects compose — index by mode then palette:
+// exported preset objects compose; index by mode then palette:
 import { presets } from "@cublya/geomap";
 <GeoMap theme={{ ...presets.dark.minimal, marker: "var(--brand)" }} />
 ```
 
 Every preset value is `var(--geomap-*, fallback)`, so any ancestor can
-retheme every map inside it with plain CSS variables — no props needed:
+retheme every map inside it with plain CSS variables, no props needed:
 
 ```css
 :root { --geomap-land: oklch(0.9 0.02 150); --geomap-route: var(--brand); }
 ```
 
 With `preset="none"` no presentation attributes are emitted; start from scratch
-against the semantic class names — `geomap-country` (plus `[data-country]`,
+against the semantic class names: `geomap-country` (plus `[data-country]`,
 `[data-selected]`, `[data-disabled]`), `geomap-route`, `geomap-marker`,
 `geomap-label`, `geomap-live`, `geomap-trail`,
 `geomap-graticule`, `geomap-sphere`, `geomap-hover`.
 
-Non-color state encoding (colour-blind-safe, à la ) via
+Non-color state encoding (colour-blind-safe) via
 `countries.pattern: (c) => "hatch" | "dots" | undefined`; inert countries via
 `countries.disabled: (c) => boolean`.
 
@@ -257,10 +255,10 @@ Non-color state encoding (colour-blind-safe, à la ) via
 `GeoControls` (zoom in/out/reset for either camera, rendered as a segmented
 pill with SVG icons) and `GeoTooltip` (pointer-anchored hover tooltip) take the
 same `preset`/`theme` props, also defaulting to `preset="none"`. Pass the same
-preset as your map — e.g. `<GeoControls camera={camera} preset="light" />` — for
+preset as your map (e.g. `<GeoControls camera={camera} preset="light" />`) for
 a matching, complete look (shadow and icons included) with no CSS file. The
-optional stylesheet only adds what inline styles can't express — hover/active/
-focus-visible states — and styles nothing but these HTML helpers (all selectors
+optional stylesheet only adds what inline styles can't express (hover/active/
+focus-visible states) and styles nothing but these HTML helpers (all selectors
 namespaced under `.geomap-*`, so it cannot leak):
 
 ```tsx
@@ -269,12 +267,12 @@ import "@cublya/geomap/styles.css";   // optional pseudo-class polish
 ```
 
 **Bring your own styles (Tailwind or raw CSS).** Every part has a stable class
-and a `data-geomap-part` hook, and `preset="none"` emits **zero** inline styles —
+and a `data-geomap-part` hook, and `preset="none"` emits **zero** inline styles,
 so your classes never fight an inline `style`. Use the `classNames` slots to
 attach utility classes per part:
 
 ```tsx
-// Tailwind — own every part
+// Tailwind: own every part
 <GeoControls
   camera={camera}
   classNames={{
@@ -284,7 +282,7 @@ attach utility classes per part:
   }}
 />
 
-// Raw CSS — headless; target the semantic hooks
+// Raw CSS: headless; target the semantic hooks
 <GeoControls camera={camera} orientation="horizontal" />
 ```
 ```css
@@ -295,7 +293,7 @@ attach utility classes per part:
 
 `GeoTooltip` exposes the same `className` / `data-geomap-part="tooltip"` hooks.
 `GeoControls` (and the segmented `GeoViewToggle`) also take an `icons` slot to
-replace any built-in glyph with your own node — the package ships **no** icon
+replace any built-in glyph with your own node; the package ships **no** icon
 dependency, so you bring the nodes:
 
 ```tsx
@@ -334,7 +332,7 @@ Same geometry pipeline as `<GeoMap>`, so exports match the on-screen map.
 
 `greatCirclePoints`, `interpolateGreatCircle`, `bearingBetween`, `haversineKm`,
 `sphericalCentroid`, `geographicBounds`, `routeLineString`, `createFlatProjection`,
-`createGlobeProjection`, `tween`, `startDecay`, `prefersReducedMotion` — everything
+`createGlobeProjection`, `tween`, `startDecay`, `prefersReducedMotion`: everything
 the components are built from is exported for advanced composition. Full surface:
 [docs/api-design.md](docs/api-design.md).
 
@@ -343,7 +341,7 @@ the components are built from is exported for advanced composition. Full surface
 No product data, no fetching, no tooltip/legend UI (you get hover data and scale
 helpers; popovers are yours), no bundled basemap, no border politics
 (`patchFeatures` is the hook for editorial geometry). A Canvas renderer is a
-planned escape hatch — the core emits only data, so the API won't change.
+planned escape hatch; the core emits only data, so the API won't change.
 
 ## Storybook
 
@@ -357,8 +355,8 @@ Storybook is at the site root and the long-form documentation is under
 Storybook is the interactive catalogue, not the complete project documentation.
 The [documentation index](docs/README.md) links the getting-started guide, public
 API reference, architecture, data and rendering concepts, theming and
-accessibility, testing and releases, troubleshooting, migration guides, and
-basemap coverage notes.
+accessibility, testing and releases, troubleshooting, and basemap coverage
+notes.
 
 ## Development
 
@@ -379,8 +377,7 @@ bash scripts/verify-fixtures.sh   # install packed tarball into Vite + Next.js a
 node scripts/generate-iso.mjs     # regenerate the ISO table
 ```
 
-Examples live in [`examples/`](examples); migration guides for the four Cublya apps
-in [`docs/migrations/`](docs/migrations).
+Examples live in [`examples/`](examples).
 
 ## Contributing
 

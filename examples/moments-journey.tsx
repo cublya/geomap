@@ -1,4 +1,4 @@
-// -style: spend choropleth + journey pins + multi-stop arcs, auto-framed.
+// Spend choropleth + journey pins + multi-stop arcs, auto-framed.
 // Wheel zoom is disabled so the surrounding page keeps scrolling (zoom buttons only).
 import * as React from "react";
 import { GeoMap, prepareCountries, useMapCamera, type Coordinate } from "@cublya/geomap";
@@ -39,7 +39,7 @@ export function MomentsJourney({
           fill: (c) => {
             const spend = c.alpha2 ? spendByAlpha2.get(c.alpha2) : undefined;
             if (!spend || maxSpend <= 0) return undefined;
-            // sqrt ramp keeps small trips visible ('s scale).
+            // sqrt ramp keeps small trips visible.
             const t = Math.sqrt(spend / maxSpend);
             return `color-mix(in oklch, var(--brand-200), var(--brand-800) ${Math.round(t * 100)}%)`;
           },

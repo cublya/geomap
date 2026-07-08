@@ -26,7 +26,7 @@ export function clientToViewBox(
 export interface GestureHandlers {
   /** Deltas in viewBox units. */
   onDrag: (dx: number, dy: number) => void;
-  /** Velocity in viewBox units per frame, from the last move — for inertia. */
+  /** Velocity in viewBox units per frame, from the last move (for inertia). */
   onDragEnd?: (velocity: [number, number]) => void;
   /** Zoom factor around a viewBox point (wheel and pinch). */
   onZoomAt?: (factor: number, point: [number, number]) => void;
@@ -52,9 +52,9 @@ interface TrackedPointer {
 }
 
 /**
- * Unified mouse/touch/pen gestures on an SVG element: drag (with 's
- * deferred pointer capture so plain taps still click child paths), two-pointer
- * pinch zoom, and non-passive wheel zoom.
+ * Mouse/touch/pen gestures on an SVG element: drag (with deferred pointer
+ * capture so plain taps still click child paths), two-pointer pinch zoom, and
+ * non-passive wheel zoom.
  */
 export function usePointerGestures(
   svgRef: RefObject<SVGSVGElement | null>,

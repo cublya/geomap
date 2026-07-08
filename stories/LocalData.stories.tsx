@@ -39,7 +39,7 @@ export const HighResolutionTopoJSON: Story = {
   },
 };
 
-// `CONTINENTS` is a plain GeoJSON FeatureCollection (see ./continents) — one
+// `CONTINENTS` is a plain GeoJSON FeatureCollection (see ./continents), one
 // dissolved MultiPolygon per continent, assembled locally from the world-atlas.
 const customSet = prepareCountries(CONTINENTS);
 

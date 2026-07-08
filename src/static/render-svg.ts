@@ -1,8 +1,10 @@
 import { geoGraticule10, geoPath } from "d3-geo";
+import { FlatProjectionKind } from "../types";
 import type { CountrySet, GeoMarker, GeoRoute, PreparedCountry } from "../types";
 import { toLonLat } from "../core/coords";
 import { routeLineString } from "../core/routes";
-import { resolveOutline, type Outline } from "../core/outline";
+import { resolveLandShadow, resolveOutline, type Outline } from "../core/outline";
+import { MARKER_DEFAULTS, ROUTE_DEFAULTS } from "../core/overlay-defaults";
 import {
   createFlatProjection,
   type FlatProjectionOptions,
@@ -39,7 +41,7 @@ export interface StaticMapOptions {
   palette?: GeoPalette;
   /**
    * Partial token overrides over the preset. Preset values are
-   * `var(--geomap-*, fallback)` — standalone SVGs resolve to the fallback,
+   * `var(--geomap-*, fallback)`; standalone SVGs resolve to the fallback,
    * so exports render correctly outside any page context.
    */
   theme?: Partial<GeoTheme>;
@@ -57,9 +59,9 @@ export function escapeXml(text: string): string {
 }
 
 /**
- * Render a flat map to a standalone SVG string — no React, no DOM. The same
- * geometry pipeline as `<GeoMap>`, so exports match on-screen maps ('s
- * WYSIWYG share-image guarantee). Pass concrete colors in `theme`/`background`;
+ * Render a flat map to a standalone SVG string (no React, no DOM). The same
+ * geometry pipeline as `<GeoMap>`, so exports match on-screen maps exactly.
+ * Pass concrete colors in `theme`/`background`;
  * `var(--token)` cannot resolve outside a page.
  */
 export function renderStaticMapSvg(options: StaticMapOptions): string {
@@ -69,7 +71,7 @@ export function renderStaticMapSvg(options: StaticMapOptions): string {
     countries,
     markers = [],
     routes = [],
-    projection: projectionInput = "naturalEarth1",
+    projection: projectionInput = FlatProjectionKind.NaturalEarth1,
     projectionOptions,
     graticule = false,
     background,
@@ -96,16 +98,13 @@ export function renderStaticMapSvg(options: StaticMapOptions): string {
   if (countries) {
     const outline = countries.outline;
     // `outline="raised"` lifts the whole landmass off the ocean with a soft
-    // shadow; a per-country callback can't drive one group filter, so the
-    // shadow keys off the layer-level (static) outline only.
-    const layerOutline = typeof outline === "function" ? undefined : outline;
-    const resolvedLand = resolveOutline(layerOutline, theme);
-    const elevated = resolvedLand.raised && theme.landShadow;
-    if (elevated) {
-      const e = resolvedLand.elevation;
+    // shadow; `resolveLandShadow` owns that decision + geometry so this export
+    // matches the on-screen `<GeoMap>` exactly.
+    const shadow = resolveLandShadow(outline, theme);
+    if (shadow) {
       parts.push(
         `<defs><filter id="geomap-relief" x="-10%" y="-10%" width="120%" height="120%">` +
-          `<feDropShadow dx="0" dy="${0.7 * e}" stdDeviation="${0.9 * e}"${attr("flood-color", theme.landShadow)}` +
+          `<feDropShadow dx="0" dy="${shadow.dy}" stdDeviation="${shadow.stdDeviation}"${attr("flood-color", theme.landShadow)}` +
           ` flood-opacity="1"/></filter></defs><g filter="url(#geomap-relief)">`,
       );
     }
@@ -125,37 +124,37 @@ export function renderStaticMapSvg(options: StaticMapOptions): string {
         (o.dash ? attr("stroke-dasharray", o.dash) : "");
       parts.push(`<path d="${d}"${attr("fill", fill)}${strokeAttrs}/>`);
     }
-    if (elevated) parts.push("</g>");
+    if (shadow) parts.push("</g>");
   }
   for (const route of routes) {
     if (route.stops.length < 2) continue;
     const d = path(routeLineString(route.stops));
     if (!d) continue;
-    const dash = route.dashed ? ' stroke-dasharray="4 4"' : "";
+    const dash = route.dashed ? ` stroke-dasharray="${ROUTE_DEFAULTS.dash}"` : "";
     parts.push(
       `<path d="${d}" fill="none"${attr("stroke", route.color ?? theme.route)}` +
-        ` stroke-width="${route.width ?? 1.4}" stroke-opacity="${route.opacity ?? 0.9}"` +
+        ` stroke-width="${route.width ?? ROUTE_DEFAULTS.width}" stroke-opacity="${route.opacity ?? ROUTE_DEFAULTS.opacity}"` +
         `${dash} stroke-linecap="round"/>`,
     );
   }
   for (const marker of markers) {
     const p = projection(toLonLat(marker.coordinates));
     if (!p || !p.every(Number.isFinite)) continue;
-    const r = marker.size ?? 3;
+    const r = marker.size ?? MARKER_DEFAULTS.radius;
     // Halo casing (painted behind fill/text) keeps overlays legible on any
     // basemap tone; omitted entirely when the theme carries no halo token.
     const circleHalo = theme.halo
-      ? `${attr("stroke", theme.halo)} stroke-width="1.5" paint-order="stroke"`
+      ? `${attr("stroke", theme.halo)} stroke-width="${MARKER_DEFAULTS.haloWidth}" paint-order="stroke"`
       : "";
     const textHalo = theme.halo
-      ? `${attr("stroke", theme.halo)} stroke-width="3" paint-order="stroke" stroke-linejoin="round"`
+      ? `${attr("stroke", theme.halo)} stroke-width="${MARKER_DEFAULTS.labelHaloWidth}" paint-order="stroke" stroke-linejoin="round"`
       : "";
     parts.push(
       `<circle cx="${p[0]}" cy="${p[1]}" r="${r}"${attr("fill", marker.color ?? theme.marker)}${circleHalo}/>`,
     );
     if (marker.label) {
       parts.push(
-        `<text x="${p[0] + r + 3}" y="${p[1] + r}" font-size="9"` +
+        `<text x="${p[0] + r + MARKER_DEFAULTS.labelGap}" y="${p[1] + r}" font-size="${MARKER_DEFAULTS.labelFontSize}"` +
           ` font-family="system-ui, sans-serif"${attr("fill", theme.markerLabel)}${textHalo}>` +
           `${escapeXml(marker.label)}</text>`,
       );

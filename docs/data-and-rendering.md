@@ -155,13 +155,13 @@ function Ring({ at }: { at: Coordinate }) {
 
 `useGeo` exposes:
 
-- `projection` — configured d3 projection.
-- `path` — configured d3 path generator.
-- `size` — viewBox width and height.
-- `project(coordinate)` — projected point or `null` when clipped/hidden.
-- `isVisible(coordinate)` — globe-aware visibility test.
-- `counterScale` — inverse flat-map zoom; `1` on a globe.
-- `theme` — resolved presentation tokens.
+- `projection`: configured d3 projection.
+- `path`: configured d3 path generator.
+- `size`: viewBox width and height.
+- `project(coordinate)`: projected point or `null` when clipped/hidden.
+- `isVisible(coordinate)`: globe-aware visibility test.
+- `counterScale`: inverse flat-map zoom; `1` on a globe.
+- `theme`: resolved presentation tokens.
 
 `useGeo` throws when called outside a map or globe provider. Custom children are
 SVG-coupled; do not assume they will appear in `renderStaticMapSvg`.

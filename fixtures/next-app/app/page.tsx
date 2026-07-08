@@ -1,5 +1,5 @@
 // Server Component: the core (prepareCountries, renderStaticMapSvg) runs during
-// SSR/prerender with no client boundary — proving the package is server-safe.
+// SSR/prerender with no client boundary, proving the package is server-safe.
 import { prepareCountries, renderStaticMapSvg } from "@cublya/geomap";
 import world110 from "world-atlas/countries-110m.json";
 import { ClientMap } from "./client-map";

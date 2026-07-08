@@ -1,7 +1,7 @@
 // Accurate continent outlines, assembled from the @cublya/world-atlas 110m
 // countries by dissolving internal borders per continent with topojson `merge`.
 // This lives in the stories tree (not the shipped package) because it is demo
-// scaffolding, not a basemap — the story feeds the result to `prepareCountries`
+// scaffolding, not a basemap; the story feeds the result to `prepareCountries`
 // exactly like any other local GeoJSON FeatureCollection.
 import { merge } from "topojson-client";
 import polygonClipping from "polygon-clipping";
@@ -15,7 +15,7 @@ import type { FeatureCollection, MultiPolygon, Position } from "geojson";
 import world110 from "@cublya/world-atlas/countries-110m.json";
 
 type CountryProps = { isoA2?: string; name?: string };
-// Atlas country geometries are all Polygon/MultiPolygon — the shapes `merge` accepts.
+// Atlas country geometries are all Polygon/MultiPolygon, the shapes `merge` accepts.
 type CountryGeometry = (TopoPolygon<CountryProps> | TopoMultiPolygon<CountryProps>) & {
   properties: CountryProps;
 };
@@ -45,7 +45,7 @@ const CONTINENT: Record<string, string> = {
   SL: "Africa", SO: "Africa", ZA: "Africa", SS: "Africa", SD: "Africa", SZ: "Africa",
   TZ: "Africa", TG: "Africa", TN: "Africa", UG: "Africa", EH: "Africa", ZM: "Africa",
   ZW: "Africa", MA: "Africa",
-  // Eurasia — Europe
+  // Eurasia: Europe
   AL: "Eurasia", AT: "Eurasia", BA: "Eurasia", BE: "Eurasia", BG: "Eurasia", BY: "Eurasia",
   CH: "Eurasia", CY: "Eurasia", CZ: "Eurasia", DE: "Eurasia", DK: "Eurasia", EE: "Eurasia",
   ES: "Eurasia", FI: "Eurasia", GB: "Eurasia", GR: "Eurasia", HR: "Eurasia", HU: "Eurasia",
@@ -53,7 +53,7 @@ const CONTINENT: Record<string, string> = {
   MD: "Eurasia", ME: "Eurasia", MK: "Eurasia", NL: "Eurasia", PL: "Eurasia", PT: "Eurasia",
   RO: "Eurasia", RS: "Eurasia", RU: "Eurasia", SE: "Eurasia", SI: "Eurasia", SK: "Eurasia",
   UA: "Eurasia",
-  // Eurasia — Asia
+  // Eurasia: Asia
   AE: "Eurasia", AF: "Eurasia", AM: "Eurasia", AZ: "Eurasia", BD: "Eurasia", BN: "Eurasia",
   BT: "Eurasia", CN: "Eurasia", "CN-TW": "Eurasia", GE: "Eurasia", ID: "Eurasia", IL: "Eurasia",
   IN: "Eurasia", IQ: "Eurasia", IR: "Eurasia", JO: "Eurasia", JP: "Eurasia", KG: "Eurasia",
@@ -94,7 +94,7 @@ const dissolve = (continent: string): MultiPolygon => merge(topology, groups.get
 // crest to the Black Sea, and through the Bosphorus. Only the segments that
 // cross land (the Urals, the Caucasus isthmus, Turkish Thrace) matter; the rest
 // runs over ocean and is trimmed away by the coastline. This is the "natural"
-// boundary — it splits Russia, Kazakhstan and Turkey mid-country, which country
+// boundary; it splits Russia, Kazakhstan and Turkey mid-country, which country
 // borders never would.
 const EUROPE_CLIP: Position[][] = [
   [
@@ -106,9 +106,9 @@ const EUROPE_CLIP: Position[][] = [
 
 // Eurasia's main landmass ring crosses the antimeridian (Chukotka pokes past
 // +180). d3-geo stitches that spherically, but polygon-clipping is planar and
-// would fill a full-width band across the map. So "unroll" every ring — walk its
+// would fill a full-width band across the map. So "unroll" every ring (walk its
 // vertices and shift longitudes by ±360 whenever an edge would jump the
-// antimeridian, keeping the ring geometrically continuous — clip, then wrap the
+// antimeridian, keeping the ring geometrically continuous), clip, then wrap the
 // results back into [-180, 180] so d3 renders the seam correctly.
 const unroll = (ring: Position[]): Position[] => {
   const out: Position[] = [ring[0]!.slice()];
