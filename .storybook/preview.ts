@@ -11,6 +11,7 @@ const preview: Preview = {
     options: {
       storySort: {
         order: [
+          "Start",
           "Intro",
           "Maps",
           "Globe",
