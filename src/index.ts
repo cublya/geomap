@@ -3,6 +3,7 @@ export type {
   Coordinate,
   CountriesLayerProps,
   CountryHover,
+  CountryHoverAnimation,
   CountryPattern,
   CountrySet,
   FlatProjectionKind,
@@ -12,6 +13,7 @@ export type {
   LiveObject,
   LonLat,
   PreparedCountry,
+  PreparedFeature,
   Rotation,
 } from "./types";
 
@@ -20,10 +22,20 @@ export {
   cx,
   presets,
   resolveTheme,
-  type GeoPresetName,
+  type GeoPreset,
+  type GeoPalette,
   type GeoTheme,
   type ResolvedGeoTheme,
 } from "./theme";
+
+// Border behaviour (orthogonal to the colour preset)
+export {
+  resolveOutline,
+  type Outline,
+  type OutlineMode,
+  type OutlineStyle,
+  type ResolvedOutline,
+} from "./core/outline";
 
 // Coordinates & spherical math
 export {
@@ -69,6 +81,7 @@ export {
   createMapCamera,
   type FitOptions,
   type FitTarget,
+  type FlyCurve,
   type FlyToOptions,
   type MapCamera,
   type MapCameraOptions,
@@ -95,6 +108,7 @@ export {
 // React components
 export { GeoMap, type GeoMapProps } from "./react/GeoMap";
 export { GeoGlobe, type GeoGlobeProps } from "./react/GeoGlobe";
+export { GeoView, type GeoViewProps } from "./react/GeoView";
 
 // React layers (for custom composition) & context
 export {
@@ -110,8 +124,25 @@ export {
 export { useGeo, type GeoContextValue } from "./react/geo-context";
 
 // Optional UI helpers (cosmetics live in the optional @cublya/geomap/styles.css)
-export { GeoControls, type CameraControlsHandle, type GeoControlsProps } from "./react/controls";
-export { GeoTooltip, type GeoTooltipProps } from "./react/tooltip";
+export {
+  GeoControls,
+  GeoViewToggle,
+  type CameraControlsHandle,
+  type GeoControlsProps,
+  type GeoControlsClassNames,
+  type GeoControlsIcons,
+  type FullscreenTarget,
+  type GeoViewMode,
+  type GeoViewToggleProps,
+  type GeoViewToggleClassNames,
+  type GeoViewToggleIcons,
+} from "./react/controls";
+export {
+  flagEmoji,
+  GeoTooltip,
+  type GeoFlagStyle,
+  type GeoTooltipProps,
+} from "./react/tooltip";
 
 // React hooks
 export {
