@@ -105,7 +105,7 @@ changes even when they use a minor version bump.
    `CHANGELOG.md`.
 2. Update documentation, examples, migrations, and screenshots.
 3. Run the full CI-equivalent command set from
-   [Contributing](https://github.com/cublya/geo/blob/main/CONTRIBUTING.md).
+   [Contributing](https://github.com/cublya/geomap/blob/main/CONTRIBUTING.md).
 4. Review the `npm pack --dry-run` file list. The package should include `dist`,
    README, and license, with working root and stylesheet exports.
 5. Move Unreleased entries under a dated version heading and set the matching

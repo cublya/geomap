@@ -6,7 +6,7 @@
     <meta name="description" content="Composable React map primitives on d3-geo: country choropleths, rotatable globes, markers, great-circle routes, live objects and camera control.">
     <meta name="theme-color" content="#17251f">
     <title>Geomap · React maps &amp; globes on d3-geo</title>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='27' fill='%23f7f4ec' stroke='%2317251f' stroke-width='4'/%3E%3Cellipse cx='32' cy='32' rx='13' ry='27' fill='none' stroke='%23e86538' stroke-width='4'/%3E%3Cpath d='M5 32h54' fill='none' stroke='%2317251f' stroke-width='4'/%3E%3C/svg%3E">
+    <link rel="icon" type="image/svg+xml" href="./public/favicon.svg">
     <link rel="stylesheet" href="./styles.css">
   </head>
   <body>
@@ -15,9 +15,8 @@
     <header class="site-header">
       <a class="brand" href="#top" aria-label="Geomap home">
         <svg class="brand-mark" aria-hidden="true" viewBox="0 0 64 64" width="28" height="28">
-          <circle cx="32" cy="32" r="27" fill="none" stroke="currentColor" stroke-width="4"/>
-          <ellipse cx="32" cy="32" rx="12.5" ry="27" fill="none" stroke="currentColor" stroke-width="3"/>
-          <path d="M5 32h54" fill="none" stroke="currentColor" stroke-width="3"/>
+          <circle cx="32" cy="32" r="20" fill="none" stroke="currentColor" stroke-width="4"/>
+          <circle cx="32" cy="32" r="9.5" fill="none" stroke="var(--accent, #e86538)" stroke-width="4"/>
         </svg>
         <span>Geomap</span>
       </a>
@@ -175,8 +174,8 @@ npm install @cublya/world-atlas</code></pre>
               </tr>
               <tr>
                 <td><strong>palette</strong><span>fill treatment</span></td>
-                <td>default · minimal</td>
-                <td><code>"default"</code></td>
+                <td>filled · minimal</td>
+                <td><code>"filled"</code></td>
                 <td>Filled land, or hue-less line art with a transparent ocean</td>
               </tr>
               <tr>
@@ -294,9 +293,8 @@ npm install @cublya/world-atlas</code></pre>
     <footer>
       <div class="footer-brand">
         <svg class="brand-mark" aria-hidden="true" viewBox="0 0 64 64" width="28" height="28">
-          <circle cx="32" cy="32" r="27" fill="none" stroke="currentColor" stroke-width="4"/>
-          <ellipse cx="32" cy="32" rx="12.5" ry="27" fill="none" stroke="currentColor" stroke-width="3"/>
-          <path d="M5 32h54" fill="none" stroke="currentColor" stroke-width="3"/>
+          <circle cx="32" cy="32" r="20" fill="none" stroke="currentColor" stroke-width="4"/>
+          <circle cx="32" cy="32" r="9.5" fill="none" stroke="var(--accent, #e86538)" stroke-width="4"/>
         </svg>
         <strong>Geomap</strong>
       </div>

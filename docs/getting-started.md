@@ -18,6 +18,8 @@ The package is ESM-only. Import all runtime values and types from
 
 ## Render a first map
 
+![Light preset world map preview](assets/previews/theme-light.png)
+
 Prepare the basemap once, outside the component render path:
 
 ```tsx
@@ -110,6 +112,8 @@ avoid two tooltips. Set `nativeTitle: true` to retain them deliberately.
 
 ## Choose a surface
 
+![Orthographic globe preview](assets/previews/globe-rotatable.png)
+
 - Use `GeoMap` for flat projections, cursor-centred zoom, and pan.
 - Use `GeoGlobe` for an orthographic globe, backface culling, rotation, inertia,
   and optional idle rotation.
@@ -186,4 +190,3 @@ only because it uses `Image`, canvas, and `Blob`.
 - Use the [API reference](api-reference.md) for exact public surface details.
 - Read [Theming and accessibility](theming-and-accessibility.md) before replacing
   presets or shipping custom controls.
-

@@ -27,9 +27,19 @@ export default defineConfig({
       }
     },
   },
-  head: [["meta", { name: "theme-color", content: "#17211b" }]],
+  // VitePress does not rewrite `head` URLs, so the base must be spelled out.
+  head: [
+    ["link", { rel: "icon", type: "image/svg+xml", href: `${base}favicon.svg` }],
+    ["link", { rel: "icon", href: `${base}favicon.ico`, sizes: "32x32" }],
+    ["meta", { name: "theme-color", content: "#17211b" }],
+  ],
   themeConfig: {
     siteTitle: "@cublya/geomap",
+    logo: {
+      light: "/brand/icon-black.svg",
+      dark: "/brand/icon-white.svg",
+      alt: "Geomap",
+    },
     nav: [
       { text: "Guide", link: "/getting-started" },
       { text: "API", link: "/api-reference" },
@@ -57,7 +67,7 @@ export default defineConfig({
         ],
       },
     ],
-    socialLinks: [{ icon: "github", link: "https://github.com/cublya/geo" }],
+    socialLinks: [{ icon: "github", link: "https://github.com/cublya/geomap" }],
     search: { provider: "local" },
     outline: { level: [2, 3] },
     footer: {

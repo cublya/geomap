@@ -5,6 +5,18 @@ project. Storybook remains the interactive component catalogue; these guides
 cover the concepts, APIs, data flow, integration, and operating procedures that
 are easier to understand in long-form documentation.
 
+## Previews
+
+| Choropleth | Patterns | Routes |
+| --- | --- | --- |
+| [![Choropleth map preview](assets/previews/choropleth-basic.png)](getting-started.md) | [![Patterned choropleth preview](assets/previews/choropleth-patterns.png)](theming-and-accessibility.md) | [![Multi-stop route preview](assets/previews/routes-multi-stop.png)](data-and-rendering.md) |
+| [Getting started](getting-started.md) | [Theming and accessibility](theming-and-accessibility.md) | [Data and rendering](data-and-rendering.md) |
+
+| Globe | Light preset | Dark preset |
+| --- | --- | --- |
+| [![Rotatable globe preview](assets/previews/globe-rotatable.png)](getting-started.md#choose-a-surface) | [![Light theme preview](assets/previews/theme-light.png)](theming-and-accessibility.md) | [![Dark theme preview](assets/previews/theme-dark.png)](theming-and-accessibility.md) |
+| [Surface selection](getting-started.md#choose-a-surface) | [Styling model](theming-and-accessibility.md#styling-model) | [Styling model](theming-and-accessibility.md#styling-model) |
+
 ## Start here
 
 - [Getting started](getting-started.md): install the package, load a basemap,
@@ -24,16 +36,16 @@ are easier to understand in long-form documentation.
   verification, visual snapshots, CI, and release procedure.
 - [Troubleshooting](troubleshooting.md): common integration, rendering, camera,
   styling, and export failures.
-- [Contributing](https://github.com/cublya/geo/blob/main/CONTRIBUTING.md): local
+- [Contributing](https://github.com/cublya/geomap/blob/main/CONTRIBUTING.md): local
   workflow and coding conventions.
 
 ## Project context
 
 - [API design notes](api-design.md): rationale and historical design detail.
 - [Basemap coverage](basemap-coverage.md): country coverage by atlas resolution.
-- [Examples](https://github.com/cublya/geo/tree/main/examples): complete,
+- [Examples](https://github.com/cublya/geomap/tree/main/examples): complete,
   typechecked scenarios.
-- [Changelog](https://github.com/cublya/geo/blob/main/CHANGELOG.md): user-visible
+- [Changelog](https://github.com/cublya/geomap/blob/main/CHANGELOG.md): user-visible
   changes by release.
 
 ## Documentation ownership
