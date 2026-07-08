@@ -5,7 +5,7 @@ package was distilled from). They import `@cublya/geomap` via the repo's tsconfi
 alias, so `npm run typecheck` keeps them honest.
 
 To run one in a real app, copy the file into any React project that has
-`@cublya/geomap`, `react` and `world-atlas` installed.
+`@cublya/geomap`, `react` and `@cublya/world-atlas` installed.
 
 | File | Shows |
 | --- | --- |
