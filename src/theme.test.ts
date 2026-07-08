@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { cx, presets, resolveTheme } from "./theme";
 
 const MODES = ["light", "dark"] as const;
-const VARIANTS = ["default", "minimal"] as const;
+const VARIANTS = ["filled", "minimal"] as const;
 
 describe("presets", () => {
   it("exposes light & dark (each with all variants) and none", () => {
@@ -36,7 +36,7 @@ describe("presets", () => {
 
   it("every mode × variant defines the same token set", () => {
     const keys = (p: object) => Object.keys(p).sort();
-    const reference = keys(presets.light.default);
+    const reference = keys(presets.light.filled);
     for (const mode of MODES) {
       for (const variant of VARIANTS) {
         expect(keys(presets[mode][variant]), `${mode}.${variant}`).toEqual(reference);
@@ -53,8 +53,8 @@ describe("resolveTheme", () => {
   it("defaults to none, then resolves mode + variant", () => {
     expect(resolveTheme()).toBe(presets.none);
     expect(resolveTheme("none")).toBe(presets.none);
-    expect(resolveTheme("light")).toBe(presets.light.default);
-    expect(resolveTheme("dark")).toBe(presets.dark.default);
+    expect(resolveTheme("light")).toBe(presets.light.filled);
+    expect(resolveTheme("dark")).toBe(presets.dark.filled);
     expect(resolveTheme("light", "minimal")).toBe(presets.light.minimal);
     expect(resolveTheme("dark", "minimal")).toBe(presets.dark.minimal);
   });
@@ -66,7 +66,7 @@ describe("resolveTheme", () => {
   });
 
   it("overrides over none give a from-scratch starting point", () => {
-    const theme = resolveTheme("none", "default", { land: "rebeccapurple" });
+    const theme = resolveTheme("none", "filled", { land: "rebeccapurple" });
     expect(theme.land).toBe("rebeccapurple");
     expect(theme.route).toBeUndefined();
   });

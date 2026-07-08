@@ -1,7 +1,7 @@
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/public/brand/logo-white.svg">
-    <img src="docs/public/brand/logo-black.svg" alt="Cublya" width="140">
+    <img src="docs/public/brand/logo-black.svg" alt="Geomap" width="160">
   </picture>
 </p>
 
@@ -194,11 +194,11 @@ the border behaviour, independently, so you don't need a preset per combination.
 <GeoMap preset="light" countries={{ data, outline: "raised" }} /> // raised land with a soft shadow
 ```
 
-`palette`: the **fill palette** (defaults to `"default"`):
+`palette`: the **fill palette** (defaults to `"filled"`):
 
 | variant     | look                                                |
 | ----------- | --------------------------------------------------- |
-| `"default"` | plain filled land                                   |
+| `"filled"`  | plain filled land                                  |
 | `"minimal"` | hue-less line-art: transparent ocean, faint fills  |
 
 `countries.outline`: the **border behaviour** (a mode, an `{ mode, color, width, dash, elevation }`
@@ -211,8 +211,8 @@ style, or a `(country) => …` callback for per-feature borders; defaults to `"l
 | `"raised"` | `gap` plus a soft drop shadow lifting the land off the ocean            |
 | `"none"`   | no border                                                               |
 
-The old bundled presets are palette × outline: `crisp` = `default` + `outline="gap"`,
-`chalk` = `minimal` + `outline="gap"`, `relief` = `default` + `outline="raised"`.
+The old bundled presets are palette × outline: `crisp` = `filled` + `outline="gap"`,
+`chalk` = `minimal` + `outline="gap"`, `relief` = `filled` + `outline="raised"`.
 
 All presentation flows through SVG attributes and theme objects: no
 Tailwind, no global CSS, no resets, no runtime CSS-in-JS, ever, in any mode.
@@ -226,7 +226,7 @@ optional controls/tooltip.
 **Style precedence** (lowest → highest):
 
 1. package defaults (`preset="none"`, nothing painted)
-2. selected `preset` + `palette` (`"light"`/`"dark"` × `"default"`/`"minimal"`, if you opt in)
+2. selected `preset` + `palette` (`"light"`/`"dark"` × `"filled"`/`"minimal"`, if you opt in)
 3. `theme` token overrides
 4. per-feature callbacks (`countries.fill` / `pattern` / `disabled` / `outline`, `renderMarker`, …)
 5. direct element props (`marker.color`, `route.color`, `countries.outline`, …)

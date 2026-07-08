@@ -39,7 +39,7 @@ export interface GeoTooltipProps {
    * bare positioned div so your CSS/Tailwind owns the surface.
    */
   preset?: GeoPreset;
-  /** Match the map's styling variant. Defaults to "default". */
+  /** Match the map's styling variant. Defaults to "filled". */
   palette?: GeoPalette;
   /** Partial token overrides applied over the preset. */
   theme?: Partial<GeoTheme>;
@@ -150,7 +150,7 @@ function flagNodeFor(
 export function GeoTooltip({
   point,
   preset = GeoPreset.None,
-  palette = GeoPalette.Default,
+  palette = GeoPalette.Filled,
   theme,
   flag,
   flagStyle = GeoFlagStyle.None,

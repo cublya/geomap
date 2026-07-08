@@ -37,7 +37,7 @@ export interface StaticMapOptions {
   graticule?: boolean;
   /** Colour mode, same as the components. Default "none" (unstyled). */
   preset?: GeoPreset;
-  /** Fill palette over the mode: "default" | "minimal". Border behaviour is `countries.outline`. */
+  /** Fill palette over the mode: "filled" | "minimal". Border behaviour is `countries.outline`. */
   palette?: GeoPalette;
   /**
    * Partial token overrides over the preset. Preset values are

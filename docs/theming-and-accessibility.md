@@ -5,11 +5,15 @@
 The visual result is composed from three independent choices:
 
 1. `preset`: `none`, `light`, or `dark`.
-2. `palette`: `default` or `minimal`.
+2. `palette`: `filled` or `minimal`.
 3. `countries.outline`: `line`, `gap`, `raised`, `none`, or a detailed outline.
 
 `preset="none"` is the default and is intentionally headless. Use a light or
 dark preset for complete token values without importing CSS.
+
+| Light preset | Dark preset |
+| --- | --- |
+| ![Light preset map preview](assets/previews/theme-light.png) | ![Dark preset map preview](assets/previews/theme-dark.png) |
 
 ```tsx
 <GeoMap
@@ -152,4 +156,3 @@ globe options rather than an ambiguous single toggle.
 - Run Storybook interaction/accessibility tests.
 - Manually inspect custom tooltip and selected-detail content with a screen
   reader when the consuming product relies on it.
-
