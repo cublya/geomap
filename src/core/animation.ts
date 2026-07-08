@@ -52,7 +52,7 @@ export function tween({
 
 export interface DecayOptions {
   velocity: [number, number];
-  /** Per-frame multiplier; 's globe uses 0.92. */
+  /** Per-frame velocity multiplier; 0.92 gives a natural spin-down. */
   decay?: number;
   /** Stop when speed falls below this. */
   minSpeed?: number;

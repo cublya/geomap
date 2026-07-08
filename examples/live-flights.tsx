@@ -1,4 +1,4 @@
-// -style: great-circle flight routes with animated planes. Feed real
+// Great-circle flight routes with animated planes. Feed real
 // positions at any cadence; the live layer slerps between updates.
 import * as React from "react";
 import {

@@ -1,4 +1,4 @@
-// -style: visited/wishlist state on a drag-rotatable globe with inertia,
+// Passport-style: visited/wishlist state on a drag-rotatable globe with inertia,
 // with hatch/dot patterns so state never relies on colour alone.
 import * as React from "react";
 import { GeoGlobe, prepareCountries, useGlobeCamera } from "@cublya/geomap";

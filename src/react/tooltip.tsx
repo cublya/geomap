@@ -1,11 +1,11 @@
 import * as React from "react";
 import {
   cx,
-  resolveTheme,
-  type GeoPreset,
-  type GeoPalette,
+  GeoPreset,
+  GeoPalette,
   type GeoTheme,
 } from "../theme";
+import { useControlSurface } from "./use-control-surface";
 
 /**
  * How the leading flag is rendered. `"none"` (default) draws nothing. All the
@@ -14,17 +14,23 @@ import {
  * for CSS icon fonts like flag-icons / circle-flags (any convention via
  * {@link GeoTooltipProps.flagClassName}).
  */
-export type GeoFlagStyle = "none" | "emoji" | "image" | "icon";
+export const GeoFlagStyle = {
+  None: "none",
+  Emoji: "emoji",
+  Image: "image",
+  Icon: "icon",
+} as const;
+export type GeoFlagStyle = (typeof GeoFlagStyle)[keyof typeof GeoFlagStyle];
 
-/** Default `<img>` source for `flagStyle="image"` — flagcdn.com SVGs. */
+/** Default `<img>` source for `flagStyle="image"`, flagcdn.com SVGs. */
 const defaultFlagSrc = (alpha2: string) => `https://flagcdn.com/${alpha2}.svg`;
 
-/** Default `<span>` class for `flagStyle="icon"` — the flag-icons convention. */
+/** Default `<span>` class for `flagStyle="icon"`, the flag-icons convention. */
 const defaultFlagClassName = (alpha2: string) => `fi fi-${alpha2}`;
 
 export interface GeoTooltipProps {
   /**
-   * Client (viewport) coordinates — pass `hover.point` from `countries.onHover`.
+   * Client (viewport) coordinates; pass `hover.point` from `countries.onHover`.
    * Null/undefined renders nothing.
    */
   point: [number, number] | null | undefined;
@@ -45,14 +51,14 @@ export interface GeoTooltipProps {
   flag?: string;
   /**
    * How to draw the {@link flag}. Defaults to `"none"`. Every style is
-   * vendor-agnostic — geomap takes no icon dependency:
-   *   • `"emoji"` — regional-indicator emoji, zero dependencies and no network.
+   * vendor-agnostic; geomap takes no icon dependency:
+   *   • `"emoji"`: regional-indicator emoji, zero dependencies and no network.
    *     Note: Chrome on Windows shows the letters (e.g. "US") instead of a flag;
    *     use `"icon"`/`"image"`/{@link renderFlag} if that matters.
-   *   • `"icon"` — a `<span>` for a CSS icon font (flag-icons, circle-flags, …).
+   *   • `"icon"`: a `<span>` for a CSS icon font (flag-icons, circle-flags, …).
    *     The class defaults to flag-icons' `fi fi-{cc}`; override with
    *     {@link flagClassName} for any other library. You supply that library's CSS.
-   *   • `"image"` — an `<img>` whose src defaults to flagcdn.com; point at any
+   *   • `"image"`: an `<img>` whose src defaults to flagcdn.com; point at any
    *     CDN (or your own assets) with {@link flagSrc}. A network request, opt-in.
    */
   flagStyle?: GeoFlagStyle;
@@ -85,7 +91,7 @@ export interface GeoTooltipProps {
 /**
  * Convert an ISO 3166-1 alpha-2 code to its regional-indicator flag emoji.
  * Returns `""` for anything that isn't two ASCII letters. Zero dependencies,
- * no assets, no network — the batteries-included path for {@link GeoTooltip}'s
+ * no assets, no network, the batteries-included path for {@link GeoTooltip}'s
  * `flagStyle="emoji"`.
  */
 export function flagEmoji(alpha2: string): string {
@@ -106,7 +112,7 @@ function flagNodeFor(
   const cc = flag.trim().toLowerCase();
   if (!/^[a-z]{2}$/.test(cc)) return null;
   if (renderFlag) return renderFlag(cc);
-  if (flagStyle === "emoji") {
+  if (flagStyle === GeoFlagStyle.Emoji) {
     const emoji = flagEmoji(cc);
     return emoji ? (
       <span data-geomap-part="tooltip-flag" aria-hidden style={{ fontSize: "1.1em", lineHeight: 1 }}>
@@ -114,12 +120,12 @@ function flagNodeFor(
       </span>
     ) : null;
   }
-  if (flagStyle === "icon") {
+  if (flagStyle === GeoFlagStyle.Icon) {
     return (
       <span data-geomap-part="tooltip-flag" aria-hidden className={flagClassName(cc)} />
     );
   }
-  if (flagStyle === "image") {
+  if (flagStyle === GeoFlagStyle.Image) {
     return (
       <img
         data-geomap-part="tooltip-flag"
@@ -137,17 +143,17 @@ function flagNodeFor(
  * Hover tooltip positioned above the pointer.
  *
  * Positioning is always inline (it must follow the cursor). With a `preset` the
- * surface — background, ink, border, shadow — is complete without any CSS import.
+ * surface (background, ink, border, shadow) is complete without any CSS import.
  * Use `preset="none"` + `className` (e.g. Tailwind) to own the surface yourself;
  * target `.geomap-tooltip` / `[data-geomap-part="tooltip"]` for raw CSS.
  */
 export function GeoTooltip({
   point,
-  preset = "none",
-  palette = "default",
+  preset = GeoPreset.None,
+  palette = GeoPalette.Default,
   theme,
   flag,
-  flagStyle = "none",
+  flagStyle = GeoFlagStyle.None,
   flagSrc = defaultFlagSrc,
   flagClassName = defaultFlagClassName,
   renderFlag,
@@ -155,9 +161,8 @@ export function GeoTooltip({
   className,
   style,
 }: GeoTooltipProps) {
-  const t = resolveTheme(preset, palette, theme);
+  const { t, styled } = useControlSurface(preset, palette, theme);
   if (!point || children == null) return null;
-  const styled = preset !== "none" || theme !== undefined;
   const border = t.tooltipBorder ?? "transparent";
   const flagNode = flagNodeFor(flag, flagStyle, flagSrc, flagClassName, renderFlag);
   return (

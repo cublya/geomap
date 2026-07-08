@@ -34,7 +34,7 @@ describe("GeoGlobe", () => {
   });
 
   it("culls markers on the backface", () => {
-    // Default rotation faces the Atlantic (-10, -18) — Tokyo is on the far side.
+    // Default rotation faces the Atlantic (-10, -18); Tokyo is on the far side.
     const { container } = render(
       <GeoGlobe
         countries={{ data: world }}
@@ -67,7 +67,7 @@ describe("GeoGlobe", () => {
     const [lambda, phi] = camera.view.rotation;
     const [lon, lat] = world.get("BR")!.centroid;
     // Framing uses the spherical centroid of the bbox corners, which sits a
-    // couple of degrees from the polygon centroid — near is good enough.
+    // couple of degrees from the polygon centroid; near is good enough.
     expect(Math.abs(lambda - -lon)).toBeLessThan(6);
     expect(Math.abs(phi - -lat)).toBeLessThan(6);
   });

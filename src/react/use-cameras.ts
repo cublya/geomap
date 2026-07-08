@@ -14,7 +14,7 @@ import {
 
 /**
  * A stable flat-map camera handle to pass to `<GeoMap camera={…}>`. Does not
- * re-render the caller on view changes — use {@link useMapView} for that.
+ * re-render the caller on view changes; use {@link useMapView} for that.
  */
 export function useMapCamera(options?: MapCameraOptions): MapCamera {
   const [camera] = useState(() => createMapCamera(options));

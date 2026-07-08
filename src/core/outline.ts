@@ -1,17 +1,24 @@
+import type { PreparedCountry } from "../types";
 import type { ResolvedGeoTheme } from "../theme";
 
 /**
- * How borders are painted — the *behaviour* axis, orthogonal to the colour
+ * How borders are painted, the *behaviour* axis, orthogonal to the colour
  * palette (`preset` × `palette`). Collapses what used to be bundled into
  * the crisp/chalk/relief presets:
- *   • `line`   — a contrast hairline (the classic ink-on-paper divider).
- *   • `gap`    — stroked in the ocean tone so neighbours read as clean gaps
+ *   • `line`:   a contrast hairline (the classic ink-on-paper divider).
+ *   • `gap`:    stroked in the ocean tone so neighbours read as clean gaps
  *                (cut-paper cartography; former `crisp`/`chalk`).
- *   • `raised` — `gap` plus a soft drop shadow that lifts the land off the
+ *   • `raised`: `gap` plus a soft drop shadow that lifts the land off the
  *                ocean (former `relief`).
- *   • `none`   — no stroke.
+ *   • `none`:   no stroke.
  */
-export type OutlineMode = "line" | "gap" | "raised" | "none";
+export const OutlineMode = {
+  Line: "line",
+  Gap: "gap",
+  Raised: "raised",
+  None: "none",
+} as const;
+export type OutlineMode = (typeof OutlineMode)[keyof typeof OutlineMode];
 
 export interface OutlineStyle {
   /** Border behaviour. Default `"line"`. */
@@ -61,11 +68,11 @@ export function resolveOutline(
   theme: ResolvedGeoTheme,
 ): ResolvedOutline {
   const style = toStyle(outline);
-  const mode = style.mode ?? "line";
+  const mode = style.mode ?? OutlineMode.Line;
   const derived =
-    mode === "none"
+    mode === OutlineMode.None
       ? undefined
-      : mode === "line"
+      : mode === OutlineMode.Line
         ? theme.landStroke
         : // `gap` + `raised` both separate neighbours in the ocean tone.
           theme.ocean;
@@ -73,7 +80,33 @@ export function resolveOutline(
     color: style.color ?? derived,
     width: style.width ?? DEFAULT_WIDTH,
     dash: style.dash,
-    raised: mode === "raised",
+    raised: mode === OutlineMode.Raised,
     elevation: style.elevation ?? 1,
   };
+}
+
+/** Drop-shadow geometry (in viewBox units) for the raised-land filter. */
+export interface LandShadow {
+  /** Vertical offset. */
+  dy: number;
+  /** Gaussian-blur radius. */
+  stdDeviation: number;
+}
+
+/**
+ * Resolve the layer-level "raised" drop shadow that lifts the whole landmass
+ * off the ocean (`outline="raised"`). It keys off the *layer* outline (a
+ * per-country callback can't drive one group filter) and needs a `landShadow`
+ * colour token; returns null when no shadow applies. Both renderers (React
+ * `PatternDefs` and the static SVG) build their filter from this, so the
+ * geometry can't drift between them.
+ */
+export function resolveLandShadow(
+  outline: Outline | ((country: PreparedCountry) => Outline | undefined) | undefined,
+  theme: ResolvedGeoTheme,
+): LandShadow | undefined {
+  const layerOutline = typeof outline === "function" ? undefined : outline;
+  const { raised, elevation } = resolveOutline(layerOutline, theme);
+  if (!raised || theme.landShadow === undefined) return undefined;
+  return { dy: 0.7 * elevation, stdDeviation: 0.9 * elevation };
 }

@@ -17,7 +17,7 @@ export interface FlatProjectionOptions {
   padding?: number;
   /**
    * Base rotation, e.g. [-12, 0, 0] to move the antimeridian seam into the Bering
-   * Sea so Russia and Alaska render whole (/ convention).
+   * Sea so Russia and Alaska render whole.
    */
   rotate?: Rotation;
 }

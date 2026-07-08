@@ -11,7 +11,7 @@ function matchesFocusVisible(el: Element): boolean {
 
 /**
  * Tracks keyboard-visible focus so the theme's `focus` token can be drawn as an
- * inline outline (SVG/props styling — no stylesheet required).
+ * inline outline (SVG/props styling, no stylesheet required).
  */
 export function useFocusVisible(): {
   focusVisible: boolean;

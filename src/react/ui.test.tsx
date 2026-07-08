@@ -58,7 +58,7 @@ describe("GeoControls", () => {
     render(<GeoControls camera={camera} preset="light" />);
     const group = screen.getByRole("group", { name: "Map controls" });
     expect(group.getAttribute("data-geomap-layout")).toBe("separate");
-    // the group is only a flex track — no shared background/clip
+    // the group is only a flex track: no shared background/clip
     expect(group.style.background).toBe("");
     expect(group.style.overflow).toBe("");
     expect(screen.getByRole("button", { name: "Zoom in" }).style.borderRadius).toBe("8px");
@@ -116,7 +116,7 @@ describe("GeoControls", () => {
     const camera = createMapCamera();
     const target = document.createElement("div");
     const requestFullscreen = vi.fn().mockResolvedValue(undefined);
-    // jsdom doesn't implement the Fullscreen API — stub what the toggle touches.
+    // jsdom doesn't implement the Fullscreen API; stub what the toggle touches.
     target.requestFullscreen = requestFullscreen;
     render(<GeoControls camera={camera} fullscreen={{ current: target }} />);
     const button = screen.getByRole("button", { name: "Enter fullscreen" });

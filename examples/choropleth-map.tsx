@@ -1,4 +1,4 @@
-// -style: score choropleth with hover tooltip, selection and camera controls.
+// Score choropleth with hover tooltip, selection and camera controls.
 import * as React from "react";
 import {
   GeoMap,

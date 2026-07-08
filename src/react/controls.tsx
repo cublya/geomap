@@ -1,11 +1,11 @@
 import * as React from "react";
 import {
   cx,
-  resolveTheme,
-  type GeoPreset,
-  type GeoPalette,
+  GeoPreset,
+  GeoPalette,
   type GeoTheme,
 } from "../theme";
+import { useControlSurface } from "./use-control-surface";
 
 /** Structural subset shared by MapCamera and GlobeCamera. */
 export interface CameraControlsHandle {
@@ -14,7 +14,7 @@ export interface CameraControlsHandle {
   reset(): void;
 }
 
-/** Per-part class hooks — the seam for Tailwind (or any utility CSS). */
+/** Per-part class hooks, the seam for Tailwind (or any utility CSS). */
 export interface GeoControlsClassNames {
   /** The outer group (the button cluster / pill container). */
   root?: string;
@@ -34,7 +34,7 @@ export interface GeoControlsClassNames {
  * Per-glyph render slots for {@link GeoControls}. Provide any subset to swap the
  * built-in inline SVG icons for your own nodes (an icon-library component, an
  * `<img>`, an emoji, …); unset slots keep the defaults. The package pulls in no
- * icon dependency — you bring the nodes.
+ * icon dependency; you bring the nodes.
  *
  * Slots are keyed per *glyph* so the fullscreen toggle stays correct:
  * `fullscreenEnter` shows while not fullscreen, `fullscreenExit` while fullscreen.
@@ -50,10 +50,14 @@ export interface GeoControlsIcons {
 }
 
 /** Which surface {@link GeoViewToggle} / `<GeoView>` is showing. */
-export type GeoViewMode = "map" | "globe";
+export const GeoViewMode = {
+  Map: "map",
+  Globe: "globe",
+} as const;
+export type GeoViewMode = (typeof GeoViewMode)[keyof typeof GeoViewMode];
 
 /**
- * The element to toggle into fullscreen — usually the map's wrapping element.
+ * The element to toggle into fullscreen, usually the map's wrapping element.
  * Pass a ref (the common case), the element itself, or a getter.
  */
 export type FullscreenTarget =
@@ -64,7 +68,7 @@ export type FullscreenTarget =
 export interface GeoControlsProps {
   /**
    * Drives the zoom-in / zoom-out / reset buttons. Omit it (e.g. on a static
-   * choropleth with no camera) to render a fullscreen-only cluster — pass
+   * choropleth with no camera) to render a fullscreen-only cluster; pass
    * `fullscreen` for that button to appear.
    */
   camera?: CameraControlsHandle;
@@ -81,9 +85,9 @@ export interface GeoControlsProps {
   orientation?: "vertical" | "horizontal";
   /**
    * How the buttons sit together:
-   *   • `separate` (default) — each button is its own rounded, shadowed tile
+   *   • `separate` (default): each button is its own rounded, shadowed tile
    *     with a small gap between them (the modern map-control look).
-   *   • `segmented` — the buttons join into a single pill with hairline
+   *   • `segmented`: the buttons join into a single pill with hairline
    *     dividers and a shared shadow.
    */
   layout?: "separate" | "segmented";
@@ -184,8 +188,8 @@ const CONTROL_SHADOW =
  */
 export function GeoControls({
   camera,
-  preset = "none",
-  palette = "default",
+  preset = GeoPreset.None,
+  palette = GeoPalette.Default,
   theme,
   orientation = "vertical",
   layout = "separate",
@@ -196,11 +200,7 @@ export function GeoControls({
   style,
   labels,
 }: GeoControlsProps) {
-  const t = React.useMemo(
-    () => resolveTheme(preset, palette, theme),
-    [preset, palette, theme],
-  );
-  const styled = preset !== "none" || theme !== undefined;
+  const { t, styled } = useControlSurface(preset, palette, theme);
   const horizontal = orientation === "horizontal";
   const segmented = layout === "segmented";
   const border = t.controlBorder ?? "transparent";
@@ -383,7 +383,7 @@ export interface GeoViewToggleProps {
 
 /**
  * A segmented map⇄globe switch: two always-visible icon options (flat map and
- * globe) in a single pill, the active one highlighted — an ARIA `radiogroup`.
+ * globe) in a single pill, the active one highlighted, an ARIA `radiogroup`.
  * `<GeoView>` renders this for you; use it standalone to drive your own
  * `GeoMap`/`GeoGlobe` swap.
  *
@@ -395,8 +395,8 @@ export interface GeoViewToggleProps {
 export function GeoViewToggle({
   mode,
   onModeChange,
-  preset = "none",
-  palette = "default",
+  preset = GeoPreset.None,
+  palette = GeoPalette.Default,
   theme,
   orientation = "horizontal",
   classNames,
@@ -405,17 +405,13 @@ export function GeoViewToggle({
   style,
   labels,
 }: GeoViewToggleProps) {
-  const t = React.useMemo(
-    () => resolveTheme(preset, palette, theme),
-    [preset, palette, theme],
-  );
-  const styled = preset !== "none" || theme !== undefined;
+  const { t, styled } = useControlSurface(preset, palette, theme);
   const horizontal = orientation === "horizontal";
   const border = t.controlBorder ?? "transparent";
 
   const options: Array<{ id: GeoViewMode; label: string; icon: IconKind; slot?: string }> = [
-    { id: "map", label: labels?.map ?? "Flat map", icon: "map", slot: classNames?.map },
-    { id: "globe", label: labels?.globe ?? "Globe", icon: "globe", slot: classNames?.globe },
+    { id: GeoViewMode.Map, label: labels?.map ?? "Flat map", icon: "map", slot: classNames?.map },
+    { id: GeoViewMode.Globe, label: labels?.globe ?? "Globe", icon: "globe", slot: classNames?.globe },
   ];
 
   let rootStyle: React.CSSProperties | undefined = style;

@@ -1,20 +1,20 @@
 /**
  * Visual presets and theme tokens.
  *
- * Components look complete by default with zero CSS imports — presentation is
+ * Components look complete by default with zero CSS imports; presentation is
  * driven entirely by SVG attributes and inline props resolved from these
  * tokens. Style precedence (lowest → highest):
  *
- *   1. package defaults        — the `none` preset (fully unstyled)
- *   2. selected preset         — `preset="light" | "dark"` × `palette`
- *   3. theme overrides         — `theme={{ land: "…" }}` (partial tokens)
- *   4. per-feature callbacks   — `countries.fill/pattern/disabled/outline`, `renderMarker`, …
- *   5. direct element props    — `marker.color`, `route.color`, `countries.outline`, …
+ *   1. package defaults        : the `none` preset (fully unstyled)
+ *   2. selected preset         : `preset="light" | "dark"` × `palette`
+ *   3. theme overrides         : `theme={{ land: "…" }}` (partial tokens)
+ *   4. per-feature callbacks   : `countries.fill/pattern/disabled/outline`, `renderMarker`, …
+ *   5. direct element props    : `marker.color`, `route.color`, `countries.outline`, …
  *
  * The default preset is `none`: components emit no presentation attributes and
  * render exactly what you tell them to (plus the semantic `geomap-*` class names
  * for CSS-driven styling). Pass `preset="light"` (or `"dark"`) to opt into a
- * complete out-of-the-box look — every value in those presets is a
+ * complete out-of-the-box look; every value in those presets is a
  * `var(--geomap-<token>, <fallback>)` expression, so consumers can also override
  * globally with CSS variables instead of props.
  *
@@ -73,21 +73,30 @@ export type ResolvedGeoTheme = { readonly [K in keyof GeoTheme]?: string | undef
  * `palette` (below) picks the fill palette, and `countries.outline` picks the
  * border behaviour. `"none"` opts out entirely.
  */
-export type GeoPreset = "light" | "dark" | "none";
+export const GeoPreset = {
+  Light: "light",
+  Dark: "dark",
+  None: "none",
+} as const;
+export type GeoPreset = (typeof GeoPreset)[keyof typeof GeoPreset];
 
 /**
  * Fill palette, applied on top of the mode:
- *   • `default` — the plain filled look (ink-on-paper landmasses).
- *   • `minimal` — hue-less line-art: transparent ocean, faint fills.
+ *   • `default`: the plain filled look (ink-on-paper landmasses).
+ *   • `minimal`: hue-less line-art: transparent ocean, faint fills.
  *
- * Border *behaviour* is a separate, orthogonal axis — see the `outline` prop
+ * Border *behaviour* is a separate, orthogonal axis; see the `outline` prop
  * (`"line" | "gap" | "raised" | "none"`). Together they reproduce the old
  * bundled presets without the combinatorial explosion:
  *   crisp  = `default` + `outline="gap"`
  *   chalk  = `minimal` + `outline="gap"`
  *   relief = `default` + `outline="raised"`
  */
-export type GeoPalette = "default" | "minimal";
+export const GeoPalette = {
+  Default: "default",
+  Minimal: "minimal",
+} as const;
+export type GeoPalette = (typeof GeoPalette)[keyof typeof GeoPalette];
 
 const CSS_VAR_NAMES: Record<keyof GeoTheme, string> = {
   ocean: "ocean",
@@ -131,7 +140,7 @@ type Fallbacks = Record<keyof GeoTheme, string>;
 /**
  * Warm paper surface with near-black "ink" landmasses. The ocean matches a
  * neutral page background so the flat map / globe disc reads as one surface
- * (no visible seam); countries are separated by paper-colored hairlines — the
+ * (no visible seam); countries are separated by paper-colored hairlines, the
  * classic ink-on-paper cartographic look. `landMuted` (no data) stays a pale
  * grey so absent-data countries read as empty against the inked ones.
  */
@@ -163,7 +172,7 @@ const lightBase: Fallbacks = {
 };
 
 /**
- * Cool-neutral dark surface with whiteish landmasses — the light preset
+ * Cool-neutral dark surface with whiteish landmasses, the light preset
  * inverted. Ocean-dark hairlines separate the light countries; `landMuted`
  * (no data) is a dim grey so absent-data reads as empty against the lit land.
  */
@@ -269,7 +278,7 @@ const styledPresets: Record<
 const none: ResolvedGeoTheme = {};
 
 /**
- * Resolved preset objects, exported for composition — index by mode then
+ * Resolved preset objects, exported for composition; index by mode then
  * variant (`{ ...presets.dark.minimal, route: "…" }`); `presets.none` is empty.
  */
 export const presets: {
@@ -284,11 +293,11 @@ export const presets: {
  * (map, globe, controls, tooltip, static render) then reads the same tokens.
  */
 export function resolveTheme(
-  preset: GeoPreset = "none",
-  palette: GeoPalette = "default",
+  preset: GeoPreset = GeoPreset.None,
+  palette: GeoPalette = GeoPalette.Default,
   overrides?: Partial<GeoTheme>,
 ): ResolvedGeoTheme {
-  const base = preset === "none" ? none : styledPresets[preset][palette];
+  const base = preset === GeoPreset.None ? none : styledPresets[preset][palette];
   return overrides ? { ...base, ...overrides } : base;
 }
 

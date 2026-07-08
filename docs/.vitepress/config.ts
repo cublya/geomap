@@ -53,18 +53,7 @@ export default defineConfig({
           { text: "Architecture", link: "/architecture" },
           { text: "Testing and releases", link: "/testing-and-releases" },
           { text: "API design notes", link: "/api-design" },
-          { text: "Feature matrix", link: "/feature-matrix" },
           { text: "Basemap coverage", link: "/basemap-coverage" },
-        ],
-      },
-      {
-        text: "Migrations",
-        items: [
-          { text: "Overview", link: "/migrations/" },
-          { text: "", link: "/migrations/" },
-          { text: "", link: "/migrations/" },
-          { text: "", link: "/migrations/" },
-          { text: "", link: "/migrations/" },
         ],
       },
     ],

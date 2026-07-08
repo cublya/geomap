@@ -4,9 +4,7 @@ export type {
   CountriesLayerProps,
   CountryHover,
   CountryHoverAnimation,
-  CountryPattern,
   CountrySet,
-  FlatProjectionKind,
   GeoBounds,
   GeoMarker,
   GeoRoute,
@@ -17,22 +15,25 @@ export type {
   Rotation,
 } from "./types";
 
+// String-union enums (companion objects + their derived types)
+export { CountryPattern, FlatProjectionKind } from "./types";
+
 // Presets & theme tokens
 export {
   cx,
   presets,
   resolveTheme,
-  type GeoPreset,
-  type GeoPalette,
+  GeoPreset,
+  GeoPalette,
   type GeoTheme,
   type ResolvedGeoTheme,
 } from "./theme";
 
 // Border behaviour (orthogonal to the colour preset)
 export {
+  OutlineMode,
   resolveOutline,
   type Outline,
-  type OutlineMode,
   type OutlineStyle,
   type ResolvedOutline,
 } from "./core/outline";
@@ -79,9 +80,9 @@ export { routeLineString, routePoints } from "./core/routes";
 // Cameras (framework-free stores)
 export {
   createMapCamera,
+  FlyCurve,
   type FitOptions,
   type FitTarget,
-  type FlyCurve,
   type FlyToOptions,
   type MapCamera,
   type MapCameraOptions,
@@ -126,21 +127,21 @@ export { useGeo, type GeoContextValue } from "./react/geo-context";
 // Optional UI helpers (cosmetics live in the optional @cublya/geomap/styles.css)
 export {
   GeoControls,
+  GeoViewMode,
   GeoViewToggle,
   type CameraControlsHandle,
   type GeoControlsProps,
   type GeoControlsClassNames,
   type GeoControlsIcons,
   type FullscreenTarget,
-  type GeoViewMode,
   type GeoViewToggleProps,
   type GeoViewToggleClassNames,
   type GeoViewToggleIcons,
 } from "./react/controls";
 export {
   flagEmoji,
+  GeoFlagStyle,
   GeoTooltip,
-  type GeoFlagStyle,
   type GeoTooltipProps,
 } from "./react/tooltip";
 

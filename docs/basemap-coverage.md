@@ -29,7 +29,7 @@ table below uses the UN's formal classification instead.
 | --- | ---: | ---: | --- |
 | `@cublya/world-atlas/countries-10m.json` | 193 / 193 | 2 / 2 | none |
 | `@cublya/world-atlas/countries-50m.json` | 193 / 193 | 2 / 2 | none |
-| `@cublya/world-atlas/countries-110m.json` | 165 / 193 | 1 / 2 | 28 members + Holy See — see below |
+| `@cublya/world-atlas/countries-110m.json` | 165 / 193 | 1 / 2 | 28 members + Holy See (see below) |
 
 **Recommendation:** use `countries-10m.json` when border detail matters and
 `countries-50m.json` when complete country coverage matters but payload size is
@@ -37,7 +37,7 @@ more important. `110m` is still fine for decorative or illustrative maps
 (routes, markers, a zoomed regional view) where missing microstate polygons are
 inconsequential.
 
-### `countries-110m.json` — missing 28 members + 1 observer
+### `countries-110m.json`: missing 28 members + 1 observer
 
 Andorra, Antigua and Barbuda, Bahrain, Barbados, Cape Verde, Comoros, Dominica,
 Grenada, Kiribati, Liechtenstein, Malta, Maldives, Marshall Islands, Mauritius,

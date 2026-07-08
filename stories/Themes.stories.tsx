@@ -27,7 +27,7 @@ const demoLayers = {
   ],
 };
 
-/** A labelled row of mutually-exclusive DemoButtons — one theming axis. */
+/** A labelled row of mutually-exclusive DemoButtons, one theming axis. */
 function Segmented<T extends string>({
   label,
   value,
@@ -345,7 +345,7 @@ export const CssVariables: Story = {
   name: "Custom (CSS variables)",
   render: () => (
     <Frame>
-      {/* Any ancestor can retheme every map inside it — no props needed. */}
+      {/* Any ancestor can retheme every map inside it; no props needed. */}
       <div style={
         {
           height: "100%",
@@ -379,7 +379,7 @@ function NoneDemo() {
   const [selectedId, setSelectedId] = React.useState<string | null>("jp");
   return (
     <Frame>
-      {/* Story-only CSS — the package ships none of this. */}
+      {/* Story-only CSS: the package ships none of this. */}
       <style>{UNSTYLED_CSS}</style>
       <div className="unstyled-demo" style={{ height: "100%" }}>
         <GeoMap
@@ -403,7 +403,7 @@ export const None: Story = {
   play: async ({ canvasElement }) => {
     await waitFor(() => {
       const country = canvasElement.querySelector("path[data-country]")!;
-      // The package emitted no fill — the story stylesheet owns everything.
+      // The package emitted no fill; the story stylesheet owns everything.
       expect(country.getAttribute("fill")).toBeNull();
     });
   },
