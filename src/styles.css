@@ -13,19 +13,38 @@
  */
 
 .geomap-controls__button {
-  transition: background 120ms ease;
+  transition: background 120ms ease, box-shadow 120ms ease;
 }
 
 .geomap-controls__button:hover {
-  background: color-mix(in oklch, currentColor 8%, transparent);
+  background: color-mix(in oklch, currentColor 8%, var(--geomap-control-bg, transparent));
 }
 
 .geomap-controls__button:active {
-  background: color-mix(in oklch, currentColor 14%, transparent);
+  background: color-mix(in oklch, currentColor 14%, var(--geomap-control-bg, transparent));
 }
 
-/* Inset so the ring is not clipped by the pill's overflow:hidden. */
 .geomap-controls__button:focus-visible {
   outline: 2px solid var(--geomap-focus, oklch(0.55 0.17 255));
+  outline-offset: 2px;
+}
+
+/* Segmented pill clips its children, so inset the ring to keep it visible. */
+.geomap-controls[data-geomap-layout="segmented"] .geomap-controls__button:focus-visible {
   outline-offset: -2px;
+}
+
+/* The map⇄globe view toggle mirrors the controls: currentColor-derived tints so
+   it follows whatever preset/override is in effect. */
+.geomap-view-toggle__option {
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.geomap-view-toggle__option:hover {
+  background: color-mix(in oklch, currentColor 8%, var(--geomap-control-bg, transparent));
+}
+
+.geomap-view-toggle__option:focus-visible {
+  outline: 2px solid var(--geomap-focus, oklch(0.55 0.17 255));
+  outline-offset: 2px;
 }

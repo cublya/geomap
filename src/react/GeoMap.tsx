@@ -15,9 +15,17 @@ import {
 import {
   createMapCamera,
   type FitTarget,
+  type FlyCurve,
   type MapCamera,
 } from "../core/camera-map";
-import { cx, resolveTheme, type GeoPresetName, type GeoTheme } from "../theme";
+import {
+  cx,
+  resolveTheme,
+  type GeoPreset,
+  type GeoPalette,
+  type GeoTheme,
+} from "../theme";
+import { resolveOutline } from "../core/outline";
 import { GeoProvider, type GeoContextValue } from "./geo-context";
 import { usePointerGestures } from "./gestures";
 import { useFocusVisible } from "./use-focus-visible";
@@ -47,12 +55,16 @@ export interface GeoMapProps<TMarker = unknown, TRoute = unknown, TLive = unknow
   camera?: MapCamera;
   /** Declarative refit whenever the value changes; `camera.fitTo` is the imperative twin. */
   fit?: FitTarget;
+  /** Animation curve for the declarative `fit`. `"arc"` (default) zooms out/pans/zooms in; `"linear"` interpolates directly. */
+  fitCurve?: FlyCurve;
   interactive?: boolean;
   wheelZoom?: boolean;
   keyboard?: boolean;
   graticule?: boolean;
-  /** Visual preset: "none" (default, unstyled) | "light" | "dark" | "minimal" | "crisp". */
-  preset?: GeoPresetName;
+  /** Colour mode: "none" (default, unstyled) | "light" | "dark". */
+  preset?: GeoPreset;
+  /** Fill palette over the mode: "default" | "minimal". Border behaviour is `countries.outline`. */
+  palette?: GeoPalette;
   /** Partial token overrides applied over the preset. */
   theme?: Partial<GeoTheme>;
   /** viewBox size; the SVG itself fills its container. */
@@ -84,11 +96,13 @@ export function GeoMap<TMarker = unknown, TRoute = unknown, TLive = unknown>({
   projectionOptions,
   camera: cameraProp,
   fit,
+  fitCurve,
   interactive = true,
   wheelZoom = true,
   keyboard = true,
   graticule = false,
   preset = "none",
+  palette = "default",
   theme: themeInput,
   width = 960,
   height = 500,
@@ -104,7 +118,10 @@ export function GeoMap<TMarker = unknown, TRoute = unknown, TLive = unknown>({
   const [fallbackCamera] = React.useState<MapCamera>(() => createMapCamera());
   const camera = cameraProp ?? fallbackCamera;
 
-  const theme = React.useMemo(() => resolveTheme(preset, themeInput), [preset, themeInput]);
+  const theme = React.useMemo(
+    () => resolveTheme(preset, palette, themeInput),
+    [preset, palette, themeInput],
+  );
   const { focusVisible, onFocus, onBlur } = useFocusVisible();
 
   const projectionOptionsKey = JSON.stringify(projectionOptions ?? null);
@@ -123,12 +140,15 @@ export function GeoMap<TMarker = unknown, TRoute = unknown, TLive = unknown>({
   const view = React.useSyncExternalStore(camera.subscribe, camera.getView, camera.getView);
 
   const fitRef = React.useRef(fit);
+  const fitCurveRef = React.useRef(fitCurve);
   React.useEffect(() => {
     fitRef.current = fit;
+    fitCurveRef.current = fitCurve;
   });
   const currentFitKey = fitKey(fit);
   React.useEffect(() => {
-    if (fitRef.current !== undefined) camera.fitTo(fitRef.current);
+    if (fitRef.current !== undefined)
+      camera.fitTo(fitRef.current, { curve: fitCurveRef.current });
   }, [currentFitKey, camera]);
 
   usePointerGestures(svgRef, {
@@ -184,6 +204,15 @@ export function GeoMap<TMarker = unknown, TRoute = unknown, TLive = unknown>({
     [projection],
   );
 
+  // The raised drop shadow lifts the whole landmass, so it keys off the
+  // layer-level outline (a static value); a per-country `outline` callback
+  // can't drive a single group filter.
+  const layerOutline = typeof countries?.outline === "function" ? undefined : countries?.outline;
+  const resolvedLand = resolveOutline(layerOutline, theme);
+  const raised = resolvedLand.raised && theme.landShadow !== undefined;
+  const landFilterId = raised ? `${patternBase}relief` : undefined;
+  const landShadowElevation = resolvedLand.elevation;
+
   const context: GeoContextValue = React.useMemo(
     () => ({
       projection,
@@ -195,8 +224,10 @@ export function GeoMap<TMarker = unknown, TRoute = unknown, TLive = unknown>({
       theme,
       isDraggingRef,
       patternIds: { hatch: `${patternBase}hatch`, dots: `${patternBase}dots` },
+      landFilterId,
+      landShadowElevation,
     }),
-    [projection, path, width, height, project, view.zoom, theme, patternBase],
+    [projection, path, width, height, project, view.zoom, theme, patternBase, landFilterId, landShadowElevation],
   );
 
   // Transform is derived directly from the projection so the first paint is

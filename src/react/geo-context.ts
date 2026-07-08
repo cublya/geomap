@@ -24,6 +24,13 @@ export interface GeoContextValue {
   /** True while a pan/rotate drag is in progress — used to suppress hover. */
   isDraggingRef: RefObject<boolean>;
   patternIds: { hatch: string; dots: string };
+  /**
+   * SVG filter id for the raised-land drop shadow (`outline="raised"`), or
+   * undefined. `PatternDefs` emits the filter; `CountriesLayer` applies it.
+   */
+  landFilterId?: string;
+  /** Drop-shadow strength for the raised-land filter (scales offset + blur). Default 1. */
+  landShadowElevation?: number;
 }
 
 // Guarded so importing the package in a React Server Component works: the

@@ -11,7 +11,14 @@ import { toLonLat } from "../core/coords";
 import { configureGlobe, createGlobeProjection } from "../core/projections";
 import { createGlobeCamera, type GlobeCamera } from "../core/camera-globe";
 import type { FitTarget } from "../core/camera-map";
-import { cx, resolveTheme, type GeoPresetName, type GeoTheme } from "../theme";
+import {
+  cx,
+  resolveTheme,
+  type GeoPreset,
+  type GeoPalette,
+  type GeoTheme,
+} from "../theme";
+import { resolveOutline } from "../core/outline";
 import { GeoProvider, type GeoContextValue } from "./geo-context";
 import { usePointerGestures } from "./gestures";
 import { useFocusVisible } from "./use-focus-visible";
@@ -46,8 +53,10 @@ export interface GeoGlobeProps<TMarker = unknown, TRoute = unknown, TLive = unkn
   /** Idle spin in degrees per second; pauses while interacting. Off by default. */
   autoRotate?: number;
   graticule?: boolean;
-  /** Visual preset: "none" (default, unstyled) | "light" | "dark" | "minimal" | "crisp". */
-  preset?: GeoPresetName;
+  /** Colour mode: "none" (default, unstyled) | "light" | "dark". */
+  preset?: GeoPreset;
+  /** Fill palette over the mode: "default" | "minimal". Border behaviour is `countries.outline`. */
+  palette?: GeoPalette;
   /** Partial token overrides applied over the preset. */
   theme?: Partial<GeoTheme>;
   width?: number;
@@ -99,6 +108,7 @@ export function GeoGlobe<TMarker = unknown, TRoute = unknown, TLive = unknown>({
   autoRotate,
   graticule = true,
   preset = "none",
+  palette = "default",
   theme: themeInput,
   width = 960,
   height = 540,
@@ -115,7 +125,10 @@ export function GeoGlobe<TMarker = unknown, TRoute = unknown, TLive = unknown>({
   const [fallbackCamera] = React.useState<GlobeCamera>(() => createGlobeCamera());
   const camera = cameraProp ?? fallbackCamera;
 
-  const theme = React.useMemo(() => resolveTheme(preset, themeInput), [preset, themeInput]);
+  const theme = React.useMemo(
+    () => resolveTheme(preset, palette, themeInput),
+    [preset, palette, themeInput],
+  );
   const { focusVisible, onFocus, onBlur } = useFocusVisible();
 
   const globe = React.useMemo(() => createGlobeProjection({ width, height }), [width, height]);
@@ -236,6 +249,15 @@ export function GeoGlobe<TMarker = unknown, TRoute = unknown, TLive = unknown>({
     [projection, isVisible],
   );
 
+  // The raised drop shadow lifts the whole landmass, so it keys off the
+  // layer-level outline (a static value); a per-country `outline` callback
+  // can't drive a single group filter.
+  const layerOutline = typeof countries?.outline === "function" ? undefined : countries?.outline;
+  const resolvedLand = resolveOutline(layerOutline, theme);
+  const raised = resolvedLand.raised && theme.landShadow !== undefined;
+  const landFilterId = raised ? `${patternBase}relief` : undefined;
+  const landShadowElevation = resolvedLand.elevation;
+
   const context: GeoContextValue = React.useMemo(
     () => ({
       projection,
@@ -247,8 +269,10 @@ export function GeoGlobe<TMarker = unknown, TRoute = unknown, TLive = unknown>({
       theme,
       isDraggingRef,
       patternIds: { hatch: `${patternBase}hatch`, dots: `${patternBase}dots` },
+      landFilterId,
+      landShadowElevation,
     }),
-    [projection, path, width, height, project, isVisible, theme, patternBase],
+    [projection, path, width, height, project, isVisible, theme, patternBase, landFilterId, landShadowElevation],
   );
 
   const sphereD = path({ type: "Sphere" }) ?? undefined;
