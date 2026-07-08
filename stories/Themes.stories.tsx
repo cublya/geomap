@@ -10,7 +10,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Built-in visual presets let components look complete with zero CSS imports — but CSS stays fully optional, so the package defaults to `preset=\"none\"` (nothing painted; you own every pixel via the semantic class names). Theming is three orthogonal axes: `preset` picks the colour mode (`\"light\"` / `\"dark\"`), `palette` picks the fill palette (`\"default\"` filled / `\"minimal\"` line-art), and `countries.outline` picks the border *behaviour* independently — `\"line\"` (hairline), `\"gap\"` (ocean-tone gaps, cut-paper), `\"raised\"` (gap + a soft drop shadow lifting the land) or `\"none\"`. `outline` also takes a per-country callback for different borders per feature. The Playground below lets you switch the mode, palette and outline live on one map. `theme` overlays partial tokens on top, and `--geomap-*` CSS variables override globally. Precedence: defaults (none) → preset+palette → theme → feature callbacks → element props.",
+          "Built-in visual presets let components look complete with zero CSS imports — but CSS stays fully optional, so the package defaults to `preset=\"none\"` (nothing painted; you own every pixel via the semantic class names). Theming is three orthogonal axes: `preset` picks the colour mode (`\"light\"` / `\"dark\"`), `palette` picks the fill palette (`\"filled\"` filled / `\"minimal\"` line-art), and `countries.outline` picks the border *behaviour* independently — `\"line\"` (hairline), `\"gap\"` (ocean-tone gaps, cut-paper), `\"raised\"` (gap + a soft drop shadow lifting the land) or `\"none\"`. `outline` also takes a per-country callback for different borders per feature. The Playground below lets you switch the mode, palette and outline live on one map. `theme` overlays partial tokens on top, and `--geomap-*` CSS variables override globally. Precedence: defaults (none) → preset+palette → theme → feature callbacks → element props.",
       },
     },
   },
@@ -70,7 +70,7 @@ function Segmented<T extends string>({
 }
 
 const PALETTES = [
-  { value: "default", label: "Default" },
+  { value: "filled", label: "Filled" },
   { value: "minimal", label: "Minimal" },
 ] as const satisfies readonly { value: GeoPalette; label: string }[];
 
@@ -129,7 +129,7 @@ function Tag({ dark, children }: { dark: boolean; children: React.ReactNode }) {
  */
 function Playground() {
   const [dark, setDark] = React.useState(false);
-  const [palette, setPalette] = React.useState<GeoPalette>("default");
+  const [palette, setPalette] = React.useState<GeoPalette>("filled");
   const [outline, setOutline] = React.useState<OutlineMode>("gap");
   const [choropleth, setChoropleth] = React.useState(true);
 
@@ -334,7 +334,7 @@ export const ComposedPreset: Story = {
         countries={{ data: world, onSelect: () => {} }}
         {...demoLayers}
         // Exported preset objects compose: start from dark, swap accents.
-        theme={{ ...presets.dark.default, route: "oklch(0.8 0.1 150)", marker: "oklch(0.8 0.1 150)" }}
+        theme={{ ...presets.dark.filled, route: "oklch(0.8 0.1 150)", marker: "oklch(0.8 0.1 150)" }}
         aria-label="Dark preset composed with green accents"
       />
     </Frame>

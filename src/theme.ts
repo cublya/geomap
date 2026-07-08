@@ -82,18 +82,18 @@ export type GeoPreset = (typeof GeoPreset)[keyof typeof GeoPreset];
 
 /**
  * Fill palette, applied on top of the mode:
- *   • `default`: the plain filled look (ink-on-paper landmasses).
+ *   • `filled`: the plain filled look (ink-on-paper landmasses).
  *   • `minimal`: hue-less line-art: transparent ocean, faint fills.
  *
  * Border *behaviour* is a separate, orthogonal axis; see the `outline` prop
  * (`"line" | "gap" | "raised" | "none"`). Together they reproduce the old
  * bundled presets without the combinatorial explosion:
- *   crisp  = `default` + `outline="gap"`
+ *   crisp  = `filled` + `outline="gap"`
  *   chalk  = `minimal` + `outline="gap"`
- *   relief = `default` + `outline="raised"`
+ *   relief = `filled` + `outline="raised"`
  */
 export const GeoPalette = {
-  Default: "default",
+  Filled: "filled",
   Minimal: "minimal",
 } as const;
 export type GeoPalette = (typeof GeoPalette)[keyof typeof GeoPalette];
@@ -135,7 +135,7 @@ function withVars(fallbacks: Record<keyof GeoTheme, string>): GeoTheme {
 
 type Fallbacks = Record<keyof GeoTheme, string>;
 
-// ── Mode bases (the `default` variant) ────────────────────────────────────────
+// ── Mode bases (the `filled` variant) ────────────────────────────────────────
 
 /**
  * Warm paper surface with near-black "ink" landmasses. The ocean matches a
@@ -265,11 +265,11 @@ const styledPresets: Record<
   Record<GeoPalette, GeoTheme>
 > = {
   light: {
-    default: withVars(lightBase),
+    filled: withVars(lightBase),
     minimal: withVars(lightMinimal),
   },
   dark: {
-    default: withVars(darkBase),
+    filled: withVars(darkBase),
     minimal: withVars(darkMinimal),
   },
 };
@@ -294,7 +294,7 @@ export const presets: {
  */
 export function resolveTheme(
   preset: GeoPreset = GeoPreset.None,
-  palette: GeoPalette = GeoPalette.Default,
+  palette: GeoPalette = GeoPalette.Filled,
   overrides?: Partial<GeoTheme>,
 ): ResolvedGeoTheme {
   const base = preset === GeoPreset.None ? none : styledPresets[preset][palette];

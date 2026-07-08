@@ -65,7 +65,7 @@ export interface GeoMapProps<TMarker = unknown, TRoute = unknown, TLive = unknow
   graticule?: boolean;
   /** Colour mode: "none" (default, unstyled) | "light" | "dark". */
   preset?: GeoPreset;
-  /** Fill palette over the mode: "default" | "minimal". Border behaviour is `countries.outline`. */
+  /** Fill palette over the mode: "filled" | "minimal". Border behaviour is `countries.outline`. */
   palette?: GeoPalette;
   /** Partial token overrides applied over the preset. */
   theme?: Partial<GeoTheme>;
@@ -97,7 +97,7 @@ export function GeoMap<TMarker = unknown, TRoute = unknown, TLive = unknown>({
   keyboard = true,
   graticule = false,
   preset = GeoPreset.None,
-  palette = GeoPalette.Default,
+  palette = GeoPalette.Filled,
   theme: themeInput,
   width = 960,
   height = 500,

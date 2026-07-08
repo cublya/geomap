@@ -120,7 +120,7 @@ export function GeoView<TMarker = unknown, TRoute = unknown, TLive = unknown>({
   inertia,
   autoRotate,
   preset = GeoPreset.None,
-  palette = GeoPalette.Default,
+  palette = GeoPalette.Filled,
   theme,
   width,
   height,

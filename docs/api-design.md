@@ -214,7 +214,7 @@ Theming is three orthogonal axes: `preset` (colour mode), `palette`
 
 ```ts
 type GeoPreset = "light" | "dark" | "none";           // colour mode
-type GeoPalette = "default" | "minimal";        // fill palette
+type GeoPalette = "filled" | "minimal";        // fill palette
 type OutlineMode = "line" | "gap" | "raised" | "none";        // border behaviour
 type Outline = OutlineMode | {
   mode?; color?; width?; dash?; elevation?;            // full style
@@ -233,14 +233,14 @@ resolveTheme(preset?, variant?, overrides?): ResolvedGeoTheme; // preset default
 resolveOutline(outline?, theme): ResolvedOutline;    // layer-agnostic border resolver
 ```
 
-Palettes, both in light and dark: `default` (plain filled land) and `minimal`
+Palettes, both in light and dark: `filled` (plain filled land) and `minimal`
 (hue-less line-art: transparent ocean, faint fills). **Border behaviour is the
 separate `countries.outline` axis**: a bare mode, a full style object, or a
 `(country) => Outline | undefined` callback for per-feature borders: `line`
 (hairline), `gap` (ocean-tone gaps so choropleth fills carry the map), `raised`
 (`gap` + a soft `landShadow` drop shadow lifting the land), `none`. The old
-bundled presets are palette × outline: crisp = `default` + `gap`, chalk =
-`minimal` + `gap`, relief = `default` + `raised`. `resolveOutline` is
+bundled presets are palette × outline: crisp = `filled` + `gap`, chalk =
+`minimal` + `gap`, relief = `filled` + `raised`. `resolveOutline` is
 layer-agnostic so future region/coastline layers reuse it.
 
 Palettes are OKLCH neutrals (no raw #fff/#000), AA ink/surface contrast, themed
@@ -251,7 +251,7 @@ equals.
 
 Style precedence (lowest → highest):
 1. package defaults: `preset="none"` (nothing painted)
-2. selected `preset` + `palette`: `"light"`/`"dark"` × `"default"`/`"minimal"`, when you opt in
+2. selected `preset` + `palette`: `"light"`/`"dark"` × `"filled"`/`"minimal"`, when you opt in
 3. `theme` partial token overrides
 4. per-feature callbacks: `countries.fill`/`pattern`/`disabled`/`outline`, `renderMarker`, `renderObject`
 5. direct element props: `marker.color`, `route.color`, `countries.outline`, …

@@ -77,7 +77,7 @@ export interface GeoControlsProps {
    * style-free buttons so your own CSS/Tailwind owns 100% of the look.
    */
   preset?: GeoPreset;
-  /** Match the map's styling variant. Defaults to "default". */
+  /** Match the map's styling variant. Defaults to "filled". */
   palette?: GeoPalette;
   /** Partial token overrides applied over the preset. */
   theme?: Partial<GeoTheme>;
@@ -189,7 +189,7 @@ const CONTROL_SHADOW =
 export function GeoControls({
   camera,
   preset = GeoPreset.None,
-  palette = GeoPalette.Default,
+  palette = GeoPalette.Filled,
   theme,
   orientation = "vertical",
   layout = "separate",
@@ -396,7 +396,7 @@ export function GeoViewToggle({
   mode,
   onModeChange,
   preset = GeoPreset.None,
-  palette = GeoPalette.Default,
+  palette = GeoPalette.Filled,
   theme,
   orientation = "horizontal",
   classNames,

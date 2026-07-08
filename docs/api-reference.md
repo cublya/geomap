@@ -26,7 +26,7 @@ Renders an interactive flat SVG map.
 | `keyboard` | `boolean` | `true` | Enables keyboard and focusability |
 | `graticule` | `boolean` | `false` | Draw coordinate grid |
 | `preset` | `GeoPreset` | `none` | `none`, `light`, or `dark` |
-| `palette` | `GeoPalette` | `default` | `default` or `minimal` |
+| `palette` | `GeoPalette` | `filled` | `filled` or `minimal` |
 | `theme` | `Partial<GeoTheme>` | - | Token overrides |
 | `width`, `height` | `number` | `960`, `500` | SVG viewBox dimensions |
 | `aria-label` | `string` | `Interactive map` | Use a data-specific label |
