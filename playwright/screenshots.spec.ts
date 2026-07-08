@@ -11,7 +11,8 @@ const STORIES = [
   "globe-globe--rotatable",
   "theming-presets--light",
   "theming-presets--dark",
-  "theming-presets--minimal",
+  "theming-presets--outline-gap",
+  "theming-presets--outline-raised",
   "theming-presets--none",
 ];
 

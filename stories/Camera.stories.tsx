@@ -2,8 +2,9 @@ import * as React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, userEvent, waitFor, within } from "storybook/test";
 import { GeoControls, GeoMap, useMapCamera, useMapView } from "@cublya/geomap";
+import type { FitTarget } from "@cublya/geomap";
 import "@cublya/geomap/styles.css";
-import { CITIES, Frame, scoreFill, world } from "./support";
+import { ACCENT, CITIES, DemoButton, Frame, Toolbar, world, worldComplete } from "./support";
 
 const meta = {
   title: "Camera/Camera",
@@ -23,30 +24,29 @@ type Story = StoryObj;
 function CameraDemo() {
   const camera = useMapCamera({ maxZoom: 8 });
   const view = useMapView(camera);
+  const frameRef = React.useRef<HTMLDivElement>(null);
   return (
-    <Frame>
+    <Frame ref={frameRef}>
       <GeoMap
         preset="light"
         camera={camera}
-        countries={{ data: world, fill: (c) => scoreFill(c.id) }}
+        countries={{ data: world }}
         aria-label="Camera playground"
       />
-      <div style={{ position: "absolute", top: 12, left: 12, display: "flex", gap: 8 }}>
-        <button type="button" onClick={() => camera.fitTo(world.get("JP")!)}>
-          Fit Japan
-        </button>
-        <button type="button" onClick={() => camera.fitTo(CITIES.map((c) => c.coordinates))}>
+      <Toolbar>
+        <DemoButton onClick={() => camera.fitTo(world.get("JP")!)}>Fit Japan</DemoButton>
+        <DemoButton onClick={() => camera.fitTo(CITIES.map((c) => c.coordinates))}>
           Fit all cities
-        </button>
-        <button type="button" onClick={() => camera.flyTo({ center: [-60, -15], zoom: 3 })}>
+        </DemoButton>
+        <DemoButton onClick={() => camera.flyTo({ center: [-60, -15], zoom: 3 })}>
           Fly to South America
-        </button>
-        <button type="button" onClick={() => camera.panBy(-120, 0)}>
-          Pan east
-        </button>
-      </div>
+        </DemoButton>
+        <DemoButton onClick={() => camera.panBy(-120, 0)}>Pan east</DemoButton>
+      </Toolbar>
       <GeoControls
         camera={camera}
+        preset="light"
+        fullscreen={frameRef}
         style={{ position: "absolute", bottom: 16, right: 16 }}
       />
       <p
@@ -81,16 +81,77 @@ export const Interactive: Story = {
   },
 };
 
-export const DeclarativeFit: Story = {
-  name: "Declarative fit prop",
-  render: () => (
+// The 10m atlas so small nations like Singapore are drawn (and highlightable);
+// the 110m atlas omits them entirely. `highlightId` overrides the country the
+// fill highlights when the fit target isn't the country itself.
+const FIT_REGIONS: { label: string; fit: FitTarget; highlightId?: string }[] = [
+  { label: "World", fit: "world" },
+  { label: "Brazil", fit: worldComplete.get("BR")! },
+  { label: "Japan", fit: worldComplete.get("JP")! },
+  { label: "Egypt", fit: worldComplete.get("EG")! },
+  // AU's real bounds reach Macquarie Island (~55°S, 159°E), which would frame a
+  // huge empty Southern Ocean — so fit the mainland + Tasmania box instead, but
+  // still highlight the whole AU shape.
+  {
+    label: "Australia",
+    fit: [
+      [112.9, -44],
+      [154, -9.5],
+    ],
+    highlightId: worldComplete.get("AU")!.id,
+  },
+  { label: "Singapore", fit: worldComplete.get("SG")! },
+];
+
+const CURVES = ["arc", "linear"] as const;
+
+function DeclarativeFitDemo() {
+  const [region, setRegion] = React.useState(1);
+  const [curve, setCurve] = React.useState<(typeof CURVES)[number]>("arc");
+  // `fitTo` derives zoom from the target's projected span (zoom =
+  // width·coverage / span), so a small country zooms in more than a large one
+  // on its own. A generous maxZoom lets tiny nations like Singapore actually
+  // reach that zoom instead of being capped at the default 8.
+  const camera = useMapCamera({ maxZoom: 120 });
+  // A country fit target carries its own id; "world"/bounds don't, so an
+  // explicit `highlightId` says what to fill for those.
+  const active = FIT_REGIONS[region]!;
+  const focused = active.fit;
+  const focusedId =
+    active.highlightId ??
+    (typeof focused === "object" && "id" in focused ? focused.id : null);
+  return (
     <Frame>
       <GeoMap
         preset="light"
-        countries={{ data: world, fill: (c) => scoreFill(c.id) }}
-        fit={world.get("BR")!}
-        aria-label="Framed on Brazil via the fit prop"
+        camera={camera}
+        countries={{
+          data: worldComplete,
+          fill: (country) => (country.id === focusedId ? ACCENT : undefined),
+        }}
+        fit={FIT_REGIONS[region]!.fit}
+        fitCurve={curve}
+        aria-label={`Framed on ${FIT_REGIONS[region]!.label} via the fit prop`}
       />
+      <Toolbar>
+        {FIT_REGIONS.map((r, i) => (
+          <DemoButton key={r.label} active={i === region} onClick={() => setRegion(i)}>
+            {r.label}
+          </DemoButton>
+        ))}
+      </Toolbar>
+      <Toolbar corner="top-right">
+        {CURVES.map((c) => (
+          <DemoButton key={c} active={c === curve} onClick={() => setCurve(c)}>
+            {c === "arc" ? "Arc" : "Linear"}
+          </DemoButton>
+        ))}
+      </Toolbar>
     </Frame>
-  ),
+  );
+}
+
+export const DeclarativeFit: Story = {
+  name: "Declarative fit prop",
+  render: () => <DeclarativeFitDemo />,
 };

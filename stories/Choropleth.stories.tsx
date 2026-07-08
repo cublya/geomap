@@ -2,13 +2,14 @@ import * as React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, userEvent, waitFor } from "storybook/test";
 import {
+  GeoControls,
   GeoMap,
   GeoTooltip,
   type CountryHover,
   type PreparedCountry,
 } from "@cublya/geomap";
 import "@cublya/geomap/styles.css";
-import { Frame, scoreFill, mockScore, world, CVD_BLUE, CVD_GOLD } from "./support";
+import { Frame, scoreFill, scoreTextColor, mockScore, world, CVD_BLUE, CVD_GOLD } from "./support";
 
 const meta = {
   title: "Maps/Choropleth",
@@ -29,9 +30,9 @@ export const Basic: Story = {
   render: () => (
     <Frame>
       <GeoMap
-        preset="crisp"
-        countries={{ data: world, fill: (c) => scoreFill(c.id) }}
-        aria-label="Mock score by country"
+        preset="light"
+        countries={{ data: world }}
+        aria-label="World countries in the default land tone"
       />
     </Frame>
   ),
@@ -113,15 +114,49 @@ export const Patterns: Story = {
 
 function TooltipDemo() {
   const [hover, setHover] = React.useState<CountryHover | null>(null);
+  const frameRef = React.useRef<HTMLDivElement>(null);
   return (
-    <Frame>
+    <Frame ref={frameRef}>
       <GeoMap
         preset="light"
         countries={{ data: world, fill: (c) => scoreFill(c.id), onHover: setHover }}
         aria-label="Hover a country for its score"
       />
-      <GeoTooltip point={hover?.point}>
-        {hover && `${hover.country.name} · score ${mockScore(hover.country.id)}`}
+      <GeoControls
+        preset="light"
+        fullscreen={frameRef}
+        style={{ position: "absolute", right: 12, bottom: 12 }}
+      />
+      <GeoTooltip point={hover?.point} preset="light" flag={hover?.country.id} flagStyle="emoji">
+        {hover && (
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              whiteSpace: "nowrap",
+            }}
+          >
+            <span style={{ fontWeight: 600 }}>{hover.country.name}</span>
+            <span
+              style={{
+                display: "inline-flex",
+                justifyContent: "center",
+                minWidth: 24,
+                padding: "1px 7px",
+                borderRadius: 6,
+                fontSize: 12,
+                fontWeight: 600,
+                fontVariantNumeric: "tabular-nums",
+                background: scoreFill(hover.country.id),
+                color: scoreTextColor(hover.country.id),
+                boxShadow: "inset 0 0 0 1px oklch(0 0 0 / 0.12)",
+              }}
+            >
+              {mockScore(hover.country.id)}
+            </span>
+          </span>
+        )}
       </GeoTooltip>
     </Frame>
   );
