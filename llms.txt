@@ -1,0 +1,53 @@
+# @cublya/geomap
+
+> Composable React map primitives on d3-geo for SVG maps and globes, with country choropleths, ISO-aware data preparation, markers, great-circle routes, live objects, cameras, static SVG output, and optional UI controls.
+
+@cublya/geomap is an ESM-only React library. It does not bundle basemap data, product data, Tailwind, global CSS, icon dependencies, or fetch logic. Pair it with `@cublya/world-atlas` or another TopoJSON or GeoJSON source, then call `prepareCountries` before rendering country layers.
+
+## Essential Links
+
+- [README](./README.md): install, quickstart, country data, cameras, layers, theming, accessibility, static output, and development commands.
+- [Documentation index](./docs/README.md): long-form guides and project documentation.
+- [Getting started](./docs/getting-started.md): first map, basemap setup, surface choice, and interaction.
+- [API reference](./docs/api-reference.md): public components, hooks, stores, types, utilities, and static rendering APIs.
+- [Data and rendering](./docs/data-and-rendering.md): coordinate conventions, country preparation, projections, routes, custom layers, and performance.
+- [Theming and accessibility](./docs/theming-and-accessibility.md): presets, CSS variables, controls, tooltip behavior, keyboard support, and reduced motion.
+- [Basemap coverage](./docs/basemap-coverage.md): country coverage by `@cublya/world-atlas` resolution.
+- [Troubleshooting](./docs/troubleshooting.md): common integration, rendering, camera, styling, and export issues.
+- [Examples](./examples/README.md): complete typed example scenarios.
+
+## Public Package Surface
+
+- Main import: `@cublya/geomap`
+- Optional stylesheet: `@cublya/geomap/styles.css`
+- React surfaces: `GeoMap`, `GeoGlobe`, `GeoView`
+- React layers: `CountriesLayer`, `MarkersLayer`, `RoutesLayer`, `LiveLayer`, `GraticuleLayer`
+- Optional UI: `GeoControls`, `GeoViewToggle`, `GeoTooltip`
+- Camera hooks and stores: `useMapCamera`, `useGlobeCamera`, `useMapView`, `useGlobeView`, `createMapCamera`, `createGlobeCamera`
+- Data prep: `prepareCountries`, `lookupIso`, `resolveCountryName`, `ISO_3166_1`
+- Geometry and projection helpers: `createFlatProjection`, `createGlobeProjection`, `greatCirclePoints`, `routeLineString`, `geographicBounds`, `toLonLat`
+- Static output: `renderStaticMapSvg`, `svgToDataUrl`, `svgToPngBlob`
+
+## Usage Notes For LLMs
+
+- Use React 18 or newer and ESM imports.
+- Import country geometry from `@cublya/world-atlas/countries-10m.json`, `countries-50m.json`, or `countries-110m.json` when examples need a basemap.
+- Call `prepareCountries(world, { exclude: ["AQ"] })` for country layers in most examples.
+- Use `GeoMap` for flat maps, `GeoGlobe` for rotatable orthographic globes, and `GeoView` when an app should switch between both.
+- `preset` defaults to `"none"`, which emits no complete visual styling. Use `preset="light"` or `preset="dark"` for ready-to-render visuals.
+- No CSS import is required for map rendering. `@cublya/geomap/styles.css` only adds pseudo-class polish for optional HTML helpers such as controls and tooltips.
+- Coordinates accept longitude and latitude conventions through helpers, but examples should prefer clear `{ lat, lng }` objects for app data.
+- Keep geopolitical changes in the data layer. Use `patchFeatures` in `prepareCountries` when an app needs editorial geometry changes.
+- Prefer documented camera methods such as `flyTo`, `fitTo`, `focus`, `zoomIn`, `zoomOut`, and `reset` instead of mutating internal state.
+- Static export uses the same data pipeline as `GeoMap`; use concrete colors for export-oriented SVG or PNG examples.
+
+## Development
+
+- Install: `npm install`
+- Unit tests: `npm run test`
+- Lint: `npm run lint`
+- Typecheck: `npm run typecheck`
+- Build: `npm run build`
+- Full verification: `npm run verify`
+- Storybook: `npm run storybook`
+- Documentation dev server: `npm run docs:dev`

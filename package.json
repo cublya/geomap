@@ -19,6 +19,7 @@
   "files": [
     "dist",
     "README.md",
+    "llms.txt",
     "LICENSE"
   ],
   "scripts": {
@@ -34,7 +35,7 @@
     "docs:build": "vitepress build docs --outDir storybook-static/docs",
     "docs:preview": "vitepress preview docs --outDir storybook-static/docs",
     "build-site": "npm run build-storybook && npm run docs:build",
-    "build-pages": "storybook build -o site/storybook && vitepress build docs --outDir site/docs && cp docs/index.html docs/styles.css site/ && cp -R docs/assets site/assets",
+    "build-pages": "storybook build -o site/storybook && vitepress build docs --outDir site/docs && cp docs/index.html docs/styles.css site/ && rm -rf site/public && cp -R docs/public site/public && cp -R docs/assets site/assets",
     "serve-storybook": "http-server storybook-static -p 6006 -s",
     "test-storybook": "test-storybook",
     "test-storybook:ci": "concurrently -k -s first \"npm:serve-storybook\" \"wait-on tcp:127.0.0.1:6006 && test-storybook --url http://127.0.0.1:6006\"",
