@@ -9,7 +9,7 @@ import {
   type GeoRoute,
   type LiveObject,
 } from "@cublya/geomap";
-import { ACCENT, Frame, scoreFill, worldDetailed } from "./support";
+import { ACCENT, Frame, worldDetailed } from "./support";
 
 const meta = {
   title: "Advanced/Performance stress",
@@ -84,7 +84,7 @@ function StressDemo() {
     <Frame height={560}>
       <GeoMap
         preset="light"
-        countries={{ data: worldDetailed, fill: (c) => scoreFill(c.id) }}
+        countries={{ data: worldDetailed }}
         markers={MARKERS}
         routes={ROUTES}
         live={{ objects, transitionMs: 1000 }}

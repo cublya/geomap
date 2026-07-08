@@ -3,7 +3,15 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, waitFor } from "storybook/test";
 import { geoCircle } from "d3-geo";
 import { GeoMap, useGeo, type Coordinate } from "@cublya/geomap";
-import { ACCENT_ALT, CITIES, Frame, world } from "./support";
+import { CITIES, Frame, paint, world } from "./support";
+
+// The overlay sits on two very different backdrops in the `light` preset:
+// near-black "ink" land and a pale cream page/ocean. A mid-tone accent washes
+// out over the cream, so the rings use a deeper vermillion (still the warm,
+// CVD-safe hue) that keeps contrast on both, and the label carries a
+// paper-colored halo so it stays legible where it crosses dark land.
+const RING = paint("oklch(0.52 0.2 40)", "#bd410f");
+const RING_HALO = paint("oklch(0.97 0.006 90)", "#f6f4ef");
 
 const meta = {
   title: "Advanced/Custom D3 layer",
@@ -25,37 +33,46 @@ function RangeRings({ center, radiiKm }: { center: Coordinate; radiiKm: number[]
   const centerLonLat: [number, number] = Array.isArray(center)
     ? center
     : [("lng" in center ? center.lng : center.lon), center.lat];
-  const p = project(center);
+  const [centerLng, centerLat] = centerLonLat;
   return (
     <g className="range-rings" pointerEvents="none">
       {radiiKm.map((km) => {
         // d3-geo's geoCircle takes an angular radius in degrees.
-        const ring = geoCircle().center(centerLonLat).radius(km / 111.32)();
+        const radiusDeg = km / 111.32;
+        const ring = geoCircle().center(centerLonLat).radius(radiusDeg)();
+        // Label each ring where it crosses the meridian due north of center.
+        const label = project([centerLng, centerLat + radiusDeg]);
         return (
-          <path
-            key={km}
-            data-ring={km}
-            d={path(ring) ?? undefined}
-            fill="none"
-            stroke={ACCENT_ALT}
-            strokeWidth={0.8}
-            strokeDasharray="2 3"
-            vectorEffect="non-scaling-stroke"
-          />
+          <React.Fragment key={km}>
+            <path
+              data-ring={km}
+              d={path(ring) ?? undefined}
+              fill="none"
+              stroke={RING}
+              strokeWidth={1.2}
+              strokeDasharray="2 3"
+              vectorEffect="non-scaling-stroke"
+            />
+            {label && (
+              <text
+                x={label[0]}
+                y={label[1] - 3 * counterScale}
+                textAnchor="middle"
+                fontSize={9 * counterScale}
+                fontFamily="system-ui"
+                fontWeight={600}
+                fill={RING}
+                stroke={RING_HALO}
+                strokeWidth={3 * counterScale}
+                strokeLinejoin="round"
+                paintOrder="stroke"
+              >
+                {km.toLocaleString()} km
+              </text>
+            )}
+          </React.Fragment>
         );
       })}
-      {p && (
-        <text
-          x={p[0]}
-          y={p[1] - 8 * counterScale}
-          textAnchor="middle"
-          fontSize={9 * counterScale}
-          fontFamily="system-ui"
-          fill={ACCENT_ALT}
-        >
-          1000 / 2500 / 5000 km
-        </text>
-      )}
     </g>
   );
 }

@@ -2,7 +2,7 @@ import * as React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, userEvent, waitFor } from "storybook/test";
 import { GeoGlobe, GeoMap, useMapCamera, useMapView, usePrefersReducedMotion } from "@cublya/geomap";
-import { Frame, scoreFill, world } from "./support";
+import { Frame, world } from "./support";
 
 const meta = {
   title: "Accessibility/Accessibility",
@@ -27,7 +27,7 @@ function KeyboardDemo() {
       <GeoMap
         preset="light"
         camera={camera}
-        countries={{ data: world, fill: (c) => scoreFill(c.id) }}
+        countries={{ data: world }}
         aria-label="Keyboard-operable map: arrows pan, plus and minus zoom, Home resets"
       />
       <p
@@ -69,7 +69,7 @@ export const KeyboardGlobe: Story = {
     <Frame>
       <GeoGlobe
         preset="light"
-        countries={{ data: world, fill: (c) => scoreFill(c.id) }}
+        countries={{ data: world }}
         aria-label="Keyboard-operable globe: arrows rotate, plus and minus zoom, Home resets"
       />
     </Frame>
@@ -82,7 +82,7 @@ function ReducedMotionDemo() {
     <Frame>
       <GeoGlobe
         preset="light"
-        countries={{ data: world, fill: (c) => scoreFill(c.id) }}
+        countries={{ data: world }}
         autoRotate={6}
         aria-label="Globe that respects reduced motion"
       />
@@ -105,5 +105,47 @@ export const ReducedMotion: Story = {
           "There is no in-page toggle for `prefers-reduced-motion` — set it at the OS/browser level and this story updates live. The behaviour itself (tweens jumping, inertia and auto-rotate disabled, live objects teleporting) is covered by unit tests and the Playwright suite, which emulates the media query.",
       },
     },
+  },
+};
+
+export const HoverAnimation: Story = {
+  name: "Customizable hover",
+  render: () => (
+    <Frame>
+      <GeoMap
+        preset="light"
+        countries={{
+          data: world,
+          // Interactive so the highlight tracks; onSelect is a no-op here.
+          onSelect: () => {},
+          // Tune the fade: a longer, eased transition of the `landHover` overlay.
+          // Pass `hover={false}` for the classic instant highlight; the fade also
+          // snaps automatically under prefers-reduced-motion.
+          hover: { durationMs: 260, easing: "cubic-bezier(0.4, 0, 0.2, 1)" },
+        }}
+        aria-label="Map whose hover highlight fades in and out"
+      />
+    </Frame>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "The hover highlight (the translucent `landHover` overlay) fades in and out. Customize it via `countries.hover` — `{ durationMs, easing }` to tune the fade, or `false` to keep it instant. It honours `prefers-reduced-motion` by snapping.",
+      },
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const br = await waitFor(() => {
+      const el = canvasElement.querySelector<SVGPathElement>('path[data-country="br"]');
+      expect(el).toBeTruthy();
+      return el!;
+    });
+    await userEvent.hover(br);
+    await waitFor(() => {
+      const overlay = canvasElement.querySelector<SVGPathElement>(".geomap-hover");
+      expect(overlay).toBeTruthy();
+      expect(overlay!.style.transition).toContain("260ms");
+    });
   },
 };

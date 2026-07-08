@@ -2,7 +2,8 @@ import * as React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, waitFor } from "storybook/test";
 import { GeoMap, prepareCountries } from "@cublya/geomap";
-import { Frame, scoreFill, worldComplete, ACCENT, CVD_GOLD } from "./support";
+import { Frame, worldComplete, paint, ACCENT, ACCENT_ALT, CVD_BLUE, CVD_GOLD } from "./support";
+import { CONTINENTS } from "./continents";
 
 const meta = {
   title: "Data/Local geodata",
@@ -10,7 +11,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "The package ships no basemap. `prepareCountries()` accepts any TopoJSON topology (world-atlas 10m shown here for complete UN-member coverage) or a plain GeoJSON FeatureCollection — identity resolves via numeric ids, ISO properties, then names.",
+          "The package ships no basemap. `prepareCountries()` accepts any TopoJSON topology (`@cublya/world-atlas` 10m shown here for complete UN-member coverage) or a plain GeoJSON FeatureCollection — identity resolves via numeric ids, ISO properties, then names.",
       },
     },
   },
@@ -20,12 +21,12 @@ export default meta;
 type Story = StoryObj;
 
 export const HighResolutionTopoJSON: Story = {
-  name: "world-atlas 10m TopoJSON (all UN members)",
+  name: "@cublya/world-atlas 10m TopoJSON (all UN members)",
   render: () => (
     <Frame>
       <GeoMap
         preset="light"
-        countries={{ data: worldComplete, fill: (c) => scoreFill(c.id) }}
+        countries={{ data: worldComplete }}
         fit={worldComplete.get("NO")!}
         aria-label="Norwegian coastline at 10m resolution"
       />
@@ -38,58 +39,47 @@ export const HighResolutionTopoJSON: Story = {
   },
 };
 
-// A hand-made FeatureCollection: identity resolves from `properties.name`.
-const CUSTOM_GEOJSON = {
-  type: "FeatureCollection" as const,
-  features: [
-    {
-      type: "Feature" as const,
-      properties: { name: "Germany" },
-      geometry: {
-        type: "Polygon" as const,
-        coordinates: [[[6, 47.3], [15, 47.3], [15, 55], [6, 55], [6, 47.3]]],
-      },
-    },
-    {
-      type: "Feature" as const,
-      properties: { name: "France" },
-      geometry: {
-        type: "Polygon" as const,
-        coordinates: [[[-4.7, 42.3], [8, 42.3], [8, 51], [-4.7, 51], [-4.7, 42.3]]],
-      },
-    },
-    {
-      type: "Feature" as const,
-      properties: { name: "Atlantis" }, // unresolvable → keeps a name-slug id
-      geometry: {
-        type: "Polygon" as const,
-        coordinates: [[[-30, 30], [-24, 30], [-24, 36], [-30, 36], [-30, 30]]],
-      },
-    },
-  ],
+// `CONTINENTS` is a plain GeoJSON FeatureCollection (see ./continents) — one
+// dissolved MultiPolygon per continent, assembled locally from the world-atlas.
+const customSet = prepareCountries(CONTINENTS);
+
+// A lighter cyan-blue for Asia (distinct from Europe's deeper blue by lightness,
+// which survives the common colour-vision deficiencies) and a green for Oceania
+// (kept clearly apart from Africa's teal, as requested).
+const ASIA_BLUE = paint("oklch(0.7 0.1 232)", "#4fa6d6");
+const OCEANIA_GREEN = paint("oklch(0.62 0.12 150)", "#3f9d66");
+
+// Categorical, colour-blind-safe fill per continent (keyed by name).
+const CONTINENT_FILL: Record<string, string> = {
+  "North America": CVD_GOLD,
+  "South America": ACCENT_ALT,
+  Africa: ACCENT,
+  Europe: CVD_BLUE,
+  Asia: ASIA_BLUE,
+  Oceania: OCEANIA_GREEN,
 };
 
-const customSet = prepareCountries(CUSTOM_GEOJSON);
-
 export const CustomGeoJSON: Story = {
-  name: "Hand-rolled GeoJSON",
+  name: "Continents (local GeoJSON)",
   render: () => (
     <Frame>
       <GeoMap
         preset="light"
+        graticule
         countries={{
           data: customSet,
-          fill: (c) => (c.alpha2 ? ACCENT : CVD_GOLD),
+          fill: (c) => CONTINENT_FILL[c.name] ?? ACCENT,
         }}
-        fit={[[-32, 28], [17, 57]]}
-        aria-label="Three custom polygons; ISO-resolved ones teal, unknown gold"
+        fit={[[-160, -50], [178, 74]]}
+        aria-label="World continents, each dissolved from its countries and filled by name"
       />
     </Frame>
   ),
   play: async ({ canvasElement }) => {
     await waitFor(() => {
-      expect(canvasElement.querySelector('path[data-country="de"]')).toBeTruthy();
-      expect(canvasElement.querySelector('path[data-country="atlantis"]')).toBeTruthy();
+      expect(canvasElement.querySelectorAll("path[data-country]")).toHaveLength(6);
+      expect(canvasElement.querySelector('path[data-country="europe"]')).toBeTruthy();
+      expect(canvasElement.querySelector('path[data-country="asia"]')).toBeTruthy();
     });
   },
 };
