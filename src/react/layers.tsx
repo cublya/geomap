@@ -14,13 +14,14 @@ import {
   toLonLat,
 } from "../core/coords";
 import { routeLineString } from "../core/routes";
+import { resolveOutline } from "../core/outline";
 import { useGeo } from "./geo-context";
 import { usePrefersReducedMotion } from "./use-reduced-motion";
 
 const GRATICULE = geoGraticule10();
 
 export function PatternDefs() {
-  const { patternIds, theme } = useGeo();
+  const { patternIds, theme, landFilterId, landShadowElevation = 1 } = useGeo();
   return (
     <defs>
       <pattern
@@ -35,6 +36,20 @@ export function PatternDefs() {
       <pattern id={patternIds.dots} width={7} height={7} patternUnits="userSpaceOnUse">
         <circle cx={2} cy={2} r={1.1} fill={theme.patternInk} />
       </pattern>
+      {landFilterId && (
+        // Soft drop shadow that lifts the whole landmass silhouette off the
+        // ocean for `outline="raised"`. Offsets are in viewBox units, scaled by
+        // the outline's elevation.
+        <filter id={landFilterId} x="-10%" y="-10%" width="120%" height="120%">
+          <feDropShadow
+            dx={0}
+            dy={0.7 * landShadowElevation}
+            stdDeviation={0.9 * landShadowElevation}
+            floodColor={theme.landShadow}
+            floodOpacity={1}
+          />
+        </filter>
+      )}
     </defs>
   );
 }
@@ -57,15 +72,22 @@ export function GraticuleLayer() {
 export function CountriesLayer({
   data,
   fill,
-  stroke,
+  outline,
+  selectedOutline,
   pattern,
   disabled,
   selectedId,
   onSelect,
   onHover,
+  hover,
+  nativeTitle,
 }: CountriesLayerProps) {
-  const { path, theme, isDraggingRef, patternIds } = useGeo();
+  const { path, theme, isDraggingRef, patternIds, landFilterId } = useGeo();
+  const reducedMotion = usePrefersReducedMotion();
   const [hoveredId, setHoveredId] = React.useState<string | null>(null);
+  // The shape the overlay draws over. Set on enter and *kept* on leave (unlike
+  // `hoveredId`, which clears) so the highlight has something to fade out over.
+  const [shownId, setShownId] = React.useState<string | null>(null);
 
   const shapes = React.useMemo(
     () =>
@@ -80,8 +102,26 @@ export function CountriesLayer({
   // (choropleths included) via the landHover token.
   const trackHover = interactive && theme.landHover !== undefined;
 
+  // Native <title> gives a free browser tooltip, but it doubles up with a custom
+  // GeoTooltip. So default it off precisely when the caller drives their own via
+  // onHover; keep it otherwise. An explicit prop always wins.
+  const showTitle = nativeTitle ?? onHover === undefined;
+
+  // Fade config: `false` (or reduced motion) means an instant snap; otherwise a
+  // short eased opacity transition drives the highlight in and out.
+  const hoverMs = hover === false || reducedMotion ? 0 : (hover?.durationMs ?? 140);
+  const hoverEasing = hover === false ? undefined : (hover?.easing ?? "ease-out");
+
+  // A single overlay follows the hovered country instead of one path per shape,
+  // and stays mounted (opacity 0) after leave so the fade-out can play.
+  const shapeById = React.useMemo(() => new Map(shapes.map((s) => [s.country.id, s.d])), [shapes]);
+  const overlayD = shownId != null ? shapeById.get(shownId) : undefined;
+
   return (
-    <g className="geomap-countries">
+    <g
+      className="geomap-countries"
+      filter={landFilterId ? `url(#${landFilterId})` : undefined}
+    >
       {shapes.map(({ country, d }) => {
         const isSelected = selectedId != null && country.id === selectedId;
         const isDisabled = disabled?.(country) ?? false;
@@ -90,6 +130,10 @@ export function CountriesLayer({
           : fill
             ? (fill(country) ?? theme.landMuted)
             : theme.land;
+        const o = resolveOutline(
+          typeof outline === "function" ? outline(country) : outline,
+          theme,
+        );
         const patternKind = isDisabled ? undefined : pattern?.(country);
         const hoverable = interactive && !isDisabled;
         return (
@@ -98,13 +142,14 @@ export function CountriesLayer({
               className="geomap-country"
               d={d}
               fill={resolvedFill}
-              stroke={isSelected ? theme.selectedStroke : (stroke ?? theme.landStroke)}
-              strokeWidth={isSelected ? 1.2 : 0.5}
+              stroke={o.color}
+              strokeWidth={o.width}
+              strokeDasharray={o.dash}
               vectorEffect="non-scaling-stroke"
               data-country={country.id}
               data-selected={isSelected ? "" : undefined}
               data-disabled={isDisabled ? "" : undefined}
-              cursor={onSelect && !isDisabled ? "pointer" : undefined}
+              cursor={hoverable ? "pointer" : undefined}
               onClick={
                 hoverable
                   ? (e) => {
@@ -121,7 +166,10 @@ export function CountriesLayer({
                 hoverable
                   ? (e) => {
                       if (isDraggingRef.current) return;
-                      if (trackHover) setHoveredId(country.id);
+                      if (trackHover) {
+                        setHoveredId(country.id);
+                        setShownId(country.id);
+                      }
                       onHover?.({ country, point: [e.clientX, e.clientY] });
                     }
                   : undefined
@@ -143,7 +191,7 @@ export function CountriesLayer({
                   : undefined
               }
             >
-              <title>{country.name}</title>
+              {showTitle && <title>{country.name}</title>}
             </path>
             {patternKind && (
               <path
@@ -154,34 +202,47 @@ export function CountriesLayer({
                 pointerEvents="none"
               />
             )}
-            {trackHover && hoveredId === country.id && (
-              <path
-                className="geomap-hover"
-                d={d}
-                fill={theme.landHover}
-                stroke="none"
-                pointerEvents="none"
-              />
-            )}
           </React.Fragment>
         );
       })}
+      {/* One highlight overlay, drawn over every country so it's never clipped by
+          a later neighbour; it fades via opacity and follows the hovered shape. */}
+      {trackHover && overlayD && (
+        <path
+          className="geomap-hover"
+          d={overlayD}
+          fill={theme.landHover}
+          stroke="none"
+          pointerEvents="none"
+          style={{
+            opacity: hoveredId != null ? 1 : 0,
+            transition: hoverMs > 0 ? `opacity ${hoverMs}ms ${hoverEasing}` : undefined,
+          }}
+        />
+      )}
       {/* Selected outline re-drawn last so neighbours don't overpaint it. */}
       {selectedId != null &&
         shapes
           .filter(({ country }) => country.id === selectedId)
-          .map(({ country, d }) => (
-            <path
-              key={`${country.id}-selected`}
-              className="geomap-selection"
-              d={d}
-              fill="none"
-              stroke={theme.selectedStroke}
-              strokeWidth={1.2}
-              vectorEffect="non-scaling-stroke"
-              pointerEvents="none"
-            />
-          ))}
+          .map(({ country, d }) => {
+            const so = resolveOutline(
+              selectedOutline ?? { color: theme.selectedStroke, width: 1.2 },
+              theme,
+            );
+            return (
+              <path
+                key={`${country.id}-selected`}
+                className="geomap-selection"
+                d={d}
+                fill="none"
+                stroke={so.color}
+                strokeWidth={so.width}
+                strokeDasharray={so.dash}
+                vectorEffect="non-scaling-stroke"
+                pointerEvents="none"
+              />
+            );
+          })}
     </g>
   );
 }
@@ -234,7 +295,13 @@ export function MarkersLayer<T>({ markers, onMarkerClick, renderMarker }: Marker
             transform={`translate(${position[0]} ${position[1]})`}
             {...clickProps}
           >
-            <circle r={r} fill={color} stroke="none">
+            <circle
+              r={r}
+              fill={color}
+              stroke={theme.halo}
+              strokeWidth={theme.halo ? 1.5 * counterScale : undefined}
+              paintOrder="stroke"
+            >
               {marker.label && <title>{marker.label}</title>}
             </circle>
             {marker.label && (
@@ -244,6 +311,10 @@ export function MarkersLayer<T>({ markers, onMarkerClick, renderMarker }: Marker
                 y={r}
                 fontSize={9 * counterScale}
                 fill={theme.markerLabel}
+                stroke={theme.halo}
+                strokeWidth={theme.halo ? 3 * counterScale : undefined}
+                paintOrder="stroke"
+                strokeLinejoin="round"
                 pointerEvents="none"
               >
                 {marker.label}
@@ -410,18 +481,37 @@ export function LiveLayer<T>({
         const color = object.color ?? theme.live;
         return (
           <g key={object.id} className="geomap-live">
-            {trailStops && (
-              <path
-                className="geomap-trail"
-                d={path(routeLineString(trailStops)) ?? undefined}
-                fill="none"
-                stroke={object.color ?? theme.trail}
-                strokeWidth={1}
-                strokeOpacity={0.6}
-                vectorEffect="non-scaling-stroke"
-                pointerEvents="none"
-              />
-            )}
+            {trailStops &&
+              (() => {
+                const trailD = path(routeLineString(trailStops)) ?? undefined;
+                return (
+                  <>
+                    {theme.halo && (
+                      // Casing: a wider halo-colored line under the trail so it
+                      // reads over dark land as well as the ocean.
+                      <path
+                        className="geomap-trail-casing"
+                        d={trailD}
+                        fill="none"
+                        stroke={theme.halo}
+                        strokeWidth={2.5}
+                        vectorEffect="non-scaling-stroke"
+                        pointerEvents="none"
+                      />
+                    )}
+                    <path
+                      className="geomap-trail"
+                      d={trailD}
+                      fill="none"
+                      stroke={object.color ?? theme.trail}
+                      strokeWidth={1}
+                      strokeOpacity={0.6}
+                      vectorEffect="non-scaling-stroke"
+                      pointerEvents="none"
+                    />
+                  </>
+                );
+              })()}
             {position &&
               (renderObject ? (
                 <g transform={`translate(${position[0]} ${position[1]})`}>
@@ -430,8 +520,17 @@ export function LiveLayer<T>({
               ) : (
                 <g transform={`translate(${position[0]} ${position[1]})`}>
                   <g transform={`rotate(${state.heading}) scale(${counterScale})`}>
-                    {/* 's plane glyph: nose up, rotated by navigational heading. */}
-                    <path className="geomap-live-icon" d="M0,-7 L4.2,6 L0,3.2 L-4.2,6 Z" fill={color} />
+                    {/* 's plane glyph: nose up, rotated by navigational heading.
+                        A halo casing keeps it legible on dark land. */}
+                    <path
+                      className="geomap-live-icon"
+                      d="M0,-7 L4.2,6 L0,3.2 L-4.2,6 Z"
+                      fill={color}
+                      stroke={theme.halo}
+                      strokeWidth={theme.halo ? 1.6 : undefined}
+                      paintOrder="stroke"
+                      strokeLinejoin="round"
+                    />
                   </g>
                   {object.label && (
                     <text
@@ -440,6 +539,10 @@ export function LiveLayer<T>({
                       y={3 * counterScale}
                       fontSize={9 * counterScale}
                       fill={theme.markerLabel}
+                      stroke={theme.halo}
+                      strokeWidth={theme.halo ? 3 * counterScale : undefined}
+                      paintOrder="stroke"
+                      strokeLinejoin="round"
                       pointerEvents="none"
                     >
                       {object.label}

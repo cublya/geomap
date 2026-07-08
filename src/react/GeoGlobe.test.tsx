@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, it, vi, afterEach } from "vitest";
 import * as React from "react";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import type { Topology } from "topojson-specification";
-import world110 from "world-atlas/countries-110m.json";
+import world110 from "@cublya/world-atlas/countries-110m.json";
 import { prepareCountries } from "../core/geodata";
 import { createGlobeCamera } from "../core/camera-globe";
 import { GeoGlobe } from "./GeoGlobe";

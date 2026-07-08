@@ -3,7 +3,7 @@ import * as React from "react";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach } from "vitest";
 import type { Topology } from "topojson-specification";
-import world110 from "world-atlas/countries-110m.json";
+import world110 from "@cublya/world-atlas/countries-110m.json";
 import { prepareCountries } from "../core/geodata";
 import { createMapCamera } from "../core/camera-map";
 import { GeoMap } from "./GeoMap";
@@ -75,6 +75,23 @@ describe("GeoMap", () => {
     expect(onHover).toHaveBeenLastCalledWith(null);
   });
 
+  it("emits a native <title> by default but drops it under onHover", () => {
+    const plain = render(<GeoMap countries={{ data: world }} />);
+    expect(plain.container.querySelector('path[data-country="br"] title')).toBeTruthy();
+    plain.unmount();
+
+    // A custom tooltip (onHover) suppresses the native one so they don't double up.
+    const hovered = render(<GeoMap countries={{ data: world, onHover: () => {} }} />);
+    expect(hovered.container.querySelector('path[data-country="br"] title')).toBeNull();
+    hovered.unmount();
+
+    // Explicit nativeTitle always wins.
+    const forced = render(
+      <GeoMap countries={{ data: world, onHover: () => {}, nativeTitle: true }} />,
+    );
+    expect(forced.container.querySelector('path[data-country="br"] title')).toBeTruthy();
+  });
+
   it("zooms with keyboard controls through a shared camera", () => {
     const camera = createMapCamera();
     render(<GeoMap countries={{ data: world }} camera={camera} aria-label="map" />);
@@ -140,6 +157,40 @@ describe("GeoMap", () => {
     );
     expect(rotated).toBe(true);
     expect(container.textContent).toContain("CB123");
+  });
+
+  it("casings a live glyph, label and trail so they read on dark land (styled presets only)", () => {
+    const live = {
+      objects: [
+        {
+          id: "fl1",
+          coordinates: [90, 60] as [number, number],
+          heading: 45,
+          label: "CB404",
+          trail: [
+            [70, 55],
+            [90, 60],
+          ] as [number, number][],
+        },
+      ],
+      transitionMs: 0,
+    };
+    const { container, rerender } = render(
+      <GeoMap countries={{ data: world }} preset="light" live={live} />,
+    );
+    // Glyph + label carry a stroke casing painted behind the fill.
+    const glyph = container.querySelector(".geomap-live-icon")!;
+    expect(glyph.getAttribute("paint-order")).toBe("stroke");
+    expect(glyph.getAttribute("stroke")).toContain("--geomap-halo");
+    const label = container.querySelector(".geomap-live .geomap-label")!;
+    expect(label.getAttribute("stroke")).toContain("--geomap-halo");
+    // The trail gets a wider halo-colored casing line beneath it.
+    expect(container.querySelector(".geomap-trail-casing")).toBeTruthy();
+
+    // Headless (preset="none"): no halo token, so no casing is emitted.
+    rerender(<GeoMap countries={{ data: world }} live={live} />);
+    expect(container.querySelector(".geomap-live-icon")!.getAttribute("stroke")).toBeNull();
+    expect(container.querySelector(".geomap-trail-casing")).toBeNull();
   });
 
   it("skips interaction affordances when interactive is false", () => {
