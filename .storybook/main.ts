@@ -5,7 +5,9 @@ const config: StorybookConfig = {
   framework: "@storybook/react-vite",
   stories: ["../stories/**/*.stories.tsx", "../stories/**/*.mdx"],
   addons: ["@storybook/addon-a11y", "@storybook/addon-docs"],
-  staticDirs: [],
+  // Shared with the VitePress docs: brand logos plus favicon.svg/favicon.ico,
+  // which Storybook picks up automatically from a static dir.
+  staticDirs: ["../docs/public"],
   async viteFinal(viteConfig) {
     viteConfig.resolve ??= {};
     // Stories import the package by its public name; alias it to the source so
