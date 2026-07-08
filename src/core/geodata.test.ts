@@ -1,13 +1,15 @@
 import { describe, expect, it } from "vitest";
 import type { Topology } from "topojson-specification";
-import world110 from "world-atlas/countries-110m.json";
-import world50 from "world-atlas/countries-50m.json";
+import world110 from "@cublya/world-atlas/countries-110m.json";
+import worldIndependent110 from "@cublya/world-atlas/countries-independent-110m.json";
+import world50 from "@cublya/world-atlas/countries-50m.json";
 import { prepareCountries } from "./geodata";
 
 const topo110 = world110 as unknown as Topology;
+const topoIndependent110 = worldIndependent110 as unknown as Topology;
 const topo50 = world50 as unknown as Topology;
 
-describe("prepareCountries (world-atlas 110m)", () => {
+describe("prepareCountries (@cublya/world-atlas 110m)", () => {
   const world = prepareCountries(topo110);
 
   it("keeps every geometry", () => {
@@ -62,9 +64,29 @@ describe("prepareCountries (world-atlas 110m)", () => {
     });
     expect(patched.get("AQ")).toBeUndefined();
   });
+
+  it("indexes dissolved map units to their UN-view country", () => {
+    expect(world.get("Kosovo")).toBe(world.get("Serbia"));
+    expect(world.get("N. Cyprus")).toBe(world.get("Cyprus"));
+    expect(world.get("Somaliland")).toBe(world.get("Somalia"));
+    expect(world.get("Crimea")).toBe(world.get("Ukraine"));
+    expect(world.get("Western Sahara")?.alpha2).toBe("EH");
+  });
 });
 
-describe("prepareCountries (world-atlas 50m)", () => {
+describe("prepareCountries (@cublya/world-atlas independent view)", () => {
+  const world = prepareCountries(topoIndependent110);
+
+  it("keeps Natural Earth independent map units separate", () => {
+    expect(world.get("Kosovo")?.name).toBe("Kosovo");
+    expect(world.get("N. Cyprus")?.name).toBe("N. Cyprus");
+    expect(world.get("Somaliland")?.name).toBe("Somaliland");
+    expect(world.get("Kosovo")).not.toBe(world.get("Serbia"));
+    expect(world.get("Somaliland")).not.toBe(world.get("Somalia"));
+  });
+});
+
+describe("prepareCountries (@cublya/world-atlas 50m)", () => {
   it("resolves every valid numeric id in the higher-resolution atlas too", () => {
     const world = prepareCountries(topo50);
     const unresolved = world.countries.filter(
