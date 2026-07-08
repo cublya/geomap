@@ -5,6 +5,8 @@ coverage/
 *.log
 .DS_Store
 storybook-static/
+site/
+docs/.vitepress/cache/
 playwright-report/
 test-results/
 fixtures/*/dist/
