@@ -69,6 +69,49 @@ describe("createMapCamera", () => {
     expect(camera.view.center[0]).toBeLessThan(before);
   });
 
+  it("cancels an active zoom tween before panning", () => {
+    let now = 0;
+    let nextFrame = 1;
+    const frames = new Map<number, FrameRequestCallback>();
+    const flushNextFrame = () => {
+      const entry = frames.entries().next().value as [number, FrameRequestCallback] | undefined;
+      expect(entry).toBeTruthy();
+      const [id, cb] = entry!;
+      frames.delete(id);
+      now += 16;
+      cb(now);
+    };
+    const flushFrames = () => {
+      for (let i = 0; i < 30 && frames.size > 0; i += 1) flushNextFrame();
+    };
+
+    vi.stubGlobal("performance", { now: () => now });
+    vi.stubGlobal("requestAnimationFrame", (cb: FrameRequestCallback) => {
+      const id = nextFrame;
+      nextFrame += 1;
+      frames.set(id, cb);
+      return id;
+    });
+    vi.stubGlobal("cancelAnimationFrame", (id: number) => {
+      frames.delete(id);
+    });
+
+    const camera = createMapCamera();
+    camera.attachEnv(makeEnv());
+    const before = camera.view.center[0];
+
+    camera.zoomIn();
+    flushNextFrame();
+    expect(camera.view.zoom).toBeGreaterThan(1);
+
+    camera.panBy(-40, 0);
+    const afterPan = camera.view.center[0];
+    expect(afterPan).toBeGreaterThan(before);
+
+    flushFrames();
+    expect(camera.view.center[0]).toBeCloseTo(afterPan, 5);
+  });
+
   it("fits a set of coordinates into the frame", () => {
     const camera = createMapCamera();
     const env = makeEnv();

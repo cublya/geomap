@@ -337,6 +337,7 @@ export function createMapCamera(options: MapCameraOptions = {}): MapCamera {
     },
     panBy(dxPx, dyPx) {
       if (!env) return;
+      stopAnimations();
       const t = transformFor(view);
       setView({
         center: centerForTransform(t.k, t.x + dxPx, t.y + dyPx),
