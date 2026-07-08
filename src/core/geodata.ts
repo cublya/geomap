@@ -11,7 +11,7 @@ export type CountrySource =
   | FeatureCollection<Geometry, Record<string, unknown>>;
 
 export interface PrepareCountriesOptions {
-  /** TopoJSON object name; default "countries" (world-atlas convention). */
+  /** TopoJSON object name; default "countries" (`@cublya/world-atlas` convention). */
   object?: string;
   /** Codes/ids/names to drop, e.g. ["AQ"] to remove Antarctica. */
   exclude?: string[];
@@ -112,7 +112,7 @@ function slug(name: string): string {
 }
 
 /**
- * Convert a TopoJSON topology (e.g. `world-atlas`) or GeoJSON FeatureCollection
+ * Convert a TopoJSON topology (e.g. `@cublya/world-atlas`) or GeoJSON FeatureCollection
  * into a {@link CountrySet} with resolved ISO identity, centroids and bounds.
  */
 export function prepareCountries(
@@ -170,6 +170,12 @@ export function prepareCountries(
     register(country.alpha3, country);
     register(country.numeric, country);
     register(country.name, country);
+    const mergedMapUnits = country.feature.properties.policyMergedMapUnits;
+    if (Array.isArray(mergedMapUnits)) {
+      for (const mapUnit of mergedMapUnits) {
+        if (typeof mapUnit === "string") register(mapUnit, country);
+      }
+    }
   }
 
   return {

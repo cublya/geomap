@@ -15,14 +15,25 @@ export interface MapCameraOptions {
   maxZoom?: number;
 }
 
+/**
+ * How a fly/fit animates between two views:
+ * - `"arc"` (default) — Van Wijk smooth zoom-and-pan: far jumps zoom out, travel,
+ *   then zoom back in, so you never slide across the world at full zoom.
+ * - `"linear"` — a direct path: pan the centre straight to the target while the
+ *   zoom eases along a geometric (perceptually even) ramp.
+ */
+export type FlyCurve = "arc" | "linear";
+
 export interface FlyToOptions {
   durationMs?: number;
+  curve?: FlyCurve;
 }
 
 export interface FitOptions {
   /** Fraction of the frame the target may occupy, 0–1. Default 0.7. */
   coverage?: number;
   maxZoom?: number;
+  curve?: FlyCurve;
 }
 
 export type FitTarget =
@@ -78,6 +89,54 @@ function isGeoBounds(target: FitTarget): target is GeoBounds {
     typeof (target[0] as LonLat)[0] === "number" &&
     Array.isArray(target[1])
   );
+}
+
+const cosh = (x: number) => (Math.exp(x) + Math.exp(-x)) / 2;
+const sinh = (x: number) => (Math.exp(x) - Math.exp(-x)) / 2;
+const tanh = (x: number) => {
+  const e = Math.exp(2 * x);
+  return (e - 1) / (e + 1);
+};
+
+/**
+ * Van Wijk & Nuij smooth zoom-and-pan. Interpolates between two views expressed
+ * as `[cx, cy, w]` — centre in projected pixels and `w` the viewport width in
+ * those same pixels. A far pan arcs outward (the camera zooms out, travels, then
+ * zooms back in) instead of sliding across the world at full zoom; a pure zoom
+ * (identical centre) just eases the scale in place. Mirrors `d3.interpolateZoom`
+ * so we get the behaviour without taking on the dependency.
+ */
+function zoomPanInterpolator(
+  a: [number, number, number],
+  b: [number, number, number],
+): (t: number) => [number, number, number] {
+  const rho = Math.SQRT2;
+  const rho2 = 2;
+  const rho4 = 4;
+  const [ux0, uy0, w0] = a;
+  const [ux1, uy1, w1] = b;
+  const dx = ux1 - ux0;
+  const dy = uy1 - uy0;
+  const d2 = dx * dx + dy * dy;
+
+  // Concentric case (no pan): an exponential — perceptually even — zoom ramp.
+  if (d2 < 1e-12) {
+    const S = Math.log(w1 / w0) / rho;
+    return (t) => [ux0 + t * dx, uy0 + t * dy, w0 * Math.exp(rho * t * S)];
+  }
+
+  const d1 = Math.sqrt(d2);
+  const b0 = (w1 * w1 - w0 * w0 + rho4 * d2) / (2 * w0 * rho2 * d1);
+  const b1 = (w1 * w1 - w0 * w0 - rho4 * d2) / (2 * w1 * rho2 * d1);
+  const r0 = Math.log(Math.sqrt(b0 * b0 + 1) - b0);
+  const r1 = Math.log(Math.sqrt(b1 * b1 + 1) - b1);
+  const S = (r1 - r0) / rho;
+  const coshr0 = cosh(r0);
+  return (t) => {
+    const s = t * S;
+    const u = (w0 / (rho2 * d1)) * (coshr0 * tanh(rho * s + r0) - sinh(r0));
+    return [ux0 + u * dx, uy0 + u * dy, (w0 * coshr0) / cosh(rho * s + r0)];
+  };
 }
 
 export function createMapCamera(options: MapCameraOptions = {}): MapCamera {
@@ -141,17 +200,47 @@ export function createMapCamera(options: MapCameraOptions = {}): MapCamera {
       center: target.center ?? from.center,
       zoom: target.zoom ?? from.zoom,
     });
+
+    // The arc curve works in the projected metric; build it only when a
+    // projection is attached (post-layout) and invertible, else fall back to the
+    // linear tween below.
+    const resolved = env;
+    let arc: ((t: number) => MapView) | null = null;
+    if ((opts.curve ?? "arc") === "arc" && resolved?.projection.invert) {
+      const p0 = resolved.projection(from.center);
+      const p1 = resolved.projection(to.center);
+      const invert = resolved.projection.invert;
+      const { width } = resolved;
+      if (p0 && p1) {
+        const interp = zoomPanInterpolator(
+          [p0[0], p0[1], width / from.zoom],
+          [p1[0], p1[1], width / to.zoom],
+        );
+        arc = (t) => {
+          const [ux, uy, w] = interp(t);
+          const inv = invert([ux, uy]);
+          return { center: inv ? [inv[0], inv[1]] : to.center, zoom: width / w };
+        };
+      }
+    }
+
     cancelAnim = tween({
       durationMs: opts.durationMs ?? 600,
       immediate: prefersReducedMotion(),
       onUpdate: (e) => {
-        setView({
-          center: [
-            from.center[0] + (to.center[0] - from.center[0]) * e,
-            from.center[1] + (to.center[1] - from.center[1]) * e,
-          ],
-          zoom: from.zoom + (to.zoom - from.zoom) * e,
-        });
+        setView(
+          arc
+            ? arc(e)
+            : {
+                center: [
+                  from.center[0] + (to.center[0] - from.center[0]) * e,
+                  from.center[1] + (to.center[1] - from.center[1]) * e,
+                ],
+                // Geometric (multiplicative) ramp so the zoom reads as
+                // perceptually even rather than accelerating at one end.
+                zoom: from.zoom * Math.pow(to.zoom / from.zoom, e),
+              },
+        );
       },
       onDone: () => {
         cancelAnim = null;
@@ -166,7 +255,7 @@ export function createMapCamera(options: MapCameraOptions = {}): MapCamera {
       return;
     }
     if (target === "world") {
-      flyTo({ ...initial, zoom: minZoom });
+      flyTo({ ...initial, zoom: minZoom }, { curve: opts.curve });
       return;
     }
     const coverage = opts.coverage ?? 0.7;
@@ -215,7 +304,7 @@ export function createMapCamera(options: MapCameraOptions = {}): MapCamera {
       minZoom,
       opts.maxZoom ?? maxZoom,
     );
-    flyTo({ center, zoom });
+    flyTo({ center, zoom }, { curve: opts.curve });
   };
 
   return {

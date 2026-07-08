@@ -24,7 +24,7 @@ export function normalizeName(name: string): string {
 }
 
 /**
- * Natural Earth / world-atlas display names that differ from the ISO English short
+ * Natural Earth / @cublya/world-atlas display names that differ from the ISO English short
  * name (union of 's and 's reconciliation tables, extended to cover the
  * 110m and 50m atlases). Keys are {@link normalizeName} outputs.
  */

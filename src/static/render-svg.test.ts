@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Topology } from "topojson-specification";
-import world110 from "world-atlas/countries-110m.json";
+import world110 from "@cublya/world-atlas/countries-110m.json";
 import { prepareCountries } from "../core/geodata";
 import { escapeXml, renderStaticMapSvg, svgToDataUrl } from "./render-svg";
 
@@ -30,6 +30,45 @@ describe("renderStaticMapSvg", () => {
     expect(svg).not.toContain("NaN");
     // One path per country plus background, route and marker elements.
     expect(svg.split("<path").length).toBeGreaterThan(world.countries.length);
+  });
+
+  it("strokes country borders in the ocean tone for outline=gap", () => {
+    const svg = renderStaticMapSvg({
+      width: 400,
+      height: 200,
+      preset: "light",
+      countries: { data: world, outline: "gap" },
+    });
+    // gap borders take the ocean fallback tone, not the landStroke tone.
+    expect(svg).toContain('stroke="var(--geomap-ocean');
+    expect(svg).not.toContain("var(--geomap-relief");
+    expect(svg).not.toContain("feDropShadow");
+  });
+
+  it("emits a drop-shadow filter for outline=raised", () => {
+    const svg = renderStaticMapSvg({
+      width: 400,
+      height: 200,
+      preset: "light",
+      countries: { data: world, outline: { mode: "raised", elevation: 2 } },
+    });
+    expect(svg).toContain("feDropShadow");
+    expect(svg).toContain('filter="url(#geomap-relief)"');
+    // Elevation scales the shadow offset (0.7 * 2).
+    expect(svg).toContain('dy="1.4"');
+  });
+
+  it("applies a per-country outline callback", () => {
+    const svg = renderStaticMapSvg({
+      width: 400,
+      height: 200,
+      preset: "light",
+      countries: {
+        data: world,
+        outline: (c) => (c.id === "de" ? { color: "#f00", width: 2 } : "none"),
+      },
+    });
+    expect(svg).toContain('stroke="#f00" stroke-width="2"');
   });
 
   it("renders without countries for route-only share images", () => {

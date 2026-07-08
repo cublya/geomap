@@ -118,4 +118,27 @@ describe("createMapCamera", () => {
     expect(camera.view.zoom).toBeCloseTo(1, 5);
     expect(camera.view.center[0]).toBeCloseTo(0, 5);
   });
+
+  // A far pan between two equally-zoomed views: the "arc" curve zooms out in the
+  // middle (Van Wijk), while "linear" holds the shared zoom the whole way.
+  const zoomsDuring = (curve: "arc" | "linear") => {
+    const camera = createMapCamera({ center: [-100, 0], zoom: 6, maxZoom: 20 });
+    camera.attachEnv(makeEnv());
+    const zooms: number[] = [];
+    camera.subscribe(() => zooms.push(camera.view.zoom));
+    camera.flyTo({ center: [100, 0], zoom: 6 }, { durationMs: 160, curve });
+    return zooms;
+  };
+
+  it("arc curve zooms out during a far pan", () => {
+    const zooms = zoomsDuring("arc");
+    expect(Math.min(...zooms)).toBeLessThan(6 - 0.5);
+    expect(zooms.at(-1)).toBeCloseTo(6, 5);
+  });
+
+  it("linear curve holds zoom across a far pan", () => {
+    const zooms = zoomsDuring("linear");
+    expect(Math.min(...zooms)).toBeCloseTo(6, 5);
+    expect(Math.max(...zooms)).toBeCloseTo(6, 5);
+  });
 });
