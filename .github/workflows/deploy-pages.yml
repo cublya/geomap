@@ -1,4 +1,4 @@
-name: Deploy Storybook to GitHub Pages
+name: Deploy documentation to GitHub Pages
 
 # Deploys only from the default branch — pull requests are tested by ci.yml and
 # never deploy.
@@ -19,15 +19,19 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
       - run: npm ci
-      - run: npm run build-storybook
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - name: Build Storybook and long-form documentation
+        run: npm run build-site
+        env:
+          DOCS_BASE: /${{ github.event.repository.name }}/docs/
+          STORYBOOK_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: storybook-static
 
@@ -39,4 +43,4 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

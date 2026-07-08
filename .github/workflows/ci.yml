@@ -9,10 +9,10 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
       - run: npm ci
       - run: npm run lint
@@ -21,7 +21,7 @@ jobs:
       - run: npm run build
       - run: npx publint
       - run: npm pack --dry-run
-      - run: npm run build-storybook
+      - run: npm run build-site
 
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
@@ -33,7 +33,7 @@ jobs:
         # "missing" bootstraps baselines for a platform that has none committed
         # (snapshots are platform-suffixed) and compares against existing ones.
         run: npx playwright test --update-snapshots=missing
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: playwright-report

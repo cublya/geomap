@@ -3,7 +3,7 @@
 import * as React from "react";
 import { GeoGlobe, prepareCountries, useGlobeCamera } from "@cublya/geomap";
 import type { Topology } from "topojson-specification";
-import world110 from "world-atlas/countries-110m.json";
+import world110 from "@cublya/world-atlas/countries-110m.json";
 
 const world = prepareCountries(world110 as unknown as Topology);
 
