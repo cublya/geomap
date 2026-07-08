@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/public/brand/logo-white.svg">
+    <img src="docs/public/brand/logo-black.svg" alt="Cublya" width="140">
+  </picture>
+</p>
+
 # @cublya/geomap
 
 Composable React map primitives on [d3-geo](https://github.com/d3/d3-geo): country
@@ -345,10 +352,12 @@ planned escape hatch; the core emits only data, so the API won't change.
 
 ## Storybook
 
-The hosted project site deploys from `main` to **https://cublya.github.io/geo/**.
-Storybook is at the site root and the long-form documentation is under
-[`/geo/docs/`](https://cublya.github.io/geo/docs/). Run Storybook locally with
-`npm run storybook` or the documentation site with `npm run docs:dev`.
+The hosted project site deploys from `main` to **https://cublya.github.io/geomap/**.
+The landing page is at the site root, Storybook lives under
+[`/geomap/storybook/`](https://cublya.github.io/geomap/storybook/), and the
+long-form documentation under
+[`/geomap/docs/`](https://cublya.github.io/geomap/docs/). Run Storybook locally
+with `npm run storybook` or the documentation site with `npm run docs:dev`.
 
 ## Documentation
 
@@ -370,7 +379,8 @@ npm run verify             # lint + types + tests + build + publint + pack dry-r
 npm run storybook          # dev server on :6006
 npm run build-storybook    # static site → storybook-static/
 npm run docs:dev           # long-form documentation dev server
-npm run build-site         # Storybook + docs → one deployable Pages artifact
+npm run build-site         # Storybook + docs → storybook-static/ (used by CI tests)
+npm run build-pages        # landing page + Storybook + docs → site/ (Pages artifact)
 npm run test-storybook:ci  # interaction + axe accessibility tests (built SB)
 npm run test:e2e           # Playwright screenshot tests (build Storybook first)
 bash scripts/verify-fixtures.sh   # install packed tarball into Vite + Next.js apps

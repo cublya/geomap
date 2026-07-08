@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Composable React map primitives on d3-geo: country choropleths, rotatable globes, markers, great-circle routes, live objects and camera control.">
+    <meta name="theme-color" content="#17251f">
+    <title>Geomap · React maps &amp; globes on d3-geo</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='27' fill='%23f7f4ec' stroke='%2317251f' stroke-width='4'/%3E%3Cellipse cx='32' cy='32' rx='13' ry='27' fill='none' stroke='%23e86538' stroke-width='4'/%3E%3Cpath d='M5 32h54' fill='none' stroke='%2317251f' stroke-width='4'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="Geomap home">
+        <svg class="brand-mark" aria-hidden="true" viewBox="0 0 64 64" width="28" height="28">
+          <circle cx="32" cy="32" r="27" fill="none" stroke="currentColor" stroke-width="4"/>
+          <ellipse cx="32" cy="32" rx="12.5" ry="27" fill="none" stroke="currentColor" stroke-width="3"/>
+          <path d="M5 32h54" fill="none" stroke="currentColor" stroke-width="3"/>
+        </svg>
+        <span>Geomap</span>
+      </a>
+      <nav aria-label="Main navigation">
+        <a href="#install">Install</a>
+        <a href="#components">Components</a>
+        <a href="#theming">Theming</a>
+        <a href="#examples">Examples</a>
+        <a href="./docs/">Documentation</a>
+      </nav>
+      <a class="github-link" href="https://github.com/cublya/geomap">GitHub <span aria-hidden="true">↗</span></a>
+    </header>
+
+    <main id="content">
+      <section class="hero" id="top">
+        <div class="hero-copy">
+          <div class="eyebrow">
+            <span class="eyebrow-badge">v0.0.1</span>
+            <span class="eyebrow-source">built on <strong>d3-geo</strong></span>
+          </div>
+          <h1>Maps &amp; globes,<br><em>ready to compose.</em></h1>
+          <p class="hero-intro">
+            Composable React map primitives: country choropleths with real ISO
+            identity, drag-rotatable globes, markers, great-circle routes and
+            live moving objects, plus a camera that can fit, focus and fly.
+          </p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#install">Get started</a>
+            <a class="button button-secondary" href="./storybook/">Open Storybook</a>
+          </div>
+        </div>
+        <div class="hero-map">
+          <div class="map-frame">
+            <img src="./assets/hero-map.svg" alt="World map rendered by GeoMap, with a dashed multi-stop great-circle route from Frankfurt via Baku and Singapore to Sydney, and the countries along it highlighted" width="1130" height="500">
+          </div>
+        </div>
+      </section>
+
+      <section class="intro-strip" aria-label="Package attributes">
+        <div><strong>All SVG</strong><span>Inspectable, CSS-styleable output. No canvas or WebGL required</span></div>
+        <div><strong>Tree-shakeable</strong><span>ESM-only with no side effects; unused layers drop away</span></div>
+        <div><strong>Nothing bundled</strong><span>No basemap, no icon set, no required stylesheet</span></div>
+      </section>
+
+      <section class="section install-section" id="install">
+        <div class="section-heading">
+          <p class="kicker">Install</p>
+          <h2>One package.<br>Bring your own world.</h2>
+          <p>
+            Geomap deliberately ships no basemap. Pair it with
+            <a href="https://github.com/cublya/world-atlas"><code>@cublya/world-atlas</code></a>,
+            its sibling TopoJSON package, or feed it any TopoJSON or GeoJSON
+            you already have.
+          </p>
+        </div>
+        <div class="code-stack">
+          <div class="code-card">
+            <div class="code-label"><span>Terminal</span><span>npm</span></div>
+            <pre><code>npm install @cublya/geomap
+<span class="syntax-comment"># recommended basemap (the package ships none)</span>
+npm install @cublya/world-atlas</code></pre>
+          </div>
+          <div class="code-card">
+            <div class="code-label"><span>React</span><span>ES modules</span></div>
+            <pre><code><span class="syntax-keyword">import</span> { GeoMap, prepareCountries } <span class="syntax-keyword">from</span> <span class="syntax-string">"@cublya/geomap"</span>;
+<span class="syntax-keyword">import</span> world <span class="syntax-keyword">from</span> <span class="syntax-string">"@cublya/world-atlas/countries-50m.json"</span>
+  <span class="syntax-keyword">with</span> { type: <span class="syntax-string">"json"</span> };
+
+<span class="syntax-keyword">const</span> countries = prepareCountries(world, { exclude: [<span class="syntax-string">"AQ"</span>] });
+
+&lt;GeoMap
+  preset=<span class="syntax-string">"light"</span>
+  countries={{ data: countries, onSelect: setCountry }}
+  fit=<span class="syntax-string">"world"</span>
+/&gt;</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <section class="section tinted" id="components">
+        <div class="section-heading wide-heading">
+          <p class="kicker">Components</p>
+          <h2>The same props, flat or spherical.</h2>
+          <p>
+            <code>GeoMap</code> draws a projected flat map; <code>GeoGlobe</code>
+            renders a drag-rotatable orthographic globe with inertia. Layers,
+            cameras and themes are shared, so switching projection is a
+            one-word change.
+          </p>
+        </div>
+
+        <div class="view-grid">
+          <article class="view-card featured">
+            <div class="card-topline"><span class="pill">Flat map</span><span>&lt;GeoMap /&gt;</span></div>
+            <h3>GeoMap</h3>
+            <p>A projected SVG world with every layer the package knows:</p>
+            <ul class="policy-list">
+              <li><span>countries</span><strong>choropleth fills, selection, hover</strong></li>
+              <li><span>markers</span><strong>screen-constant pins</strong></li>
+              <li><span>routes</span><strong>great-circle arcs between stops</strong></li>
+              <li><span>live</span><strong>moving objects on one shared loop</strong></li>
+              <li><span>children</span><strong>your own SVG in projected space</strong></li>
+            </ul>
+          </article>
+
+          <article class="view-card">
+            <div class="card-topline"><span class="pill quiet">Orthographic</span><span>&lt;GeoGlobe /&gt;</span></div>
+            <h3>GeoGlobe</h3>
+            <p>
+              The same props render a globe. Drag rotates with inertia, and
+              markers or objects on the far hemisphere cull automatically.
+            </p>
+            <pre class="compact-code"><code>&lt;GeoGlobe
+  countries={{ data: countries, fill }}
+  markers={pins}
+  routes={arcs}
+  autoRotate={4}
+/&gt;</code></pre>
+            <p class="card-note">
+              Undecided? <code>GeoView</code> flips between both behind a
+              built-in map ⇄ globe toggle, keeping the geographic centre
+              across the switch.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="theming">
+        <div class="section-heading">
+          <p class="kicker">Theming</p>
+          <h2>Three axes.<br>No CSS file.</h2>
+          <p>
+            Styling is preset × palette × outline: orthogonal props rather
+            than a preset per combination. The default preset
+            <code>"none"</code> paints nothing at all; opt in for a complete
+            look with one prop.
+          </p>
+        </div>
+        <div class="axes-table-wrap">
+          <table class="axes-table">
+            <thead>
+              <tr>
+                <th>Axis</th>
+                <th>Values</th>
+                <th>Default</th>
+                <th>What it sets</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>preset</strong><span>colour mode</span></td>
+                <td>none · light · dark</td>
+                <td><code>"none"</code></td>
+                <td>A complete AA-contrast palette for ocean, land, states and controls</td>
+              </tr>
+              <tr>
+                <td><strong>palette</strong><span>fill treatment</span></td>
+                <td>default · minimal</td>
+                <td><code>"default"</code></td>
+                <td>Filled land, or hue-less line art with a transparent ocean</td>
+              </tr>
+              <tr>
+                <td><strong>outline</strong><span>border behaviour</span></td>
+                <td>line · gap · raised · none</td>
+                <td><code>"line"</code></td>
+                <td>Hairline borders, cut-paper gaps, or raised land with a soft shadow</td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="table-note">
+            Every preset value resolves through <code>var(--geomap-*, fallback)</code>,
+            so an ancestor stylesheet can retheme every map with plain CSS
+            variables, and <code>countries.pattern</code> adds hatch and dot
+            encodings that stay readable without colour.
+          </p>
+        </div>
+      </section>
+
+      <section class="section internals-section" id="internals">
+        <div class="section-heading wide-heading">
+          <p class="kicker">Under the hood</p>
+          <h2>Built from parts you can import.</h2>
+          <p>
+            The components are thin compositions over exported utilities
+            (projections, great-circle math, tweens, cameras), so advanced
+            composition never needs a fork.
+          </p>
+        </div>
+        <div class="model-grid">
+          <article>
+            <span class="model-number">01</span>
+            <h3>Cameras</h3>
+            <p>
+              <code>useMapCamera</code> and <code>useGlobeCamera</code> expose
+              <code>fitTo</code>, <code>flyTo</code> and <code>focus</code>,
+              honour reduced-motion preferences, and are plain framework-free
+              stores when you need them outside React.
+            </p>
+          </article>
+          <article>
+            <span class="model-number">02</span>
+            <h3>ISO identity</h3>
+            <p>
+              <code>prepareCountries</code> resolves every feature against a
+              bundled ISO 3166-1 table: <code>get("US")</code>,
+              <code>get("usa")</code>, <code>get("840")</code> and
+              <code>get("United States of America")</code> are the same country.
+            </p>
+          </article>
+          <article>
+            <span class="model-number">03</span>
+            <h3>Accessibility</h3>
+            <p>
+              The SVG is <code>role="img"</code> and focusable: arrows pan or
+              rotate, <code>+</code>/<code>−</code> zoom, <code>Home</code>
+              resets, and every country carries a native
+              <code>&lt;title&gt;</code>.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section tinted example-section" id="examples">
+        <div class="section-heading">
+          <p class="kicker">Live examples</p>
+          <h2>See it moving.</h2>
+          <p>
+            Every component, preset and interaction is exercised in Storybook:
+            choropleths, globes, multi-stop routes, live flights. The stories
+            double as the surface for interaction and axe accessibility tests.
+          </p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="./storybook/">Open Storybook</a>
+            <a class="button button-secondary" href="./docs/">Read the documentation</a>
+          </div>
+        </div>
+        <div class="code-card shot-card">
+          <div class="code-label"><span>GeoMap</span><span>preset dark</span></div>
+          <div class="shot-frame">
+            <img src="./assets/previews/theme-dark.png" alt="Dark-preset world map rendered by GeoMap, with a dashed great-circle route from New York to Tokyo" width="1200" height="720" loading="lazy">
+          </div>
+        </div>
+      </section>
+
+      <section class="section provenance-section" id="source">
+        <div class="provenance-card">
+          <div>
+            <p class="kicker">Source and license</p>
+            <h2>MIT, and small on purpose.</h2>
+          </div>
+          <div class="provenance-copy">
+            <p>
+              Geomap is MIT-licensed and built to stay out of your way: no
+              product data, no fetching, no bundled basemap and no border
+              politics. <code>patchFeatures</code> is the explicit hook for
+              editorial geometry.
+            </p>
+            <p>
+              It pairs with <code>@cublya/world-atlas</code>, the sibling
+              package that redistributes Natural Earth as quantized TopoJSON
+              with documented boundary views.
+            </p>
+            <div class="text-links">
+              <a href="https://github.com/cublya/geomap">GitHub <span aria-hidden="true">↗</span></a>
+              <a href="https://www.npmjs.com/package/@cublya/geomap">npm <span aria-hidden="true">↗</span></a>
+              <a href="https://github.com/cublya/geomap/blob/main/CHANGELOG.md">Changelog <span aria-hidden="true">↗</span></a>
+              <a href="https://github.com/cublya/world-atlas">World Atlas <span aria-hidden="true">↗</span></a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="footer-brand">
+        <svg class="brand-mark" aria-hidden="true" viewBox="0 0 64 64" width="28" height="28">
+          <circle cx="32" cy="32" r="27" fill="none" stroke="currentColor" stroke-width="4"/>
+          <ellipse cx="32" cy="32" rx="12.5" ry="27" fill="none" stroke="currentColor" stroke-width="3"/>
+          <path d="M5 32h54" fill="none" stroke="currentColor" stroke-width="3"/>
+        </svg>
+        <strong>Geomap</strong>
+      </div>
+      <p>React map primitives, maintained by <a href="https://www.cublya.com">Cublya</a>.</p>
+      <div><a href="https://github.com/cublya/geomap">GitHub</a><a href="https://www.npmjs.com/package/@cublya/geomap">npm</a><a href="./docs/">Documentation</a><a href="./storybook/">Storybook</a><a href="#top">Back to top ↑</a></div>
+    </footer>
+  </body>
+</html>
