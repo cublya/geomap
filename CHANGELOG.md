@@ -6,10 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this package adheres to [Semantic Versioning](https://semver.org/). It is
 currently pre-1.0 (`0.0.1`), so the public API may still change.
 
-## [0.0.1] - 2026-07-08
+## [0.0.1] - 2026-07-09 (Hikmat Samadov)
 
 ### Added
 
+- `llms.txt` file summarizing the package's public surface and usage instructions.
+- Visual preview images for flat maps, globes, choropleths, patterns, and multi-stop routes.
 - `<GeoMap>` (Mercator / Natural Earth / Equal Earth / custom d3 projection) and
   `<GeoGlobe>` (orthographic, drag-rotate with inertia, optional auto-rotate).
 - `<GeoView>`: one component that flips between the flat map and the globe via a
@@ -52,13 +54,13 @@ currently pre-1.0 (`0.0.1`), so the public API may still change.
 - Built-in visual presets: complete looks with zero CSS imports, via SVG
   attributes and theme objects. Three orthogonal axes: `preset` picks the colour
   mode (`light` / `dark` / `none`), `palette` picks the fill palette
-  (`default` filled / `minimal` line-art), and `countries.outline` picks the
+  (`filled` filled / `minimal` line-art), and `countries.outline` picks the
   border behaviour independently: `line` (hairline), `gap` (ocean-tone gaps so
   choropleth fills carry the map), `raised` (`gap` + a soft drop shadow lifting
   the land) or `none`. `outline` also accepts a full `{ mode, color, width, dash,
   elevation }` style or a `(country) => Outline` callback for per-feature
-  borders. Palette × outline reproduces the classic cut-paper (`default` + `gap`)
-  and raised-relief (`default` + `raised`) looks without a preset per combination.
+  borders. Palette × outline reproduces the classic cut-paper (`filled` + `gap`)
+  and raised-relief (`filled` + `raised`) looks without a preset per combination.
   Every combo works in light and dark; `none` (**the default**) stays fully
   unstyled. OKLCH neutral palettes, AA contrast, no raw `#fff`/`#000`, no branding.
 - `resolveOutline()` + `Outline` / `OutlineStyle` / `OutlineMode` /
@@ -102,6 +104,8 @@ currently pre-1.0 (`0.0.1`), so the public API may still change.
 
 ### Changed
 
+- Renamed the preset palette variant `default` to `filled` to avoid clash with default prop values.
+- Custom branding theme for Storybook using the brand colors and logos.
 - Renamed the package from `@cublya/geo` to `@cublya/geomap` (CSS/class prefix
   `geo-*` → `geomap-*`, CSS variables `--geo-*` → `--geomap-*`) for a more
   literal, obvious name.
