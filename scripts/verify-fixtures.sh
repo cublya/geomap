@@ -7,7 +7,10 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
-TARBALL_NAME="$(npm pack --silent | tail -1)"
+# Reuse an existing build (CI builds once, up front); only build when run
+# standalone without a dist. --ignore-scripts then skips prepack's rebuild.
+[ -f dist/index.js ] || npm run build
+TARBALL_NAME="$(npm pack --ignore-scripts --silent | tail -1)"
 TARBALL="$ROOT/$TARBALL_NAME"
 trap 'rm -f "$TARBALL"' EXIT
 echo "packed $TARBALL_NAME"
