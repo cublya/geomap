@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://cublya.github.io/geomap/sitemap.xml
+Sitemap: https://cublya.github.io/geomap/docs/sitemap.xml

@@ -3,11 +3,46 @@ import { defineConfig } from "vitepress";
 const base = process.env.DOCS_BASE ?? "/docs/";
 const storybookUrl = process.env.STORYBOOK_URL ?? "http://localhost:6006/";
 
+// Origin the docs are published under. The sitemap library resolves each page
+// URL against `hostname`, dropping VitePress' `base`, so the hostname has to
+// carry the full base path for the generated URLs to be correct.
+const origin = process.env.DOCS_ORIGIN ?? "https://cublya.github.io";
+// Landing-page asset used as the social preview image. `base` ends in `docs/`;
+// the shared assets live one level up at the site root.
+const siteRoot = `${origin}${base.replace(/docs\/$/, "")}`;
+const ogImage = `${siteRoot}assets/og-image.png`;
+
 export default defineConfig({
+  lang: "en-US",
   title: "Geomap",
-  description: "Project and API documentation for @cublya/geomap",
+  description:
+    "Guides and API reference for @cublya/geomap — composable React map and globe primitives built on d3-geo.",
   base,
   cleanUrls: true,
+  sitemap: { hostname: `${origin}${base}` },
+  transformHead({ pageData, siteData }) {
+    const rel = pageData.relativePath
+      .replace(/(^|\/)index\.md$/, "$1")
+      .replace(/\.md$/, "");
+    const canonical = `${origin}${siteData.base}${rel}`;
+    const pageTitle = pageData.title
+      ? `${pageData.title} | Geomap`
+      : "Geomap · React maps & globes on d3-geo";
+    const description = pageData.description || siteData.description;
+    return [
+      ["link", { rel: "canonical", href: canonical }],
+      ["meta", { property: "og:type", content: "website" }],
+      ["meta", { property: "og:site_name", content: "Geomap" }],
+      ["meta", { property: "og:title", content: pageTitle }],
+      ["meta", { property: "og:description", content: description }],
+      ["meta", { property: "og:url", content: canonical }],
+      ["meta", { property: "og:image", content: ogImage }],
+      ["meta", { name: "twitter:card", content: "summary_large_image" }],
+      ["meta", { name: "twitter:title", content: pageTitle }],
+      ["meta", { name: "twitter:description", content: description }],
+      ["meta", { name: "twitter:image", content: ogImage }],
+    ];
+  },
   rewrites: {
     "README.md": "index.md",
   },
