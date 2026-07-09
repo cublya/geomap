@@ -4,9 +4,23 @@ All notable changes to this package are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this package adheres to [Semantic Versioning](https://semver.org/). It is
-currently pre-1.0 (`0.0.1`), so the public API may still change.
+currently pre-1.0 beta, so the public API may still change.
 
-## [0.0.1] - 2026-07-09 (Hikmat Samadov)
+## [0.0.2-beta] - 2026-07-09 (Hikmat Samadov)
+
+### Added
+
+- `GeoControls` buttons now mirror their accessible labels into native browser
+  titles, so built-in icon controls expose simple hover/focus tooltip text and
+  localized `labels` update both surfaces.
+
+### Changed
+
+- The optional `@cublya/geomap/styles.css` now gives control buttons a pointer
+  cursor even when consumers use headless controls plus the optional polish
+  stylesheet.
+
+## [0.0.1-beta] - 2026-07-09 (Hikmat Samadov)
 
 ### Added
 

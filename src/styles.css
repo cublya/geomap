@@ -13,6 +13,7 @@
  */
 
 .geomap-controls__button {
+  cursor: pointer;
   transition: background 120ms ease, box-shadow 120ms ease;
 }
 

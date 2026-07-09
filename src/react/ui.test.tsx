@@ -78,7 +78,7 @@ describe("GeoControls", () => {
   it("accepts custom labels", () => {
     const camera = createMapCamera();
     render(<GeoControls camera={camera} labels={{ zoomIn: "Bigger" }} />);
-    expect(screen.getByRole("button", { name: "Bigger" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Bigger" }).getAttribute("title")).toBe("Bigger");
   });
 
   it("applies per-part classNames (Tailwind seam) after the base classes", () => {
