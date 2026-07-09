@@ -20,7 +20,7 @@ jobs:
       - run: npm run test
       - run: npm run build
       - run: npx publint
-      - run: npm pack --dry-run
+      - run: npm pack --dry-run --ignore-scripts # reuse the build above; skip prepack rebuild
       - run: npm run build-site
 
       - name: Install Playwright browser
