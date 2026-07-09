@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this package adheres to [Semantic Versioning](https://semver.org/). It is
 currently pre-1.0 beta, so the public API may still change.
 
-## [0.0.2-beta] - 2026-07-09 (Hikmat Samadov)
+## [0.0.1-beta-2] - 2026-07-09 (Hikmat Samadov)
 
 ### Added
 
@@ -20,7 +20,7 @@ currently pre-1.0 beta, so the public API may still change.
   cursor even when consumers use headless controls plus the optional polish
   stylesheet.
 
-## [0.0.1-beta] - 2026-07-09 (Hikmat Samadov)
+## [0.0.1-beta-1] - 2026-07-09 (Hikmat Samadov)
 
 ### Added
 
