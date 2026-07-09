@@ -329,6 +329,7 @@ export function GeoControls({
             type="button"
             aria-label={label}
             aria-pressed={pressed}
+            title={label}
             data-geomap-part={part}
             data-geomap-fullscreen={key === "fullscreen" ? (pressed ? "on" : "off") : undefined}
             className={cx("geomap-controls__button", classNames?.button, classNames?.[key])}
