@@ -6,6 +6,7 @@ import type { Topology } from "topojson-specification";
 import world110 from "@cublya/world-atlas/countries-110m.json";
 import { prepareCountries } from "../core/geodata";
 import { createMapCamera } from "../core/camera-map";
+import { createFlatProjection } from "../core/projections";
 import { GeoMap } from "./GeoMap";
 import { useGeo } from "./geo-context";
 
@@ -33,6 +34,16 @@ describe("GeoMap", () => {
     expect(svg.getAttribute("tabindex")).toBe("0");
     const paths = container.querySelectorAll("path[data-country]");
     expect(paths.length).toBe(world.countries.length);
+  });
+
+  it("renders a Canvas surface when requested", () => {
+    const { container } = render(
+      <GeoMap renderer="canvas" countries={{ data: world }} aria-label="Canvas map" />,
+    );
+    const canvas = screen.getByRole("img", { name: "Canvas map" });
+    expect(canvas.tagName.toLowerCase()).toBe("canvas");
+    expect(canvas.getAttribute("tabindex")).toBe("0");
+    expect(container.querySelector("svg.geomap-map")).toBeNull();
   });
 
   it("fills countries via the callback and falls back to the muted tone", () => {
@@ -138,6 +149,57 @@ describe("GeoMap", () => {
       (p) => p.getAttribute("stroke-linecap") === "round",
     );
     expect(route).toBe(true);
+  });
+
+  it("keeps custom React layers available over the Canvas renderer", () => {
+    function CrossHair() {
+      const { project } = useGeo();
+      const p = project({ lat: 48.8566, lng: 2.3522 })!;
+      return <circle data-testid="custom-canvas-layer" cx={p[0]} cy={p[1]} r={2} />;
+    }
+    const { container } = render(
+      <GeoMap renderer="canvas" countries={{ data: world }}>
+        <CrossHair />
+      </GeoMap>,
+    );
+    expect(screen.getByTestId("custom-canvas-layer")).toBeTruthy();
+    // Custom layers project into viewBox space, so the overlay must carry the
+    // same pan/zoom transform the canvas draws with, else they'd drift apart.
+    const overlayGroup = container.querySelector('svg[aria-hidden="true"] > g');
+    expect(overlayGroup?.getAttribute("transform")).toMatch(/^translate\(.*\) scale\(1\)$/);
+  });
+
+  it("reports default marker clicks from the Canvas renderer", () => {
+    const onMarkerClick = vi.fn();
+    render(
+      <GeoMap
+        renderer="canvas"
+        markers={[{ id: "origin", coordinates: [0, 0], size: 8 }]}
+        onMarkerClick={onMarkerClick}
+        aria-label="Canvas marker map"
+      />,
+    );
+    const canvas = screen.getByRole("img", { name: "Canvas marker map" });
+    vi.spyOn(canvas, "getBoundingClientRect").mockReturnValue({
+      x: 0,
+      y: 0,
+      width: 960,
+      height: 500,
+      top: 0,
+      right: 960,
+      bottom: 500,
+      left: 0,
+      toJSON: () => ({}),
+    });
+    const projection = createFlatProjection("naturalEarth1", { width: 960, height: 500 });
+    const [px, py] = projection([0, 0])!;
+    const [cx, cy] = projection([0, 20])!;
+    const x = 480 + px - cx;
+    const y = 250 + py - cy;
+    fireEvent.click(canvas, { clientX: x, clientY: y });
+    expect(onMarkerClick).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "origin" }),
+    );
   });
 
   it("renders live objects rotated by heading", () => {

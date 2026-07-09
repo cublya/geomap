@@ -1,7 +1,7 @@
 {
   "name": "@cublya/geomap",
-  "version": "0.0.1-beta-2",
-  "description": "Composable React map primitives on d3-geo: country choropleths, globes, markers, great-circle routes, live objects and camera control.",
+  "version": "0.0.1-beta.3",
+  "description": "Composable React map primitives on d3-geo: SVG/Canvas country choropleths, globes, markers, great-circle routes, live objects and camera control.",
   "license": "MIT",
   "type": "module",
   "sideEffects": false,
@@ -96,7 +96,8 @@
     "topojson",
     "geojson",
     "great-circle",
-    "svg"
+    "svg",
+    "canvas"
   ],
   "repository": {
     "type": "git",

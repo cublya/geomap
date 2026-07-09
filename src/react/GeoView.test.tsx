@@ -30,6 +30,17 @@ describe("GeoView", () => {
     expect(screen.getByRole("radio", { name: "Globe" })).toBeTruthy();
   });
 
+  it("forwards renderer='canvas' to both surfaces", () => {
+    const { container } = render(
+      <GeoView renderer="canvas" preset="light" countries={{ data: world }} />,
+    );
+    expect(container.querySelector("canvas.geomap-map")).toBeTruthy();
+    expect(container.querySelector("svg.geomap-map")).toBeNull();
+    fireEvent.click(screen.getByRole("radio", { name: "Globe" }));
+    expect(container.querySelector("canvas.geomap-globe")).toBeTruthy();
+    expect(container.querySelector("svg.geomap-globe")).toBeNull();
+  });
+
   it("honors defaultMode='globe' and shows the sphere", () => {
     const { container } = render(
       <GeoView preset="light" defaultMode="globe" countries={{ data: world }} />,

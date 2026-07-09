@@ -10,12 +10,12 @@ export interface ViewBoxSize {
  * preserveAspectRatio="xMidYMid meet" (the components' default).
  */
 export function clientToViewBox(
-  svg: SVGSVGElement,
+  element: Element,
   viewBox: ViewBoxSize,
   clientX: number,
   clientY: number,
 ): [number, number] {
-  const rect = svg.getBoundingClientRect();
+  const rect = element.getBoundingClientRect();
   if (rect.width === 0 || rect.height === 0) return [0, 0];
   const scale = Math.min(rect.width / viewBox.width, rect.height / viewBox.height);
   const offsetX = (rect.width - viewBox.width * scale) / 2;
@@ -57,7 +57,7 @@ interface TrackedPointer {
  * non-passive wheel zoom.
  */
 export function usePointerGestures(
-  svgRef: RefObject<SVGSVGElement | null>,
+  elementRef: RefObject<HTMLElement | SVGSVGElement | null>,
   { enabled, wheelZoom, viewBox, handlers, isDraggingRef }: PointerGestureOptions,
 ): void {
   // Keep latest values readable from stable listeners without re-binding.
@@ -67,8 +67,8 @@ export function usePointerGestures(
   });
 
   useEffect(() => {
-    const svg = svgRef.current;
-    if (!svg) return;
+    const element = elementRef.current;
+    if (!element) return;
 
     const pointers = new Map<number, TrackedPointer>();
     let dragging = false;
@@ -78,7 +78,7 @@ export function usePointerGestures(
     let pinchDistance = 0;
 
     const vbScale = () => {
-      const rect = svg.getBoundingClientRect();
+      const rect = element.getBoundingClientRect();
       if (rect.width === 0 || rect.height === 0) return 1;
       const { viewBox: vb } = stateRef.current;
       return Math.min(rect.width / vb.width, rect.height / vb.height);
@@ -108,7 +108,7 @@ export function usePointerGestures(
         const distance = Math.hypot(a!.clientX - b!.clientX, a!.clientY - b!.clientY);
         if (pinchDistance > 0 && distance > 0) {
           const mid = clientToViewBox(
-            svg,
+            element,
             stateRef.current.viewBox,
             (a!.clientX + b!.clientX) / 2,
             (a!.clientY + b!.clientY) / 2,
@@ -128,7 +128,7 @@ export function usePointerGestures(
         // its synthetic click to the country/marker underneath.
         dragging = true;
         isDraggingRef.current = true;
-        svg.setPointerCapture(e.pointerId);
+        element.setPointerCapture(e.pointerId);
       }
       tracked.clientX = e.clientX;
       tracked.clientY = e.clientY;
@@ -157,22 +157,22 @@ export function usePointerGestures(
       if (!on || !wheelOn || !h.onZoomAt) return;
       e.preventDefault();
       const factor = e.deltaY < 0 ? WHEEL_STEP : 1 / WHEEL_STEP;
-      h.onZoomAt(factor, clientToViewBox(svg, vb, e.clientX, e.clientY));
+      h.onZoomAt(factor, clientToViewBox(element, vb, e.clientX, e.clientY));
     };
 
-    svg.addEventListener("pointerdown", onPointerDown);
-    svg.addEventListener("pointermove", onPointerMove);
-    svg.addEventListener("pointerup", endPointer);
-    svg.addEventListener("pointercancel", endPointer);
+    element.addEventListener("pointerdown", onPointerDown as EventListener);
+    element.addEventListener("pointermove", onPointerMove as EventListener);
+    element.addEventListener("pointerup", endPointer as EventListener);
+    element.addEventListener("pointercancel", endPointer as EventListener);
     // Native listener: React registers wheel as passive, which blocks preventDefault.
-    svg.addEventListener("wheel", onWheel, { passive: false });
+    element.addEventListener("wheel", onWheel as EventListener, { passive: false });
 
     return () => {
-      svg.removeEventListener("pointerdown", onPointerDown);
-      svg.removeEventListener("pointermove", onPointerMove);
-      svg.removeEventListener("pointerup", endPointer);
-      svg.removeEventListener("pointercancel", endPointer);
-      svg.removeEventListener("wheel", onWheel);
+      element.removeEventListener("pointerdown", onPointerDown as EventListener);
+      element.removeEventListener("pointermove", onPointerMove as EventListener);
+      element.removeEventListener("pointerup", endPointer as EventListener);
+      element.removeEventListener("pointercancel", endPointer as EventListener);
+      element.removeEventListener("wheel", onWheel as EventListener);
     };
-  }, [svgRef, isDraggingRef]);
+  }, [elementRef, isDraggingRef]);
 }

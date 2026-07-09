@@ -49,6 +49,15 @@ export interface GeoControlsIcons {
   fullscreenExit?: React.ReactNode;
 }
 
+export type GeoControlKey = "zoomIn" | "zoomOut" | "reset" | "fullscreen";
+
+export interface GeoControlButtonSlot {
+  key: GeoControlKey;
+  part: "zoom-in" | "zoom-out" | "reset" | "fullscreen";
+  label: string;
+  button: React.ReactElement<React.ButtonHTMLAttributes<HTMLButtonElement>>;
+}
+
 /** Which surface {@link GeoViewToggle} / `<GeoView>` is showing. */
 export const GeoViewMode = {
   Map: "map",
@@ -108,6 +117,18 @@ export interface GeoControlsProps {
    * unset slot keeps the default icon. See {@link GeoControlsIcons}.
    */
   icons?: GeoControlsIcons;
+  /**
+   * Wrap each rendered button, for example with a design-system tooltip trigger.
+   * The provided `button` is the real control button with behavior, labels, and
+   * state already wired.
+   */
+  wrapButton?: (slot: GeoControlButtonSlot) => React.ReactNode;
+  /**
+   * Mirror each accessible label into a native browser title. Defaults to `true`
+   * unless `wrapButton` is provided, where it defaults to `false` to avoid
+   * duplicate browser and design-system tooltips.
+   */
+  nativeTitle?: boolean;
   /** Convenience alias for `classNames.root`; both are applied. */
   className?: string;
   style?: React.CSSProperties;
@@ -120,7 +141,6 @@ export interface GeoControlsProps {
   };
 }
 
-type Key = "zoomIn" | "zoomOut" | "reset" | "fullscreen";
 type IconKind =
   | "zoomIn"
   | "zoomOut"
@@ -196,6 +216,8 @@ export function GeoControls({
   fullscreen,
   classNames,
   icons,
+  wrapButton,
+  nativeTitle,
   className,
   style,
   labels,
@@ -204,6 +226,7 @@ export function GeoControls({
   const horizontal = orientation === "horizontal";
   const segmented = layout === "segmented";
   const border = t.controlBorder ?? "transparent";
+  const showNativeTitle = nativeTitle ?? !wrapButton;
 
   const [isFullscreen, setIsFullscreen] = React.useState(false);
   const resolveFullscreenTarget = React.useCallback((): HTMLElement | null => {
@@ -235,8 +258,8 @@ export function GeoControls({
   }, [resolveFullscreenTarget]);
 
   const buttons: Array<{
-    key: Key;
-    part: string;
+    key: GeoControlKey;
+    part: GeoControlButtonSlot["part"];
     label: string;
     icon: IconKind;
     action: () => void;
@@ -323,13 +346,12 @@ export function GeoControls({
                 boxShadow: CONTROL_SHADOW,
               };
         }
-        return (
+        const button = (
           <button
-            key={key}
             type="button"
             aria-label={label}
             aria-pressed={pressed}
-            title={label}
+            title={showNativeTitle ? label : undefined}
             data-geomap-part={part}
             data-geomap-fullscreen={key === "fullscreen" ? (pressed ? "on" : "off") : undefined}
             className={cx("geomap-controls__button", classNames?.button, classNames?.[key])}
@@ -338,6 +360,11 @@ export function GeoControls({
           >
             {icons?.[icon as keyof GeoControlsIcons] ?? <Icon kind={icon} />}
           </button>
+        );
+        return (
+          <React.Fragment key={key}>
+            {wrapButton ? wrapButton({ key, part, label, button }) : button}
+          </React.Fragment>
         );
       })}
     </div>
@@ -362,6 +389,14 @@ export interface GeoViewToggleIcons {
   globe?: React.ReactNode;
 }
 
+export interface GeoViewToggleOptionSlot {
+  mode: GeoViewMode;
+  part: "view-toggle-map" | "view-toggle-globe";
+  label: string;
+  active: boolean;
+  option: React.ReactElement<React.ButtonHTMLAttributes<HTMLButtonElement>>;
+}
+
 export interface GeoViewToggleProps {
   /** The surface currently shown. */
   mode: GeoViewMode;
@@ -378,6 +413,18 @@ export interface GeoViewToggleProps {
   className?: string;
   /** Replace the built-in map/globe glyphs with your own nodes. */
   icons?: GeoViewToggleIcons;
+  /**
+   * Wrap each rendered option, for example with a design-system tooltip trigger.
+   * The provided `option` is the real radio button with behavior, labels, and
+   * active state already wired.
+   */
+  wrapOption?: (slot: GeoViewToggleOptionSlot) => React.ReactNode;
+  /**
+   * Mirror each accessible label into a native browser title. Defaults to `true`
+   * unless `wrapOption` is provided, where it defaults to `false` to avoid
+   * duplicate browser and design-system tooltips.
+   */
+  nativeTitle?: boolean;
   style?: React.CSSProperties;
   labels?: { map?: string; globe?: string };
 }
@@ -403,12 +450,15 @@ export function GeoViewToggle({
   classNames,
   className,
   icons,
+  wrapOption,
+  nativeTitle,
   style,
   labels,
 }: GeoViewToggleProps) {
   const { t, styled } = useControlSurface(preset, palette, theme);
   const horizontal = orientation === "horizontal";
   const border = t.controlBorder ?? "transparent";
+  const showNativeTitle = nativeTitle ?? !wrapOption;
 
   const options: Array<{ id: GeoViewMode; label: string; icon: IconKind; slot?: string }> = [
     { id: GeoViewMode.Map, label: labels?.map ?? "Flat map", icon: "map", slot: classNames?.map },
@@ -442,6 +492,7 @@ export function GeoViewToggle({
     >
       {options.map(({ id, label, icon, slot }) => {
         const active = id === mode;
+        const part = `view-toggle-${id}` as GeoViewToggleOptionSlot["part"];
         let optionStyle: React.CSSProperties | undefined;
         if (styled) {
           optionStyle = {
@@ -462,15 +513,14 @@ export function GeoViewToggle({
             ...(active && { boxShadow: `inset 0 0 0 1px ${border}` }),
           };
         }
-        return (
+        const option = (
           <button
-            key={id}
             type="button"
             role="radio"
             aria-checked={active}
             aria-label={label}
-            title={label}
-            data-geomap-part={`view-toggle-${id}`}
+            title={showNativeTitle ? label : undefined}
+            data-geomap-part={part}
             data-geomap-active={active ? "" : undefined}
             className={cx("geomap-view-toggle__option", classNames?.option, slot)}
             onClick={() => onModeChange(id)}
@@ -478,6 +528,11 @@ export function GeoViewToggle({
           >
             {icons?.[id] ?? <Icon kind={icon} />}
           </button>
+        );
+        return (
+          <React.Fragment key={id}>
+            {wrapOption ? wrapOption({ mode: id, part, label, active, option }) : option}
+          </React.Fragment>
         );
       })}
     </div>

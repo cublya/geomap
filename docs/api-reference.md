@@ -8,7 +8,8 @@ truth.
 
 ### `GeoMap`
 
-Renders an interactive flat SVG map.
+Renders an interactive flat map. SVG is the default renderer; pass
+`renderer="canvas"` for a Canvas-backed surface.
 
 | Prop | Type | Default | Notes |
 | --- | --- | --- | --- |
@@ -28,7 +29,8 @@ Renders an interactive flat SVG map.
 | `preset` | `GeoPreset` | `none` | `none`, `light`, or `dark` |
 | `palette` | `GeoPalette` | `filled` | `filled` or `minimal` |
 | `theme` | `Partial<GeoTheme>` | - | Token overrides |
-| `width`, `height` | `number` | `960`, `500` | SVG viewBox dimensions |
+| `width`, `height` | `number` | `960`, `500` | Internal coordinate system |
+| `renderer` | `GeoRenderer` | `svg` | `svg` or `canvas` |
 | `aria-label` | `string` | `Interactive map` | Use a data-specific label |
 | `children` | `ReactNode` | - | Custom projected SVG layers |
 
@@ -38,7 +40,7 @@ replace the default marker; context contains projected `position` and
 
 ### `GeoGlobe`
 
-Renders an orthographic SVG globe. Shared layer, styling, interaction, size, and
+Renders an orthographic globe. Shared layer, styling, interaction, renderer, size, and
 children props match `GeoMap`. Globe-specific props are:
 
 | Prop | Type | Default | Notes |
@@ -66,6 +68,7 @@ Important props:
 - `controls`: `true`, `false`, or partial `GeoControlsProps`.
 - `projection*` applies only to map mode; `inertia` and `autoRotate` apply only
   to globe mode.
+- `renderer` applies to whichever surface is active.
 
 The wrapper fills its containing block and is positioned relative for overlays.
 
@@ -88,7 +91,9 @@ The wrapper fills its containing block and is positioned relative for overlays.
 | `nativeTitle` | Controls native SVG title emission |
 
 `CountriesLayer`, `MarkersLayer`, `RoutesLayer`, `LiveLayer`, and
-`GraticuleLayer` are also exported for custom composition inside `GeoProvider`.
+`GraticuleLayer` are also exported for custom SVG composition inside
+`GeoProvider`. In Canvas mode, custom React layers and custom marker/live
+renderers are mounted in a projected SVG overlay.
 
 ## Optional UI
 
@@ -98,12 +103,15 @@ Accepts any `CameraControlsHandle` with `zoomIn`, `zoomOut`, and `reset` methods
 `orientation` is vertical or horizontal. `layout` is separate (default) or
 segmented. `fullscreen` accepts an element, ref, or element getter. `classNames`,
 `icons`, and `labels` customize each part without replacing behavior.
+`wrapButton` can wrap each rendered button with a design-system tooltip trigger;
+`nativeTitle` controls browser title tooltips.
 
 ### `GeoViewToggle`
 
 A controlled `map | globe` radiogroup. Pass `mode` and `onModeChange`. It supports
 the same preset/palette/theme model, per-part class names, custom icons, and
-localized labels.
+localized labels. `wrapOption` can wrap each rendered option with a
+design-system tooltip trigger; `nativeTitle` controls browser title tooltips.
 
 ### `GeoTooltip`
 

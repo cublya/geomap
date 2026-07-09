@@ -3,7 +3,8 @@ import { FlatProjectionKind } from "../types";
 import type { CountrySet, GeoMarker, GeoRoute, PreparedCountry } from "../types";
 import { toLonLat } from "../core/coords";
 import { routeLineString } from "../core/routes";
-import { resolveLandShadow, resolveOutline, type Outline } from "../core/outline";
+import { resolveLandShadow, type Outline } from "../core/outline";
+import { resolveCountryStyle } from "../core/country-style";
 import { MARKER_DEFAULTS, ROUTE_DEFAULTS } from "../core/overlay-defaults";
 import {
   createFlatProjection,
@@ -111,11 +112,9 @@ export function renderStaticMapSvg(options: StaticMapOptions): string {
     for (const country of countries.data.countries) {
       const d = path(country.feature);
       if (!d) continue;
-      const fill = countries.fill
-        ? (countries.fill(country) ?? theme.landMuted)
-        : theme.land;
-      const o = resolveOutline(
-        typeof outline === "function" ? outline(country) : outline,
+      const { fill, outline: o } = resolveCountryStyle(
+        country,
+        { fill: countries.fill, outline },
         theme,
       );
       const strokeAttrs =

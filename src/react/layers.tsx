@@ -14,8 +14,14 @@ import {
   toLonLat,
 } from "../core/coords";
 import { routeLineString } from "../core/routes";
-import { resolveOutline } from "../core/outline";
-import { MARKER_DEFAULTS, ROUTE_DEFAULTS } from "../core/overlay-defaults";
+import { resolveCountryStyle, resolveSelectedOutline } from "../core/country-style";
+import {
+  LIVE_DEFAULTS,
+  LIVE_GLYPH_D,
+  MARKER_DEFAULTS,
+  PATTERN_DEFAULTS,
+  ROUTE_DEFAULTS,
+} from "../core/overlay-defaults";
 import { useGeo } from "./geo-context";
 import { usePrefersReducedMotion } from "./use-reduced-motion";
 
@@ -27,15 +33,32 @@ export function PatternDefs() {
     <defs>
       <pattern
         id={patternIds.hatch}
-        width={6}
-        height={6}
+        width={PATTERN_DEFAULTS.hatch.spacing}
+        height={PATTERN_DEFAULTS.hatch.spacing}
         patternUnits="userSpaceOnUse"
         patternTransform="rotate(45)"
       >
-        <line x1={0} y1={0} x2={0} y2={6} stroke={theme.patternInk} strokeWidth={1.4} />
+        <line
+          x1={0}
+          y1={0}
+          x2={0}
+          y2={PATTERN_DEFAULTS.hatch.spacing}
+          stroke={theme.patternInk}
+          strokeWidth={PATTERN_DEFAULTS.hatch.strokeWidth}
+        />
       </pattern>
-      <pattern id={patternIds.dots} width={7} height={7} patternUnits="userSpaceOnUse">
-        <circle cx={2} cy={2} r={1.1} fill={theme.patternInk} />
+      <pattern
+        id={patternIds.dots}
+        width={PATTERN_DEFAULTS.dots.spacing}
+        height={PATTERN_DEFAULTS.dots.spacing}
+        patternUnits="userSpaceOnUse"
+      >
+        <circle
+          cx={PATTERN_DEFAULTS.dots.offset}
+          cy={PATTERN_DEFAULTS.dots.offset}
+          r={PATTERN_DEFAULTS.dots.radius}
+          fill={theme.patternInk}
+        />
       </pattern>
       {landFilterId && landShadow && (
         // Soft drop shadow that lifts the whole landmass silhouette off the
@@ -128,17 +151,12 @@ export function CountriesLayer({
     >
       {shapes.map(({ country, d }) => {
         const isSelected = selectedId != null && country.id === selectedId;
-        const isDisabled = disabled?.(country) ?? false;
-        const resolvedFill = isDisabled
-          ? theme.landDisabled
-          : fill
-            ? (fill(country) ?? theme.landMuted)
-            : theme.land;
-        const o = resolveOutline(
-          typeof outline === "function" ? outline(country) : outline,
-          theme,
-        );
-        const patternKind = isDisabled ? undefined : pattern?.(country);
+        const {
+          isDisabled,
+          fill: resolvedFill,
+          outline: o,
+          pattern: patternKind,
+        } = resolveCountryStyle(country, { fill, outline, disabled, pattern }, theme);
         const hoverable = interactive && !isDisabled;
         return (
           <React.Fragment key={country.id}>
@@ -229,10 +247,7 @@ export function CountriesLayer({
         shapes
           .filter(({ country }) => country.id === selectedId)
           .map(({ country, d }) => {
-            const so = resolveOutline(
-              selectedOutline ?? { color: theme.selectedStroke, width: 1.2 },
-              theme,
-            );
+            const so = resolveSelectedOutline(selectedOutline, theme);
             return (
               <path
                 key={`${country.id}-selected`}
@@ -521,7 +536,7 @@ export function LiveLayer<T>({
                     d={trailD}
                     fill="none"
                     stroke={theme.halo}
-                    strokeWidth={2.5}
+                    strokeWidth={LIVE_DEFAULTS.trailCasingWidth}
                     vectorEffect="non-scaling-stroke"
                     pointerEvents="none"
                   />
@@ -531,8 +546,8 @@ export function LiveLayer<T>({
                   d={trailD}
                   fill="none"
                   stroke={object.color ?? theme.trail}
-                  strokeWidth={1}
-                  strokeOpacity={0.6}
+                  strokeWidth={LIVE_DEFAULTS.trailWidth}
+                  strokeOpacity={LIVE_DEFAULTS.trailOpacity}
                   vectorEffect="non-scaling-stroke"
                   pointerEvents="none"
                 />
@@ -550,10 +565,10 @@ export function LiveLayer<T>({
                         A halo casing keeps it legible on dark land. */}
                     <path
                       className="geomap-live-icon"
-                      d="M0,-7 L4.2,6 L0,3.2 L-4.2,6 Z"
+                      d={LIVE_GLYPH_D}
                       fill={color}
                       stroke={theme.halo}
-                      strokeWidth={theme.halo ? 1.6 : undefined}
+                      strokeWidth={theme.halo ? LIVE_DEFAULTS.haloWidth : undefined}
                       paintOrder="stroke"
                       strokeLinejoin="round"
                     />

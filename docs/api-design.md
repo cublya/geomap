@@ -21,9 +21,9 @@ rules, basemap files or copy. Everything is exported from the package root, ESM-
 └──────────────────────────────────────────────────────────┘
 ```
 
-The core layer is plain TypeScript over d3-geo, usable from Node, workers, or a
-future Canvas renderer. React components only consume serializable outputs (path
-strings, projected points), following a geometry/component split.
+The core layer is plain TypeScript over d3-geo, usable from Node, workers, SVG,
+or Canvas. React components consume serializable geometry outputs (path strings,
+projected points) plus projections that can stream directly into Canvas.
 
 ## Coordinates
 
@@ -175,7 +175,7 @@ globe.zoomIn/zoomOut/zoomTo/reset/set
 ```
 
 Hooks wrap framework-free `createMapCamera()` / `createGlobeCamera()` stores
-(subscribe/getSnapshot), so the same cameras will drive the future Canvas renderer.
+(subscribe/getSnapshot), so the same cameras drive both SVG and Canvas renderers.
 Passing no `camera` prop gives an internal uncontrolled camera; `fit` still works.
 All tweens and inertia check `prefers-reduced-motion` at start and jump instead.
 
@@ -308,12 +308,12 @@ a WYSIWYG share pipeline; the PNG step uses Image + canvas and is browser-only.
 `interpolateGreatCircle(a, b, t)`, `bearingBetween(a, b)`, `haversineKm(a, b)`,
 `geographicBounds(coords)`, plus the animation primitives `tween()` and easing.
 
-## Future: Canvas escape hatch
+## Browser renderers
 
-Reserved, not implemented: a `renderer="canvas"` prop on both components. The
-contract that makes it cheap later: core produces only data (path strings via
-`geoPath` can target a Canvas context directly), cameras are store objects, and
-custom SVG layers are the single explicitly SVG-only feature.
+`GeoMap`, `GeoGlobe`, and `GeoView` accept `renderer="svg" | "canvas"`.
+SVG is the default and keeps all paths inspectable/styleable in the DOM. Canvas
+uses the same projections, cameras, gestures, and built-in layers; custom React
+layers and custom marker/live renderers mount in a projected SVG overlay.
 
 ## Non-goals
 

@@ -3,6 +3,7 @@ import { geoDistance, geoPath } from "d3-geo";
 import type {
   CountriesLayerProps,
   Coordinate,
+  GeoRenderer,
   GeoMarker,
   GeoRoute,
   LonLat,
@@ -33,6 +34,7 @@ import {
   type LiveLayerComponentProps,
   type MarkersLayerProps,
 } from "./layers";
+import { CanvasRenderer } from "./canvas-renderer";
 
 export interface GeoGlobeProps<TMarker = unknown, TRoute = unknown, TLive = unknown> {
   countries?: CountriesLayerProps;
@@ -61,6 +63,8 @@ export interface GeoGlobeProps<TMarker = unknown, TRoute = unknown, TLive = unkn
   theme?: Partial<GeoTheme>;
   width?: number;
   height?: number;
+  /** Rendering backend. SVG is the default; Canvas is useful for denser scenes. */
+  renderer?: GeoRenderer;
   className?: string;
   style?: React.CSSProperties;
   "aria-label"?: string;
@@ -105,12 +109,14 @@ export function GeoGlobe<TMarker = unknown, TRoute = unknown, TLive = unknown>({
   theme: themeInput,
   width = 960,
   height = 540,
+  renderer = "svg",
   className,
   style,
   "aria-label": ariaLabel = "Interactive globe",
   children,
 }: GeoGlobeProps<TMarker, TRoute, TLive>) {
   const svgRef = React.useRef<SVGSVGElement>(null);
+  const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const isDraggingRef = React.useRef(false);
   const patternBase = React.useId();
   const reducedMotion = usePrefersReducedMotion();
@@ -160,7 +166,7 @@ export function GeoGlobe<TMarker = unknown, TRoute = unknown, TLive = unknown>({
 
   const degPerPixel = 180 / (Math.PI * globe.baseScale * zoom);
 
-  usePointerGestures(svgRef, {
+  usePointerGestures(renderer === "canvas" ? canvasRef : svgRef, {
     enabled: interactive,
     wheelZoom,
     viewBox: { width, height },
@@ -192,7 +198,7 @@ export function GeoGlobe<TMarker = unknown, TRoute = unknown, TLive = unknown>({
     return () => cancelAnimationFrame(frame);
   }, [autoRotate, reducedMotion, camera]);
 
-  const onKeyDown = (e: React.KeyboardEvent<SVGSVGElement>) => {
+  const onKeyDown = (e: React.KeyboardEvent<SVGSVGElement | HTMLCanvasElement>) => {
     if (!interactive || !keyboard) return;
     switch (e.key) {
       case "ArrowLeft":
@@ -266,6 +272,39 @@ export function GeoGlobe<TMarker = unknown, TRoute = unknown, TLive = unknown>({
   );
 
   const sphereD = path({ type: "Sphere" }) ?? undefined;
+
+  if (renderer === "canvas") {
+    return (
+      <CanvasRenderer
+        mode="globe"
+        canvasRef={canvasRef}
+        context={context}
+        projection={projection}
+        path={path}
+        width={width}
+        height={height}
+        sphereD={sphereD}
+        countries={countries}
+        markers={markers}
+        onMarkerClick={onMarkerClick}
+        renderMarker={renderMarker}
+        routes={routes}
+        live={live}
+        graticule={graticule}
+        className={cx("geomap", "geomap-globe", className)}
+        style={style}
+        ariaLabel={ariaLabel}
+        interactive={interactive}
+        keyboard={keyboard}
+        focusVisible={focusVisible}
+        onKeyDown={onKeyDown}
+        onFocus={onFocus}
+        onBlur={onBlur}
+      >
+        {children}
+      </CanvasRenderer>
+    );
+  }
 
   return (
     <svg

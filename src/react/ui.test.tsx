@@ -81,6 +81,26 @@ describe("GeoControls", () => {
     expect(screen.getByRole("button", { name: "Bigger" }).getAttribute("title")).toBe("Bigger");
   });
 
+  it("wraps each button for custom tooltip systems", () => {
+    const camera = createMapCamera();
+    render(
+      <GeoControls
+        camera={camera}
+        labels={{ zoomIn: "Bigger" }}
+        wrapButton={({ button, label, part }) => (
+          <span data-label={label} data-part={part}>
+            {button}
+          </span>
+        )}
+      />,
+    );
+
+    const zoomIn = screen.getByRole("button", { name: "Bigger" });
+    expect(zoomIn.getAttribute("title")).toBeNull();
+    expect(zoomIn.parentElement?.getAttribute("data-label")).toBe("Bigger");
+    expect(zoomIn.parentElement?.getAttribute("data-part")).toBe("zoom-in");
+  });
+
   it("applies per-part classNames (Tailwind seam) after the base classes", () => {
     const camera = createMapCamera();
     render(
@@ -210,6 +230,31 @@ describe("GeoViewToggle", () => {
     expect(
       screen.getByRole("radio", { name: "Flat map" }).querySelector("[data-testid='my-map']"),
     ).toBeTruthy();
+  });
+
+  it("wraps each option for custom tooltip systems", () => {
+    render(
+      <GeoViewToggle
+        mode="map"
+        onModeChange={() => {}}
+        labels={{ globe: "3D" }}
+        wrapOption={({ option, label, active, part }) => (
+          <span
+            data-label={label}
+            data-active={active ? "yes" : "no"}
+            data-part={part}
+          >
+            {option}
+          </span>
+        )}
+      />,
+    );
+
+    const globe = screen.getByRole("radio", { name: "3D" });
+    expect(globe.getAttribute("title")).toBeNull();
+    expect(globe.parentElement?.getAttribute("data-label")).toBe("3D");
+    expect(globe.parentElement?.getAttribute("data-active")).toBe("no");
+    expect(globe.parentElement?.getAttribute("data-part")).toBe("view-toggle-globe");
   });
 
   it("applies per-part classNames after the base classes", () => {
