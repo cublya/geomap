@@ -205,6 +205,5 @@ must preserve XML escaping.
 - Prefer 50m/110m geometry for small widgets.
 - Avoid expensive scale computation inside per-country callbacks.
 - Use the Performance Storybook story and a production build for profiling.
-- Consider a dedicated aggregation or future Canvas path for thousands of
-  rapidly changing objects; SVG remains the deliberate renderer today.
-
+- Use `renderer="canvas"` for denser scenes with many rapidly changing built-in
+  objects; keep SVG when DOM inspection and CSS styling matter more.

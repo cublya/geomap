@@ -4,6 +4,7 @@ import { FlatProjectionKind } from "../types";
 import type {
   CountriesLayerProps,
   Coordinate,
+  GeoRenderer,
   GeoMarker,
   GeoRoute,
 } from "../types";
@@ -42,6 +43,7 @@ import {
   type LiveLayerComponentProps,
   type MarkersLayerProps,
 } from "./layers";
+import { CanvasRenderer } from "./canvas-renderer";
 
 export interface GeoMapProps<TMarker = unknown, TRoute = unknown, TLive = unknown> {
   countries?: CountriesLayerProps;
@@ -72,6 +74,8 @@ export interface GeoMapProps<TMarker = unknown, TRoute = unknown, TLive = unknow
   /** viewBox size; the SVG itself fills its container. */
   width?: number;
   height?: number;
+  /** Rendering backend. SVG is the default; Canvas is useful for denser scenes. */
+  renderer?: GeoRenderer;
   className?: string;
   style?: React.CSSProperties;
   "aria-label"?: string;
@@ -101,12 +105,14 @@ export function GeoMap<TMarker = unknown, TRoute = unknown, TLive = unknown>({
   theme: themeInput,
   width = 960,
   height = 500,
+  renderer = "svg",
   className,
   style,
   "aria-label": ariaLabel = "Interactive map",
   children,
 }: GeoMapProps<TMarker, TRoute, TLive>) {
   const svgRef = React.useRef<SVGSVGElement>(null);
+  const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const isDraggingRef = React.useRef(false);
   const patternBase = React.useId();
 
@@ -146,7 +152,7 @@ export function GeoMap<TMarker = unknown, TRoute = unknown, TLive = unknown>({
       camera.fitTo(fitRef.current, { curve: fitCurveRef.current });
   }, [currentFitKey, camera]);
 
-  usePointerGestures(svgRef, {
+  usePointerGestures(renderer === "canvas" ? canvasRef : svgRef, {
     enabled: interactive,
     wheelZoom,
     viewBox: { width, height },
@@ -158,7 +164,7 @@ export function GeoMap<TMarker = unknown, TRoute = unknown, TLive = unknown>({
     },
   });
 
-  const onKeyDown = (e: React.KeyboardEvent<SVGSVGElement>) => {
+  const onKeyDown = (e: React.KeyboardEvent<SVGSVGElement | HTMLCanvasElement>) => {
     if (!interactive || !keyboard) return;
     switch (e.key) {
       case "ArrowLeft":
@@ -227,6 +233,49 @@ export function GeoMap<TMarker = unknown, TRoute = unknown, TLive = unknown>({
   const projectedCenter = projection(view.center) ?? [width / 2, height / 2];
   const tx = width / 2 - view.zoom * projectedCenter[0];
   const ty = height / 2 - view.zoom * projectedCenter[1];
+
+  // Stable identity so the canvas only repaints when the transform actually
+  // changes, not on every unrelated parent render.
+  const mapTransform = React.useMemo(
+    () => ({ tx, ty, zoom: view.zoom }),
+    [tx, ty, view.zoom],
+  );
+
+  if (renderer === "canvas") {
+    return (
+      <CanvasRenderer
+        mode="map"
+        canvasRef={canvasRef}
+        context={context}
+        projection={projection}
+        path={path}
+        width={width}
+        height={height}
+        mapTransform={mapTransform}
+        countries={countries}
+        markers={markers}
+        onMarkerClick={onMarkerClick}
+        renderMarker={renderMarker}
+        routes={routes}
+        live={live}
+        graticule={graticule}
+        className={cx("geomap", "geomap-map", className)}
+        style={{
+          background: theme.ocean,
+          ...style,
+        }}
+        ariaLabel={ariaLabel}
+        interactive={interactive}
+        keyboard={keyboard}
+        focusVisible={focusVisible}
+        onKeyDown={onKeyDown}
+        onFocus={onFocus}
+        onBlur={onBlur}
+      >
+        {children}
+      </CanvasRenderer>
+    );
+  }
 
   return (
     <svg

@@ -10,7 +10,7 @@
 Composable React map primitives on [d3-geo](https://github.com/d3/d3-geo): country
 choropleths with real ISO identity, rotatable orthographic globes, markers,
 great-circle routes, animated live objects, and a camera with fit / focus / fly-to
-(all SVG, all tree-shakeable, no basemap or product data bundled).
+(SVG by default, optional Canvas, all tree-shakeable, no basemap or product data bundled).
 
 Built to subsume the hand-rolled maps in several Cublya apps.
 
@@ -88,6 +88,11 @@ import { GeoView } from "@cublya/geomap";
 
 Use `<GeoViewToggle mode onModeChange />` standalone to drive your own swap, and
 `toggle={false}` / `controls={false}` on `GeoView` to drop either overlay.
+
+Choose the browser renderer with `renderer="svg"` (default) or
+`renderer="canvas"`. SVG is inspectable and CSS-styleable; Canvas is useful for
+denser scenes while preserving the same cameras, gestures, country callbacks,
+and built-in layers. Custom React layers render in an SVG overlay in Canvas mode.
 
 ## Country data and ISO identity
 
@@ -310,6 +315,33 @@ import { Plus, Minus, Map, Globe } from "lucide-react";
 <GeoViewToggle mode={mode} onModeChange={setMode} icons={{ map: <Map size={15} />, globe: <Globe size={15} /> }} />
 ```
 
+Use `wrapButton` / `wrapOption` when your app has a tooltip system such as
+Radix/shadcn. The slot receives the real control element, already wired with
+behavior and labels:
+
+```tsx
+<GeoControls
+  camera={camera}
+  wrapButton={({ button, label }) => (
+    <Tooltip>
+      <TooltipTrigger asChild>{button}</TooltipTrigger>
+      <TooltipContent side="left">{label}</TooltipContent>
+    </Tooltip>
+  )}
+/>
+
+<GeoViewToggle
+  mode={mode}
+  onModeChange={setMode}
+  wrapOption={({ option, label }) => (
+    <Tooltip>
+      <TooltipTrigger asChild>{option}</TooltipTrigger>
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
+  )}
+/>
+```
+
 ## Interaction & accessibility
 
 Pointer events unify mouse/touch/pen: drag pans or rotates (deferred capture keeps
@@ -347,8 +379,8 @@ the components are built from is exported for advanced composition. Full surface
 
 No product data, no fetching, no tooltip/legend UI (you get hover data and scale
 helpers; popovers are yours), no bundled basemap, no border politics
-(`patchFeatures` is the hook for editorial geometry). A Canvas renderer is a
-planned escape hatch; the core emits only data, so the API won't change.
+(`patchFeatures` is the hook for editorial geometry). Static export remains
+SVG-first; PNG export rasterizes that SVG in the browser.
 
 ## Storybook
 

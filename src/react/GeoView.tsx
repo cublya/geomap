@@ -1,5 +1,5 @@
 import * as React from "react";
-import type { CountriesLayerProps, GeoMarker, GeoRoute } from "../types";
+import type { CountriesLayerProps, GeoMarker, GeoRenderer, GeoRoute } from "../types";
 import { createMapCamera, type FitTarget, type MapCamera } from "../core/camera-map";
 import { createGlobeCamera, type GlobeCamera } from "../core/camera-globe";
 import type { FlatProjectionOptions, ProjectionInput } from "../core/projections";
@@ -67,6 +67,8 @@ export interface GeoViewProps<TMarker = unknown, TRoute = unknown, TLive = unkno
   theme?: Partial<GeoTheme>;
   width?: number;
   height?: number;
+  /** Rendering backend for the active surface. Defaults to SVG. */
+  renderer?: GeoRenderer;
   /**
    * The overlaid map⇄globe {@link GeoViewToggle}. `true` (default) renders the
    * segmented switch top-left matching the preset; pass a partial
@@ -124,6 +126,7 @@ export function GeoView<TMarker = unknown, TRoute = unknown, TLive = unknown>({
   theme,
   width,
   height,
+  renderer,
   toggle = true,
   controls = true,
   className,
@@ -204,6 +207,7 @@ export function GeoView<TMarker = unknown, TRoute = unknown, TLive = unknown>({
           theme={theme}
           width={width}
           height={height}
+          renderer={renderer}
           aria-label={ariaLabel}
         >
           {children}
@@ -229,6 +233,7 @@ export function GeoView<TMarker = unknown, TRoute = unknown, TLive = unknown>({
           theme={theme}
           width={width}
           height={height}
+          renderer={renderer}
           aria-label={ariaLabel}
         >
           {children}

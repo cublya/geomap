@@ -16,6 +16,9 @@ export type GeoBounds = [LonLat, LonLat];
 /** d3 rotation triple: [lambda, phi, gamma] in degrees. */
 export type Rotation = [number, number, number];
 
+/** Rendering backend for browser map/globe components. */
+export type GeoRenderer = "svg" | "canvas";
+
 /**
  * A renderable geographic feature, independent of what it represents. The unit
  * of styling for map layers: countries today, but regions, subregions, or

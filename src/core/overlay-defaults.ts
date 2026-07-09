@@ -25,3 +25,32 @@ export const MARKER_DEFAULTS = {
   /** Label x-offset past the marker radius. */
   labelGap: 3,
 } as const;
+
+export const LIVE_DEFAULTS = {
+  /** Plane glyph outline (nose up), in viewBox units at counterScale 1. */
+  glyph: [
+    [0, -7],
+    [4.2, 6],
+    [0, 3.2],
+    [-4.2, 6],
+  ] as const,
+  /** Halo casing stroke width behind the glyph. */
+  haloWidth: 1.6,
+  /** Halo-colored casing stroke width under the trail. */
+  trailCasingWidth: 2.5,
+  /** Trail stroke width. */
+  trailWidth: 1,
+  /** Trail stroke opacity. */
+  trailOpacity: 0.6,
+} as const;
+
+/** The plane glyph as an SVG path `d` string, derived from {@link LIVE_DEFAULTS}. */
+export const LIVE_GLYPH_D =
+  LIVE_DEFAULTS.glyph.map(([x, y], i) => `${i === 0 ? "M" : "L"}${x},${y}`).join(" ") + " Z";
+
+export const PATTERN_DEFAULTS = {
+  /** Diagonal hatch fill. */
+  hatch: { spacing: 6, strokeWidth: 1.4 },
+  /** Dot-grid fill. */
+  dots: { spacing: 7, radius: 1.1, offset: 2 },
+} as const;

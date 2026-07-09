@@ -5,6 +5,7 @@ import type { Topology } from "topojson-specification";
 import world110 from "@cublya/world-atlas/countries-110m.json";
 import { prepareCountries } from "../core/geodata";
 import { createGlobeCamera } from "../core/camera-globe";
+import { createGlobeProjection, configureGlobe } from "../core/projections";
 import { GeoGlobe } from "./GeoGlobe";
 
 const world = prepareCountries(world110 as unknown as Topology);
@@ -31,6 +32,55 @@ describe("GeoGlobe", () => {
     expect(countryPaths.length).toBeGreaterThan(20);
     // clipAngle(90) drops the far hemisphere, so not every country has a path.
     expect(countryPaths.length).toBeLessThan(world.countries.length);
+  });
+
+  it("renders a Canvas surface when requested", () => {
+    const { container } = render(
+      <GeoGlobe renderer="canvas" countries={{ data: world }} aria-label="Canvas globe" />,
+    );
+    const canvas = screen.getByRole("img", { name: "Canvas globe" });
+    expect(canvas.tagName.toLowerCase()).toBe("canvas");
+    expect(container.querySelector("svg.geomap-globe")).toBeNull();
+  });
+
+  it("culls backface markers from Canvas hit-testing", () => {
+    // Default rotation faces the Atlantic ([-10, -18]); Lisbon is on the front,
+    // Tokyo on the far side. Both raw-project to a finite point on the disc, so
+    // only the isVisible cull keeps a far-side click from registering.
+    const size = { width: 960, height: 540 };
+    const projection = configureGlobe(createGlobeProjection(size), size, [-10, -18, 0], 1);
+    const lisbon = projection([-9.14, 38.72])!;
+    const tokyo = projection([139.69, 35.68])!;
+    const onMarkerClick = vi.fn();
+    render(
+      <GeoGlobe
+        renderer="canvas"
+        markers={[
+          { id: "lis", coordinates: [-9.14, 38.72] },
+          { id: "tyo", coordinates: [139.69, 35.68] },
+        ]}
+        onMarkerClick={onMarkerClick}
+        aria-label="Canvas globe markers"
+      />,
+    );
+    const canvas = screen.getByRole("img", { name: "Canvas globe markers" });
+    vi.spyOn(canvas, "getBoundingClientRect").mockReturnValue({
+      x: 0,
+      y: 0,
+      width: 960,
+      height: 540,
+      top: 0,
+      right: 960,
+      bottom: 540,
+      left: 0,
+      toJSON: () => ({}),
+    });
+    // A click at Tokyo's projected spot must not fire — it's on the backface.
+    fireEvent.click(canvas, { clientX: tokyo[0], clientY: tokyo[1] });
+    expect(onMarkerClick).not.toHaveBeenCalled();
+    // Lisbon, on the near face, does fire.
+    fireEvent.click(canvas, { clientX: lisbon[0], clientY: lisbon[1] });
+    expect(onMarkerClick).toHaveBeenCalledWith(expect.objectContaining({ id: "lis" }));
   });
 
   it("culls markers on the backface", () => {

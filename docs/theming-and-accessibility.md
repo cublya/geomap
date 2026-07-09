@@ -143,8 +143,12 @@ keyboard-reachable control.
 or denied by browser policy, so layout must remain usable without it.
 
 Customize visible and accessible labels through `labels`; replacing an icon does
-not replace its button label. `GeoViewToggle` is an ARIA radiogroup with map and
-globe options rather than an ambiguous single toggle.
+not replace its button label. `GeoControls` mirrors labels into native titles by
+default. Use `wrapButton` to compose each real button with a design-system
+tooltip trigger; native titles default off in that mode to avoid duplicate
+tooltips. `GeoViewToggle` is an ARIA radiogroup with map and globe options
+rather than an ambiguous single toggle; use `wrapOption` for the same tooltip
+composition pattern on those options.
 
 ## Release accessibility checklist
 

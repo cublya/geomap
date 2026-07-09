@@ -41,9 +41,9 @@ export function WorldMap() {
 }
 ```
 
-The SVG fills its container. Give the container a definite height; otherwise a
-percentage height can resolve to zero. `width` and `height` on `GeoMap` define
-the SVG viewBox and coordinate system, not its CSS size.
+The rendered surface fills its container. Give the container a definite height;
+otherwise a percentage height can resolve to zero. `width` and `height` on
+`GeoMap` define the internal coordinate system, not its CSS size.
 
 ## Add application data
 
@@ -134,6 +134,11 @@ avoid two tooltips. Set `nativeTitle: true` to retain them deliberately.
 `GeoView` is a positioned wrapper and also requires a container with a usable
 height. Set `toggle={false}` or `controls={false}` when the host application owns
 those controls.
+
+Use `renderer="canvas"` on `GeoMap`, `GeoGlobe`, or `GeoView` when you want a
+Canvas-backed map. SVG remains the default and is best when you need DOM
+inspection or CSS styling; Canvas keeps the same cameras, gestures, country
+callbacks, and built-in layers for denser scenes.
 
 ## Use an external camera
 

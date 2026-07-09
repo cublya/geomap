@@ -1,6 +1,6 @@
 # @cublya/geomap
 
-> Composable React map primitives on d3-geo for SVG maps and globes, with country choropleths, ISO-aware data preparation, markers, great-circle routes, live objects, cameras, static SVG output, and optional UI controls.
+> Composable React map primitives on d3-geo for SVG or Canvas maps and globes, with country choropleths, ISO-aware data preparation, markers, great-circle routes, live objects, cameras, static SVG output, and optional UI controls.
 
 @cublya/geomap is an ESM-only React library. It does not bundle basemap data, product data, Tailwind, global CSS, icon dependencies, or fetch logic. Pair it with `@cublya/world-atlas` or another TopoJSON or GeoJSON source, then call `prepareCountries` before rendering country layers.
 
@@ -34,6 +34,7 @@
 - Import country geometry from `@cublya/world-atlas/countries-10m.json`, `countries-50m.json`, or `countries-110m.json` when examples need a basemap.
 - Call `prepareCountries(world, { exclude: ["AQ"] })` for country layers in most examples.
 - Use `GeoMap` for flat maps, `GeoGlobe` for rotatable orthographic globes, and `GeoView` when an app should switch between both.
+- Use `renderer="canvas"` for a Canvas-backed browser surface; SVG remains the default and best for DOM inspection/CSS styling.
 - `preset` defaults to `"none"`, which emits no complete visual styling. Use `preset="light"` or `preset="dark"` for ready-to-render visuals.
 - No CSS import is required for map rendering. `@cublya/geomap/styles.css` only adds pseudo-class polish for optional HTML helpers such as controls and tooltips.
 - Coordinates accept longitude and latitude conventions through helpers, but examples should prefer clear `{ lat, lng }` objects for app data.
