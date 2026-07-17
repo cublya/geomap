@@ -16,7 +16,7 @@ import {
   ROUTE_DEFAULTS,
 } from "../core/overlay-defaults";
 import { resolveCountryStyle, resolveSelectedOutline } from "../core/country-style";
-import { routeLineString } from "../core/routes";
+import { routeGeometryLineString, routeLineString } from "../core/routes";
 import type { ResolvedGeoTheme } from "../theme";
 import { GeoProvider, type GeoContextValue } from "./geo-context";
 import {
@@ -47,6 +47,7 @@ export interface CanvasRendererProps<TMarker = unknown, TRoute = unknown, TLive 
   sphereD?: string;
   countries?: CountriesLayerProps;
   markers?: GeoMarker<TMarker>[];
+  showMarkerLabels?: boolean;
   onMarkerClick?: MarkersLayerProps<TMarker>["onMarkerClick"];
   renderMarker?: MarkersLayerProps<TMarker>["renderMarker"];
   routes?: GeoRoute<TRoute>[];
@@ -244,7 +245,7 @@ function drawRoutes<T>(
   ctx.lineCap = "round";
   for (const route of routes) {
     if (route.stops.length < 2) continue;
-    drawGeo(ctx, path, routeLineString(route.stops), () => {
+    drawGeo(ctx, path, routeGeometryLineString(route), () => {
       if (!applyStroke(ctx, resolve, route.color ?? theme.route)) return;
       ctx.globalAlpha = route.opacity ?? ROUTE_DEFAULTS.opacity;
       ctx.lineWidth = (route.width ?? ROUTE_DEFAULTS.width) * counterScale;
@@ -263,6 +264,7 @@ function drawMarkers<T>(
   markers: GeoMarker<T>[] | undefined,
   theme: ResolvedGeoTheme,
   counterScale: number,
+  showMarkerLabels: boolean,
 ): void {
   if (!markers) return;
   for (const marker of markers) {
@@ -270,16 +272,35 @@ function drawMarkers<T>(
     const position = project(marker.coordinates);
     if (!position) continue;
     const r = (marker.size ?? MARKER_DEFAULTS.radius) * counterScale;
-    if (theme.halo && applyStroke(ctx, resolve, theme.halo)) {
-      ctx.lineWidth = MARKER_DEFAULTS.haloWidth * counterScale;
+    if (marker.selected && applyFill(ctx, resolve, theme.markerSelected)) {
+      ctx.beginPath();
+      ctx.arc(position[0], position[1], r + MARKER_DEFAULTS.selectedRingGap * counterScale, 0, Math.PI * 2);
+      ctx.fill();
     }
-    if (applyFill(ctx, resolve, marker.color ?? theme.marker)) {
+    const stroke = marker.stroke ?? theme.halo;
+    // Retain the established paint sequence when no new dot-casing fields are
+    // used. The enhanced branch also allows an explicit marker stroke without
+    // a dot fill, matching SVG's independently emitted circle attributes.
+    if (marker.stroke === undefined && marker.strokeWidth === undefined) {
+      if (theme.halo && applyStroke(ctx, resolve, theme.halo)) {
+        ctx.lineWidth = MARKER_DEFAULTS.haloWidth * counterScale;
+      }
+      if (applyFill(ctx, resolve, marker.color ?? theme.marker)) {
+        ctx.beginPath();
+        ctx.arc(position[0], position[1], r, 0, Math.PI * 2);
+        ctx.fill();
+        if (theme.halo) ctx.stroke();
+      }
+    } else {
       ctx.beginPath();
       ctx.arc(position[0], position[1], r, 0, Math.PI * 2);
-      ctx.fill();
-      if (theme.halo) ctx.stroke();
+      if (applyFill(ctx, resolve, marker.color ?? theme.marker)) ctx.fill();
+      if (applyStroke(ctx, resolve, stroke)) {
+        ctx.lineWidth = (marker.strokeWidth ?? MARKER_DEFAULTS.haloWidth) * counterScale;
+        ctx.stroke();
+      }
     }
-    if (marker.label) {
+    if (showMarkerLabels && marker.label) {
       ctx.font = `${MARKER_DEFAULTS.labelFontSize * counterScale}px system-ui, sans-serif`;
       ctx.textBaseline = "alphabetic";
       const x = position[0] + r + MARKER_DEFAULTS.labelGap * counterScale;
@@ -494,6 +515,7 @@ export function CanvasRenderer<TMarker = unknown, TRoute = unknown, TLive = unkn
   sphereD,
   countries,
   markers,
+  showMarkerLabels = true,
   onMarkerClick,
   renderMarker,
   routes,
@@ -561,7 +583,7 @@ export function CanvasRenderer<TMarker = unknown, TRoute = unknown, TLive = unkn
       drawCountries(ctx, path, shapes, resolve, countries, context.theme, counterScale, hoveredId);
     }
     drawRoutes(ctx, canvasPath, resolve, routes, context.theme, counterScale);
-    if (!renderMarker) drawMarkers(ctx, context.project, resolve, markers, context.theme, counterScale);
+    if (!renderMarker) drawMarkers(ctx, context.project, resolve, markers, context.theme, counterScale, showMarkerLabels);
     if (!live?.renderObject) drawLive(ctx, canvasPath, context.project, resolve, live, context.theme, counterScale);
     ctx.restore();
   }, [
@@ -579,6 +601,7 @@ export function CanvasRenderer<TMarker = unknown, TRoute = unknown, TLive = unkn
     projection,
     renderMarker,
     routes,
+    showMarkerLabels,
     shapes,
     sphereD,
     width,

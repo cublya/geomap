@@ -43,6 +43,8 @@ export interface GeoTheme {
   sphere: string;
   marker: string;
   markerLabel: string;
+  /** Fill of the ring behind selected markers. */
+  markerSelected: string;
   /**
    * Contrast casing painted behind overlay glyphs, labels, and trails so they
    * stay legible on any basemap tone (e.g. dark inked land on the light preset).
@@ -111,6 +113,7 @@ const CSS_VAR_NAMES: Record<keyof GeoTheme, string> = {
   sphere: "sphere",
   marker: "marker",
   markerLabel: "marker-label",
+  markerSelected: "marker-selected",
   halo: "halo",
   route: "route",
   live: "live",
@@ -157,6 +160,7 @@ const lightBase: Fallbacks = {
   sphere: "oklch(0.3 0.01 90 / 0.22)",
   marker: "oklch(0.35 0.015 260)",
   markerLabel: "oklch(0.3 0.01 90)",
+  markerSelected: "oklch(0.62 0.19 255 / 0.22)",
   halo: "oklch(0.98 0.006 90 / 0.9)",
   route: "oklch(0.4 0.02 260)",
   live: "oklch(0.4 0.02 260)",
@@ -189,6 +193,7 @@ const darkBase: Fallbacks = {
   sphere: "oklch(0.95 0.01 90 / 0.22)",
   marker: "oklch(0.87 0.02 260)",
   markerLabel: "oklch(0.93 0.005 90)",
+  markerSelected: "oklch(0.72 0.15 255 / 0.30)",
   halo: "oklch(0.16 0.008 250 / 0.85)",
   route: "oklch(0.83 0.03 260)",
   live: "oklch(0.83 0.03 260)",

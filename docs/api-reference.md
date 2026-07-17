@@ -15,7 +15,8 @@ Renders an interactive flat map. SVG is the default renderer; pass
 | --- | --- | --- | --- |
 | `countries` | `CountriesLayerProps` | - | Prepared country layer and callbacks |
 | `markers` | `GeoMarker<T>[]` | - | Projected markers |
-| `routes` | `GeoRoute<T>[]` | - | Great-circle, multi-stop routes |
+| `showMarkerLabels` | `boolean` | `true` | Show visible marker labels (SVG titles remain) |
+| `routes` | `GeoRoute<T>[]` | - | Great-circle (default) or straight, multi-stop routes |
 | `live` | `LiveLayerComponentProps<T>` | - | Prop-driven moving objects |
 | `projection` | `ProjectionInput` | `naturalEarth1` | Named projection or factory |
 | `projectionOptions` | `FlatProjectionOptions` | - | Projection tuning |
@@ -37,6 +38,12 @@ Renders an interactive flat map. SVG is the default renderer; pass
 `onMarkerClick` receives the typed marker. `renderMarker(marker, context)` can
 replace the default marker; context contains projected `position` and
 `counterScale`.
+
+`GeoMarker` accepts `selected` (a `theme.markerSelected` ring behind the dot),
+`stroke`, and `strokeWidth`; `stroke` overrides the marker dot's `halo` casing.
+`GeoRoute.geometry` is `"great-circle"` by default or `"straight"` to join only
+the supplied stops. `showMarkerLabels` is also available on `GeoGlobe` and
+`GeoView`, and on `renderStaticMapSvg` options.
 
 ### `GeoGlobe`
 
@@ -204,7 +211,8 @@ Named flat projections are `naturalEarth1`, `mercator`, and `equalEarth`.
 
 ## Theme and outline utilities
 
-- `presets`, `resolveTheme`, and `cx`.
+- `presets`, `resolveTheme`, and `cx`; `GeoTheme.markerSelected` is the fill
+  token for selected marker rings (`--geomap-marker-selected`).
 - `resolveOutline` converts an `Outline` into color, width, dash, raised state,
   and elevation.
 - `GeoPreset`, `GeoPalette`, `GeoTheme`, `ResolvedGeoTheme`.

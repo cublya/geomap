@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { routeLineString, routePoints } from "./routes";
+import { routeGeometryLineString, routeLineString, routePoints } from "./routes";
 
 describe("routePoints", () => {
   it("chains multi-stop routes without duplicating shared stops", () => {
@@ -36,5 +36,17 @@ describe("routeLineString", () => {
     ]);
     expect(line.type).toBe("LineString");
     expect(line.coordinates.length).toBe(49);
+  });
+});
+
+describe("routeGeometryLineString", () => {
+  it("keeps straight routes at exactly their supplied stops while great circles densify", () => {
+    const stops: [number, number][] = [
+      [0, 0],
+      [10, 10],
+      [20, 5],
+    ];
+    expect(routeGeometryLineString({ stops, geometry: "straight" }).coordinates).toEqual(stops);
+    expect(routeGeometryLineString({ stops, geometry: "great-circle" }).coordinates).toHaveLength(97);
   });
 });

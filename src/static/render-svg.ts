@@ -2,7 +2,7 @@ import { geoGraticule10, geoPath } from "d3-geo";
 import { FlatProjectionKind } from "../types";
 import type { CountrySet, GeoMarker, GeoRoute, PreparedCountry } from "../types";
 import { toLonLat } from "../core/coords";
-import { routeLineString } from "../core/routes";
+import { routeGeometryLineString } from "../core/routes";
 import { resolveLandShadow, type Outline } from "../core/outline";
 import { resolveCountryStyle } from "../core/country-style";
 import { MARKER_DEFAULTS, ROUTE_DEFAULTS } from "../core/overlay-defaults";
@@ -32,6 +32,8 @@ export interface StaticMapOptions {
     outline?: Outline | ((country: PreparedCountry) => Outline | undefined);
   };
   markers?: GeoMarker[];
+  /** Whether marker labels are visibly rendered. Default true. */
+  showMarkerLabels?: boolean;
   routes?: GeoRoute[];
   projection?: ProjectionInput;
   projectionOptions?: FlatProjectionOptions;
@@ -127,7 +129,7 @@ export function renderStaticMapSvg(options: StaticMapOptions): string {
   }
   for (const route of routes) {
     if (route.stops.length < 2) continue;
-    const d = path(routeLineString(route.stops));
+    const d = path(routeGeometryLineString(route));
     if (!d) continue;
     const dash = route.dashed ? ` stroke-dasharray="${ROUTE_DEFAULTS.dash}"` : "";
     parts.push(
@@ -142,16 +144,22 @@ export function renderStaticMapSvg(options: StaticMapOptions): string {
     const r = marker.size ?? MARKER_DEFAULTS.radius;
     // Halo casing (painted behind fill/text) keeps overlays legible on any
     // basemap tone; omitted entirely when the theme carries no halo token.
-    const circleHalo = theme.halo
-      ? `${attr("stroke", theme.halo)} stroke-width="${MARKER_DEFAULTS.haloWidth}" paint-order="stroke"`
+    const stroke = marker.stroke ?? theme.halo;
+    const circleHalo = stroke
+      ? `${attr("stroke", stroke)} stroke-width="${marker.strokeWidth ?? MARKER_DEFAULTS.haloWidth}" paint-order="stroke"`
       : "";
     const textHalo = theme.halo
       ? `${attr("stroke", theme.halo)} stroke-width="${MARKER_DEFAULTS.labelHaloWidth}" paint-order="stroke" stroke-linejoin="round"`
       : "";
+    if (marker.selected && theme.markerSelected) {
+      parts.push(
+        `<circle cx="${p[0]}" cy="${p[1]}" r="${r + MARKER_DEFAULTS.selectedRingGap}"${attr("fill", theme.markerSelected)} stroke="none"/>`,
+      );
+    }
     parts.push(
       `<circle cx="${p[0]}" cy="${p[1]}" r="${r}"${attr("fill", marker.color ?? theme.marker)}${circleHalo}/>`,
     );
-    if (marker.label) {
+    if (options.showMarkerLabels !== false && marker.label) {
       parts.push(
         `<text x="${p[0] + r + MARKER_DEFAULTS.labelGap}" y="${p[1] + r}" font-size="${MARKER_DEFAULTS.labelFontSize}"` +
           ` font-family="system-ui, sans-serif"${attr("fill", theme.markerLabel)}${textHalo}>` +

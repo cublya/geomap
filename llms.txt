@@ -1,6 +1,6 @@
 # @cublya/geomap
 
-> Composable React map primitives on d3-geo for SVG or Canvas maps and globes, with country choropleths, ISO-aware data preparation, markers, great-circle routes, live objects, cameras, static SVG output, and optional UI controls.
+> Composable React map primitives on d3-geo for SVG or Canvas maps and globes, with country choropleths, ISO-aware data preparation, selected/styled markers, great-circle or straight routes, live objects, cameras, static SVG output, and optional UI controls.
 
 @cublya/geomap is an ESM-only React library. It does not bundle basemap data, product data, Tailwind, global CSS, icon dependencies, or fetch logic. Pair it with `@cublya/world-atlas` or another TopoJSON or GeoJSON source, then call `prepareCountries` before rendering country layers.
 
@@ -25,6 +25,8 @@
 - Optional UI: `GeoControls`, `GeoViewToggle`, `GeoTooltip`
 - Camera hooks and stores: `useMapCamera`, `useGlobeCamera`, `useMapView`, `useGlobeView`, `createMapCamera`, `createGlobeCamera`
 - Data prep: `prepareCountries`, `lookupIso`, `resolveCountryName`, `ISO_3166_1`
+- Marker fields: `selected`, `stroke`, `strokeWidth`; `showMarkerLabels` on map, globe, view, and static SVG options; `GeoTheme.markerSelected` / `--geomap-marker-selected` controls selection-ring fill.
+- Routes default to `geometry: "great-circle"`; use `geometry: "straight"` for an undensified line through supplied stops.
 - Geometry and projection helpers: `createFlatProjection`, `createGlobeProjection`, `greatCirclePoints`, `routeLineString`, `geographicBounds`, `toLonLat`
 - Static output: `renderStaticMapSvg`, `svgToDataUrl`, `svgToPngBlob`
 

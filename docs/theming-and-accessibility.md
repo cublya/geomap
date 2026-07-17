@@ -27,6 +27,10 @@ The resolution order is preset, palette, partial `theme` overrides, layer
 callbacks, then direct item properties. A marker's `color`, for example, wins
 over `theme.marker`.
 
+`markerSelected` (`--geomap-marker-selected`) fills the optional ring behind a
+marker with `selected: true`. The light and dark presets provide it; with
+`preset="none"`, supply it explicitly in `theme` to render selection rings.
+
 ## Theme tokens and CSS variables
 
 Built-in token values use CSS variables with fallback colors. Override a token

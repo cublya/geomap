@@ -1,5 +1,5 @@
 import type { LineString } from "geojson";
-import type { Coordinate, LonLat } from "../types";
+import type { Coordinate, GeoRoute, LonLat } from "../types";
 import { greatCirclePoints, toLonLat } from "./coords";
 
 /**
@@ -27,4 +27,12 @@ export function routeLineString(
   samplesPerSegment = 48,
 ): LineString {
   return { type: "LineString", coordinates: routePoints(stops, samplesPerSegment) };
+}
+
+/** Build the route geometry selected by a route's optional geometry mode. */
+export function routeGeometryLineString(route: Pick<GeoRoute, "stops" | "geometry">): LineString {
+  if (route.geometry === "straight") {
+    return { type: "LineString", coordinates: route.stops.map(toLonLat) };
+  }
+  return routeLineString(route.stops);
 }

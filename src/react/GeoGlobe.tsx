@@ -39,6 +39,8 @@ import { CanvasRenderer } from "./canvas-renderer";
 export interface GeoGlobeProps<TMarker = unknown, TRoute = unknown, TLive = unknown> {
   countries?: CountriesLayerProps;
   markers?: GeoMarker<TMarker>[];
+  /** Whether marker labels are visibly rendered. Default true. */
+  showMarkerLabels?: boolean;
   onMarkerClick?: MarkersLayerProps<TMarker>["onMarkerClick"];
   renderMarker?: MarkersLayerProps<TMarker>["renderMarker"];
   routes?: GeoRoute<TRoute>[];
@@ -92,6 +94,7 @@ function fitCoordinates(target: FitTarget): Coordinate[] {
 export function GeoGlobe<TMarker = unknown, TRoute = unknown, TLive = unknown>({
   countries,
   markers,
+  showMarkerLabels = true,
   onMarkerClick,
   renderMarker,
   routes,
@@ -286,6 +289,7 @@ export function GeoGlobe<TMarker = unknown, TRoute = unknown, TLive = unknown>({
         sphereD={sphereD}
         countries={countries}
         markers={markers}
+        showMarkerLabels={showMarkerLabels}
         onMarkerClick={onMarkerClick}
         renderMarker={renderMarker}
         routes={routes}
@@ -350,6 +354,7 @@ export function GeoGlobe<TMarker = unknown, TRoute = unknown, TLive = unknown>({
         {markers && markers.length > 0 && (
           <MarkersLayer
             markers={markers}
+            showMarkerLabels={showMarkerLabels}
             onMarkerClick={onMarkerClick}
             renderMarker={renderMarker}
           />

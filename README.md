@@ -145,10 +145,10 @@ All tweens and inertia honour `prefers-reduced-motion` by jumping to the target.
 
 ```tsx
 <GeoMap
-  markers={[{ id: "vie", coordinates: { lat: 48.2, lng: 16.37 }, label: "VIE", kind: "airport" }]}
+  markers={[{ id: "vie", coordinates: { lat: 48.2, lng: 16.37 }, label: "VIE", kind: "airport", selected: true, stroke: "white" }]}
   onMarkerClick={(m) => open(m.id)}
   renderMarker={(m, { counterScale }) => <MyPin scale={counterScale} />}   // optional
-  routes={[{ id: "trip", stops: [vienna, tokyo, sydney], dashed: true }]}  // ≥2 stops chained
+  routes={[{ id: "trip", stops: [vienna, tokyo, sydney], dashed: true, geometry: "great-circle" }]}  // "straight" joins only stops
   live={{
     objects: flights.map((f) => ({
       id: f.id,
@@ -164,6 +164,10 @@ All tweens and inertia honour `prefers-reduced-motion` by jumping to the target.
 
 Marker sizes counter-scale under zoom so pins stay screen-constant; on the globe,
 markers/objects on the far hemisphere are culled automatically.
+Set `showMarkerLabels={false}` on `GeoMap`, `GeoGlobe`, or `GeoView` to hide
+visible labels while SVG hover titles remain. Native marker styling also includes
+`selected` rings (`theme.markerSelected`), plus per-marker `stroke` and
+`strokeWidth` casing overrides.
 
 ## Custom SVG layers
 
