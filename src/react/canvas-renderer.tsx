@@ -16,7 +16,12 @@ import {
   ROUTE_DEFAULTS,
 } from "../core/overlay-defaults";
 import { resolveCountryStyle, resolveSelectedOutline } from "../core/country-style";
-import { routeGeometryLineString, routeLineString } from "../core/routes";
+import {
+  arcControlPoint,
+  projectRoutePoints,
+  routeGeometryLineString,
+  routeLineString,
+} from "../core/routes";
 import type { ResolvedGeoTheme } from "../theme";
 import { GeoProvider, type GeoContextValue } from "./geo-context";
 import {
@@ -236,6 +241,7 @@ function drawCountries(
 function drawRoutes<T>(
   ctx: CanvasRenderingContext2D,
   path: GeoPath,
+  project: GeoContextValue["project"],
   resolve: ColorResolver,
   routes: GeoRoute<T>[] | undefined,
   theme: ResolvedGeoTheme,
@@ -245,6 +251,31 @@ function drawRoutes<T>(
   ctx.lineCap = "round";
   for (const route of routes) {
     if (route.stops.length < 2) continue;
+    if (route.arc || route.geometry === "straight") {
+      const points = projectRoutePoints(route.stops, project);
+      if (!points) continue;
+      ctx.beginPath();
+      if (route.arc) {
+        for (let i = 0; i < points.length - 1; i++) {
+          const start = points[i]!;
+          const end = points[i + 1]!;
+          const control = arcControlPoint(start, end, route.arc);
+          ctx.moveTo(start[0], start[1]);
+          ctx.quadraticCurveTo(control[0], control[1], end[0], end[1]);
+        }
+      } else {
+        ctx.moveTo(points[0]![0], points[0]![1]);
+        for (const point of points.slice(1)) ctx.lineTo(point[0], point[1]);
+      }
+      if (!applyStroke(ctx, resolve, route.color ?? theme.route)) continue;
+      ctx.globalAlpha = route.opacity ?? ROUTE_DEFAULTS.opacity;
+      ctx.lineWidth = (route.width ?? ROUTE_DEFAULTS.width) * counterScale;
+      if (route.dashed) ctx.setLineDash(ROUTE_DEFAULTS.dash.split(/\s+/).map(Number));
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+      ctx.setLineDash([]);
+      continue;
+    }
     drawGeo(ctx, path, routeGeometryLineString(route), () => {
       if (!applyStroke(ctx, resolve, route.color ?? theme.route)) return;
       ctx.globalAlpha = route.opacity ?? ROUTE_DEFAULTS.opacity;
@@ -582,7 +613,7 @@ export function CanvasRenderer<TMarker = unknown, TRoute = unknown, TLive = unkn
     if (countries) {
       drawCountries(ctx, path, shapes, resolve, countries, context.theme, counterScale, hoveredId);
     }
-    drawRoutes(ctx, canvasPath, resolve, routes, context.theme, counterScale);
+    drawRoutes(ctx, canvasPath, context.project, resolve, routes, context.theme, counterScale);
     if (!renderMarker) drawMarkers(ctx, context.project, resolve, markers, context.theme, counterScale, showMarkerLabels);
     if (!live?.renderObject) drawLive(ctx, canvasPath, context.project, resolve, live, context.theme, counterScale);
     ctx.restore();

@@ -148,7 +148,7 @@ All tweens and inertia honour `prefers-reduced-motion` by jumping to the target.
   markers={[{ id: "vie", coordinates: { lat: 48.2, lng: 16.37 }, label: "VIE", kind: "airport", selected: true, stroke: "white" }]}
   onMarkerClick={(m) => open(m.id)}
   renderMarker={(m, { counterScale }) => <MyPin scale={counterScale} />}   // optional
-  routes={[{ id: "trip", stops: [vienna, tokyo, sydney], dashed: true, geometry: "great-circle" }]}  // "straight" joins only stops
+  routes={[{ id: "trip", stops: [vienna, tokyo, sydney], dashed: true, arc: 0.18 }]}  // arc is a screen-space bow; "straight" is a true screen polyline
   live={{
     objects: flights.map((f) => ({
       id: f.id,
@@ -164,6 +164,11 @@ All tweens and inertia honour `prefers-reduced-motion` by jumping to the target.
 
 Marker sizes counter-scale under zoom so pins stay screen-constant; on the globe,
 markers/objects on the far hemisphere are culled automatically.
+Routes default to sampled `geometry: "great-circle"`. Use `geometry: "straight"`
+for a true projected screen-space polyline, or `arc` for a screen-space bow whose
+height is a fraction of each segment length (and takes precedence over
+`geometry`). Straight and bowed routes assume both endpoints are on the visible
+globe hemisphere and do not backface-clip; great-circle routes still clip normally.
 Set `showMarkerLabels={false}` on `GeoMap`, `GeoGlobe`, or `GeoView` to hide
 visible labels while SVG hover titles remain. Native marker styling also includes
 `selected` rings (`theme.markerSelected`), plus per-marker `stroke` and

@@ -76,7 +76,15 @@ export {
 } from "./core/projections";
 
 // Routes
-export { routeLineString, routePoints } from "./core/routes";
+export {
+  arcControlPoint,
+  arcPath,
+  projectRoutePoints,
+  routeLineString,
+  routePoints,
+  screenRoutePath,
+  type ScreenPoint,
+} from "./core/routes";
 
 // Cameras (framework-free stores)
 export {

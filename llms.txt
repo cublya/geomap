@@ -26,7 +26,7 @@
 - Camera hooks and stores: `useMapCamera`, `useGlobeCamera`, `useMapView`, `useGlobeView`, `createMapCamera`, `createGlobeCamera`
 - Data prep: `prepareCountries`, `lookupIso`, `resolveCountryName`, `ISO_3166_1`
 - Marker fields: `selected`, `stroke`, `strokeWidth`; `showMarkerLabels` on map, globe, view, and static SVG options; `GeoTheme.markerSelected` / `--geomap-marker-selected` controls selection-ring fill.
-- Routes default to `geometry: "great-circle"`; use `geometry: "straight"` for an undensified line through supplied stops.
+- Routes default to `geometry: "great-circle"`; use `geometry: "straight"` for a true projected screen-space polyline, or `arc` for a screen-space bow (fraction of segment length; takes precedence). Straight/arc routes assume visible globe endpoints and do not backface-clip; great-circle routes clip normally.
 - Geometry and projection helpers: `createFlatProjection`, `createGlobeProjection`, `greatCirclePoints`, `routeLineString`, `geographicBounds`, `toLonLat`
 - Static output: `renderStaticMapSvg`, `svgToDataUrl`, `svgToPngBlob`
 
