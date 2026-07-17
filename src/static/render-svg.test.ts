@@ -80,6 +80,27 @@ describe("renderStaticMapSvg", () => {
     expect(svg).toContain("<path");
     expect(svg).not.toContain("NaN");
   });
+
+  it("renders selected marker rings and marker stroke overrides", () => {
+    const svg = renderStaticMapSvg({
+      width: 400,
+      height: 200,
+      theme: { markerSelected: "selected", halo: "halo" },
+      markers: [{ id: "m", coordinates: [0, 0], size: 5, selected: true, stroke: "stroke", strokeWidth: 2 }],
+    });
+    expect(svg).toContain('r="9" fill="selected" stroke="none"');
+    expect(svg).toContain('stroke="stroke" stroke-width="2" paint-order="stroke"');
+  });
+
+  it("omits visible marker labels when requested", () => {
+    const svg = renderStaticMapSvg({
+      width: 400,
+      height: 200,
+      showMarkerLabels: false,
+      markers: [{ id: "m", coordinates: [0, 0], label: "Hidden" }],
+    });
+    expect(svg).not.toContain("<text");
+  });
 });
 
 describe("escapeXml", () => {

@@ -33,6 +33,8 @@ function remapZoom(v: number, inMin: number, inMax: number, outMin: number, outM
 export interface GeoViewProps<TMarker = unknown, TRoute = unknown, TLive = unknown> {
   countries?: CountriesLayerProps;
   markers?: GeoMarker<TMarker>[];
+  /** Whether marker labels are visibly rendered. Default true. */
+  showMarkerLabels?: boolean;
   onMarkerClick?: MarkersLayerProps<TMarker>["onMarkerClick"];
   renderMarker?: MarkersLayerProps<TMarker>["renderMarker"];
   routes?: GeoRoute<TRoute>[];
@@ -103,6 +105,7 @@ export interface GeoViewProps<TMarker = unknown, TRoute = unknown, TLive = unkno
 export function GeoView<TMarker = unknown, TRoute = unknown, TLive = unknown>({
   countries,
   markers,
+  showMarkerLabels = true,
   onMarkerClick,
   renderMarker,
   routes,
@@ -191,6 +194,7 @@ export function GeoView<TMarker = unknown, TRoute = unknown, TLive = unknown>({
           camera={map}
           countries={countries}
           markers={markers}
+          showMarkerLabels={showMarkerLabels}
           onMarkerClick={onMarkerClick}
           renderMarker={renderMarker}
           routes={routes}
@@ -217,6 +221,7 @@ export function GeoView<TMarker = unknown, TRoute = unknown, TLive = unknown>({
           camera={globe}
           countries={countries}
           markers={markers}
+          showMarkerLabels={showMarkerLabels}
           onMarkerClick={onMarkerClick}
           renderMarker={renderMarker}
           routes={routes}

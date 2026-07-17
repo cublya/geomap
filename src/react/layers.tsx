@@ -13,7 +13,7 @@ import {
   shortestAngleDelta,
   toLonLat,
 } from "../core/coords";
-import { routeLineString } from "../core/routes";
+import { routeGeometryLineString, routeLineString } from "../core/routes";
 import { resolveCountryStyle, resolveSelectedOutline } from "../core/country-style";
 import {
   LIVE_DEFAULTS,
@@ -268,6 +268,8 @@ export function CountriesLayer({
 
 export interface MarkersLayerProps<T = unknown> {
   markers: GeoMarker<T>[];
+  /** Whether marker labels are visibly rendered. Default true. */
+  showMarkerLabels?: boolean;
   onMarkerClick?: (marker: GeoMarker<T>) => void;
   renderMarker?: (
     marker: GeoMarker<T>,
@@ -275,7 +277,12 @@ export interface MarkersLayerProps<T = unknown> {
   ) => React.ReactNode;
 }
 
-export function MarkersLayer<T>({ markers, onMarkerClick, renderMarker }: MarkersLayerProps<T>) {
+export function MarkersLayer<T>({
+  markers,
+  showMarkerLabels = true,
+  onMarkerClick,
+  renderMarker,
+}: MarkersLayerProps<T>) {
   const { project, theme, counterScale, isDraggingRef } = useGeo();
   // Projection is the expensive step; recompute it only when markers or the
   // projection change, not on every pan/zoom frame (counterScale sizing below
@@ -313,6 +320,7 @@ export function MarkersLayer<T>({ markers, onMarkerClick, renderMarker }: Marker
         }
         const r = (marker.size ?? MARKER_DEFAULTS.radius) * counterScale;
         const color = marker.color ?? theme.marker;
+        const stroke = marker.stroke ?? theme.halo;
         return (
           <g
             key={marker.id}
@@ -321,16 +329,25 @@ export function MarkersLayer<T>({ markers, onMarkerClick, renderMarker }: Marker
             transform={`translate(${position[0]} ${position[1]})`}
             {...clickProps}
           >
+            {marker.selected && theme.markerSelected && (
+              <circle
+                className="geomap-marker-selection"
+                r={r + MARKER_DEFAULTS.selectedRingGap * counterScale}
+                fill={theme.markerSelected}
+                stroke="none"
+                pointerEvents="none"
+              />
+            )}
             <circle
               r={r}
               fill={color}
-              stroke={theme.halo}
-              strokeWidth={theme.halo ? MARKER_DEFAULTS.haloWidth * counterScale : undefined}
+              stroke={stroke}
+              strokeWidth={stroke ? (marker.strokeWidth ?? MARKER_DEFAULTS.haloWidth) * counterScale : undefined}
               paintOrder="stroke"
             >
               {marker.label && <title>{marker.label}</title>}
             </circle>
-            {marker.label && (
+            {showMarkerLabels && marker.label && (
               <text
                 className="geomap-label"
                 x={r + MARKER_DEFAULTS.labelGap * counterScale}
@@ -364,7 +381,7 @@ export function RoutesLayer<T>({ routes }: RoutesLayerProps<T>) {
   const paths = React.useMemo(
     () =>
       routes.map((route) =>
-        route.stops.length < 2 ? null : path(routeLineString(route.stops)) || null,
+        route.stops.length < 2 ? null : path(routeGeometryLineString(route)) || null,
       ),
     [routes, path],
   );

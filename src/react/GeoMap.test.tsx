@@ -151,6 +151,56 @@ describe("GeoMap", () => {
     expect(route).toBe(true);
   });
 
+  it("renders selected marker rings and lets per-marker strokes override the halo", () => {
+    const { container } = render(
+      <GeoMap
+        preset="light"
+        theme={{ halo: "halo", markerSelected: "selected" }}
+        markers={[
+          { id: "selected", coordinates: [0, 0], size: 5, selected: true, stroke: "marker-stroke", strokeWidth: 2 },
+          { id: "unselected", coordinates: [10, 0], selected: true },
+        ]}
+      />,
+    );
+    const rings = container.querySelectorAll(".geomap-marker-selection");
+    expect(rings).toHaveLength(2);
+    expect(rings[0]?.getAttribute("r")).toBe("9");
+    const dot = rings[0]?.nextElementSibling;
+    expect(dot?.getAttribute("stroke")).toBe("marker-stroke");
+    expect(dot?.getAttribute("stroke-width")).toBe("2");
+  });
+
+  it("only renders selected marker rings when both marker selection and token are present", () => {
+    const { container } = render(
+      <GeoMap
+        theme={{ markerSelected: "selected" }}
+        markers={[
+          { id: "selected", coordinates: [0, 0], selected: true },
+          { id: "plain", coordinates: [10, 0] },
+        ]}
+      />,
+    );
+    expect(container.querySelectorAll(".geomap-marker-selection")).toHaveLength(1);
+  });
+
+  it("does not render selected marker rings without the markerSelected token", () => {
+    const { container } = render(
+      <GeoMap markers={[{ id: "selected", coordinates: [0, 0], selected: true }]} />,
+    );
+    expect(container.querySelector(".geomap-marker-selection")).toBeNull();
+  });
+
+  it("hides visible marker labels while preserving SVG title hover text", () => {
+    const { container } = render(
+      <GeoMap
+        showMarkerLabels={false}
+        markers={[{ id: "labelled", coordinates: [0, 0], label: "Hover label" }]}
+      />,
+    );
+    expect(container.querySelector(".geomap-marker text")).toBeNull();
+    expect(container.querySelector(".geomap-marker title")?.textContent).toBe("Hover label");
+  });
+
   it("keeps custom React layers available over the Canvas renderer", () => {
     function CrossHair() {
       const { project } = useGeo();

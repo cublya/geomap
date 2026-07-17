@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this package adheres to [Semantic Versioning](https://semver.org/). It is
 currently pre-1.0 beta, so the public API may still change.
 
+## [0.0.1-beta.4] - 2026-07-17 (Hikmat Samadov)
+
+### Added
+
+- Native selected/styled markers across SVG, Canvas, and static SVG: `GeoMarker`
+  now accepts `selected`, `stroke`, and `strokeWidth`; `markerSelected` /
+  `--geomap-marker-selected` supplies the optional selection ring.
+- `showMarkerLabels` on `GeoMap`, `GeoGlobe`, `GeoView`, and static SVG options.
+- `GeoRoute.geometry`: the existing great-circle default or an undensified
+  `"straight"` line through supplied stops.
+
 ## [0.0.1-beta.3] - 2026-07-09 (Hikmat Samadov)
 
 ### Added

@@ -53,6 +53,12 @@ export interface GeoMarker<T = unknown> {
   /** Radius in viewBox units; default 3. */
   size?: number;
   color?: string;
+  /** Draw a filled selection ring behind the marker dot when the theme provides one. */
+  selected?: boolean;
+  /** Per-marker dot casing color; overrides the theme halo. */
+  stroke?: string;
+  /** Per-marker dot casing width in viewBox units. */
+  strokeWidth?: number;
   data?: T;
 }
 
@@ -60,6 +66,8 @@ export interface GeoRoute<T = unknown> {
   id: string;
   /** Two or more stops; consecutive pairs are joined by great-circle arcs. */
   stops: Coordinate[];
+  /** Route shape. Defaults to the sampled great-circle path. */
+  geometry?: "great-circle" | "straight";
   color?: string;
   width?: number;
   dashed?: boolean;

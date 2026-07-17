@@ -16,6 +16,8 @@ export const ROUTE_DEFAULTS = {
 export const MARKER_DEFAULTS = {
   /** Circle radius in viewBox units. */
   radius: 3,
+  /** Extra radius around selected marker dots, in viewBox units. */
+  selectedRingGap: 4,
   /** Halo stroke width behind the marker circle. */
   haloWidth: 1.5,
   /** Halo stroke width behind label text (markers and live objects). */
