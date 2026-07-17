@@ -13,7 +13,7 @@ import {
   shortestAngleDelta,
   toLonLat,
 } from "../core/coords";
-import { routeGeometryLineString, routeLineString } from "../core/routes";
+import { projectRoutePoints, routeGeometryLineString, routeLineString, screenRoutePath } from "../core/routes";
 import { resolveCountryStyle, resolveSelectedOutline } from "../core/country-style";
 import {
   LIVE_DEFAULTS,
@@ -375,15 +375,20 @@ export interface RoutesLayerProps<T = unknown> {
 }
 
 export function RoutesLayer<T>({ routes }: RoutesLayerProps<T>) {
-  const { path, theme } = useGeo();
+  const { path, project, theme } = useGeo();
   // Great-circle re-sampling + path building is the costly step; recompute it
   // only when the routes or projection change, not on every pan/zoom frame.
   const paths = React.useMemo(
     () =>
-      routes.map((route) =>
-        route.stops.length < 2 ? null : path(routeGeometryLineString(route)) || null,
-      ),
-    [routes, path],
+      routes.map((route) => {
+        if (route.stops.length < 2) return null;
+        if (route.arc || route.geometry === "straight") {
+          const points = projectRoutePoints(route.stops, project);
+          return points ? screenRoutePath(points, route.arc) : null;
+        }
+        return path(routeGeometryLineString(route)) || null;
+      }),
+    [routes, path, project],
   );
   return (
     <g className="geomap-routes" pointerEvents="none">

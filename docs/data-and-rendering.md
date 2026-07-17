@@ -103,9 +103,14 @@ const markers: GeoMarker<{ airportId: number }>[] = [
 ```
 
 Routes require at least two stops to render. Each consecutive pair becomes a
-sampled great-circle segment by default. Set `geometry: "straight"` to join
-only the supplied stops; great-circle routes can cross the antimeridian without
-the straight-line wrap artifacts produced by planar interpolation.
+sampled great-circle segment by default. Set `geometry: "straight"` for a true
+projected screen-space polyline through only the supplied stops. Set `arc` to
+bow each segment: its quadratic control point is offset perpendicular by `arc`
+times the projected segment length (toward the top of the screen), so the visible
+curve rises about half of `arc × length`. It takes
+precedence over `geometry`. Straight and bowed routes assume both endpoints are
+on the visible globe hemisphere and do not backface-clip; great-circle routes
+still clip normally and can cross the antimeridian without planar wrap artifacts.
 
 Live objects interpolate between successive coordinate props. The library does
 not fetch or schedule feed updates; pass each new observation from the host. A

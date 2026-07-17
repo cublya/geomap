@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this package adheres to [Semantic Versioning](https://semver.org/). It is
 currently pre-1.0 beta, so the public API may still change.
 
+## [0.0.1-beta.5] - 2026-07-17 (Hikmat Samadov)
+
+### Added
+
+- `GeoRoute.arc` for screen-space bowed route segments across SVG, Canvas, and
+  static SVG rendering.
+
+### Fixed
+
+- `GeoRoute.geometry: "straight"` now renders as a true projected polyline
+  rather than an adaptively re-sampled geodesic.
+
 ## [0.0.1-beta.4] - 2026-07-17 (Hikmat Samadov)
 
 ### Added

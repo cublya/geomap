@@ -16,7 +16,7 @@ Renders an interactive flat map. SVG is the default renderer; pass
 | `countries` | `CountriesLayerProps` | - | Prepared country layer and callbacks |
 | `markers` | `GeoMarker<T>[]` | - | Projected markers |
 | `showMarkerLabels` | `boolean` | `true` | Show visible marker labels (SVG titles remain) |
-| `routes` | `GeoRoute<T>[]` | - | Great-circle (default) or straight, multi-stop routes |
+| `routes` | `GeoRoute<T>[]` | - | Great-circle (default), screen-straight, or bowed multi-stop routes |
 | `live` | `LiveLayerComponentProps<T>` | - | Prop-driven moving objects |
 | `projection` | `ProjectionInput` | `naturalEarth1` | Named projection or factory |
 | `projectionOptions` | `FlatProjectionOptions` | - | Projection tuning |
@@ -41,8 +41,14 @@ replace the default marker; context contains projected `position` and
 
 `GeoMarker` accepts `selected` (a `theme.markerSelected` ring behind the dot),
 `stroke`, and `strokeWidth`; `stroke` overrides the marker dot's `halo` casing.
-`GeoRoute.geometry` is `"great-circle"` by default or `"straight"` to join only
-the supplied stops. `showMarkerLabels` is also available on `GeoGlobe` and
+`GeoRoute.geometry` is `"great-circle"` by default or `"straight"` for a true
+projected screen-space polyline through the supplied stops. `GeoRoute.arc` adds
+a screen-space bow: the quadratic control point is offset perpendicular to each
+projected segment by `arc` times its length (toward the top of the screen), so
+the visible curve rises about half of `arc × length`. It takes
+precedence over `geometry`. Screen-space routes assume both endpoints are on the
+visible globe hemisphere and do not backface-clip; great-circle routes still do.
+`showMarkerLabels` is also available on `GeoGlobe` and
 `GeoView`, and on `renderStaticMapSvg` options.
 
 ### `GeoGlobe`

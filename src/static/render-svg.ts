@@ -2,7 +2,7 @@ import { geoGraticule10, geoPath } from "d3-geo";
 import { FlatProjectionKind } from "../types";
 import type { CountrySet, GeoMarker, GeoRoute, PreparedCountry } from "../types";
 import { toLonLat } from "../core/coords";
-import { routeGeometryLineString } from "../core/routes";
+import { projectRoutePoints, routeGeometryLineString, screenRoutePath } from "../core/routes";
 import { resolveLandShadow, type Outline } from "../core/outline";
 import { resolveCountryStyle } from "../core/country-style";
 import { MARKER_DEFAULTS, ROUTE_DEFAULTS } from "../core/overlay-defaults";
@@ -129,7 +129,13 @@ export function renderStaticMapSvg(options: StaticMapOptions): string {
   }
   for (const route of routes) {
     if (route.stops.length < 2) continue;
-    const d = path(routeGeometryLineString(route));
+    const d =
+      route.arc || route.geometry === "straight"
+        ? (() => {
+            const points = projectRoutePoints(route.stops, (stop) => projection(toLonLat(stop)));
+            return points ? screenRoutePath(points, route.arc) : null;
+          })()
+        : path(routeGeometryLineString(route));
     if (!d) continue;
     const dash = route.dashed ? ` stroke-dasharray="${ROUTE_DEFAULTS.dash}"` : "";
     parts.push(

@@ -68,6 +68,13 @@ export interface GeoRoute<T = unknown> {
   stops: Coordinate[];
   /** Route shape. Defaults to the sampled great-circle path. */
   geometry?: "great-circle" | "straight";
+  /**
+   * Screen-space bow. The quadratic control point is offset perpendicular to
+   * each projected segment by `arc` times its length (toward the top of the
+   * screen), so the visible curve rises about half of `arc × length`. Takes
+   * precedence over `geometry`; `0` or omitted keeps the segment flat.
+   */
+  arc?: number;
   color?: string;
   width?: number;
   dashed?: boolean;

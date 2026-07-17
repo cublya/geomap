@@ -81,6 +81,20 @@ describe("renderStaticMapSvg", () => {
     expect(svg).not.toContain("NaN");
   });
 
+  it("renders straight and bowed routes in projected screen space", () => {
+    const svg = renderStaticMapSvg({
+      width: 400,
+      height: 200,
+      routes: [
+        { id: "straight", stops: [[0, 0], [40, 20]], geometry: "straight" },
+        { id: "arc", stops: [[0, 0], [40, 20]], arc: 0.25 },
+      ],
+    });
+    const paths = [...svg.matchAll(/<path d="([^"]+)" fill="none"/g)].map((match) => match[1]);
+    expect(paths[0]).toMatch(/^M[^LQ]+L[^LQ]+$/);
+    expect(paths[1]).toMatch(/^M[^LQ]+Q[^LQ]+$/);
+  });
+
   it("renders selected marker rings and marker stroke overrides", () => {
     const svg = renderStaticMapSvg({
       width: 400,

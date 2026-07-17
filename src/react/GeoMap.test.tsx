@@ -151,6 +151,20 @@ describe("GeoMap", () => {
     expect(route).toBe(true);
   });
 
+  it("renders straight and bowed routes in projected screen space", () => {
+    const { container } = render(
+      <GeoMap
+        routes={[
+          { id: "straight", stops: [[0, 0], [40, 20]], geometry: "straight" },
+          { id: "arc", stops: [[0, 0], [40, 20]], arc: 0.25 },
+        ]}
+      />,
+    );
+    const routes = container.querySelectorAll(".geomap-route");
+    expect(routes[0]?.getAttribute("d")).toMatch(/^M[^LQ]+L[^LQ]+$/);
+    expect(routes[1]?.getAttribute("d")).toMatch(/^M[^LQ]+Q[^LQ]+$/);
+  });
+
   it("renders selected marker rings and lets per-marker strokes override the halo", () => {
     const { container } = render(
       <GeoMap

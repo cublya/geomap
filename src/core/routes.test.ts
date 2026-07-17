@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { routeGeometryLineString, routeLineString, routePoints } from "./routes";
+import {
+  arcControlPoint,
+  arcPath,
+  routeGeometryLineString,
+  routeLineString,
+  routePoints,
+  screenRoutePath,
+} from "./routes";
 
 describe("routePoints", () => {
   it("chains multi-stop routes without duplicating shared stops", () => {
@@ -48,5 +55,20 @@ describe("routeGeometryLineString", () => {
     ];
     expect(routeGeometryLineString({ stops, geometry: "straight" }).coordinates).toEqual(stops);
     expect(routeGeometryLineString({ stops, geometry: "great-circle" }).coordinates).toHaveLength(97);
+    expect(routeGeometryLineString({ stops }).coordinates).toEqual(
+      routeGeometryLineString({ stops, geometry: "great-circle" }).coordinates,
+    );
+  });
+});
+
+describe("screenRoutePath", () => {
+  it("draws a straight route as a two-point projected polyline", () => {
+    expect(screenRoutePath([[10, 20], [30, 40]])).toBe("M10,20L30,40");
+  });
+
+  it("draws arcs with a top-facing perpendicular control point", () => {
+    expect(arcControlPoint([0, 0], [10, 0], 0.5)).toEqual([5, -5]);
+    expect(arcPath([0, 0], [10, 0], 0.5)).toBe("M0,0Q5,-5 10,0");
+    expect(screenRoutePath([[0, 0], [10, 0]], 0.5)).toBe("M0,0Q5,-5 10,0");
   });
 });
