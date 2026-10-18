@@ -28,6 +28,15 @@ are easier to understand in long-form documentation.
 - [Theming and accessibility](theming-and-accessibility.md): presets, custom
   styles, controls, keyboard support, tooltips, and reduced motion.
 
+## Guides
+
+- [Choosing a projection for a world map](guides/choosing-a-projection.md):
+  measured area distortion of Mercator, Natural Earth and Equal Earth, moving
+  the 180° seam, and custom d3-geo projections.
+- [Rendering a choropleth map in React](guides/choropleth-map.md): resolution
+  choice, joining data by ISO code, finding records that fail to match, class
+  breaks, and readability without colour.
+
 ## Maintainers and contributors
 
 - [Architecture](architecture.md): package boundaries, runtime data flow,
