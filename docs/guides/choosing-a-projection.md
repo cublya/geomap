@@ -1,4 +1,5 @@
 ---
+date: 2026-10-18
 description: Mercator, Natural Earth, Equal Earth or an orthographic globe? Measured area distortion on real country polygons, the antimeridian seam, and how to pass a custom d3-geo projection.
 ---
 
@@ -56,9 +57,12 @@ How these numbers were produced: country polygons from
 `@cublya/world-atlas/countries-50m.json`; true area from d3's
 [`geoArea`](https://d3js.org/d3-geo/math#geoArea), which returns spherical
 area in steradians; drawn area from
-[`path.area`](https://d3js.org/d3-geo/path#path_area) after fitting each
-projection to the same 960 by 500 extent. Ratios are independent of the extent,
-so the numbers hold at any map size.
+[`path.area`](https://d3js.org/d3-geo/path#path_area). Natural Earth and
+Equal Earth were fitted to a 960 by 500 extent; Mercator, which cannot be
+fitted to the whole sphere, was given a scale that maps 360° of longitude to
+the same width. Ratios between countries do not depend on scale, so the
+numbers hold at any map size. The script is
+[`scripts/measure/projection-areas.mjs`](https://github.com/cublya/geomap/blob/main/scripts/measure/projection-areas.mjs).
 
 ### Why this matters for a choropleth
 
@@ -78,8 +82,9 @@ Flat maps take a named projection. The default is `naturalEarth1`:
 ```tsx
 import { GeoMap, prepareCountries, type PreparedCountry } from "@cublya/geomap";
 import world from "@cublya/world-atlas/countries-50m.json";
+import type { Topology } from "topojson-specification";
 
-const countries = prepareCountries(world, { exclude: ["AQ"] });
+const countries = prepareCountries(world as unknown as Topology, { exclude: ["AQ"] });
 
 export function RateMap({ fill }: { fill: (c: PreparedCountry) => string | undefined }) {
   return (
@@ -133,8 +138,10 @@ d3's [`projection.rotate`](https://d3js.org/d3-geo/projection#projection_rotate)
 convention of `[lambda, phi, gamma]` in degrees.
 
 Avoid large rotations on world maps. A rotation of `-150` centres the Pacific
-but moves the cut to 30° west, which splits Greenland and, through their
-overseas territories, France, the Netherlands and Portugal.
+but moves the cut to 30° west, which splits Greenland, South Georgia and,
+through their overseas territories, France, the Netherlands and Portugal.
+[`scripts/measure/antimeridian-seam.mjs`](https://github.com/cublya/geomap/blob/main/scripts/measure/antimeridian-seam.mjs)
+lists the split countries for each rotation.
 
 ## Custom projections
 
@@ -183,8 +190,10 @@ Three rules for factories:
 3. Keep the factory stable. Define it at module scope or memoize it, so the map
    does not rebuild its projection on every render.
 
-`d3-geo` is already a dependency of the package, so importing its projection
-factories adds no new install.
+`d3-geo` is a dependency of the package, but import it from your own code
+only after adding it to your own `package.json` (`npm install d3-geo`). Strict
+installers such as pnpm and Yarn Plug'n'Play do not let you import a package
+you have not declared.
 
 ## When to use a globe instead
 
@@ -210,8 +219,8 @@ same props, and carries the geographic centre across the switch:
 - The map overlays or mimics a web tile map: `mercator`, and expect the poles
   to be clipped.
 - Russia's tip appears on the wrong edge: `projectionOptions={{ rotate: [-12, 0, 0] }}`.
-- A region, not the world: a factory with a regional projection, fitted to the
-  region's features.
+- A region, not the world: a factory with a regional projection, fitted to a
+  longitude and latitude box.
 - Orientation over comparison: `GeoGlobe`, or `GeoView` to offer both.
 
 ## Related
