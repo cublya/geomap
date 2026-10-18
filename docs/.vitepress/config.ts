@@ -1,4 +1,14 @@
-import { defineConfig } from "vitepress";
+import { defineConfig, type HeadConfig } from "vitepress";
+
+// Product identity in one place. The product name is a working name: change it
+// here and the docs title, metadata and structured data follow.
+const brand = {
+  name: "Geomap",
+  packageName: "@cublya/geomap",
+  tagline: "React maps & globes on d3-geo",
+  repository: "https://github.com/cublya/geomap",
+  organization: { name: "Cublya", url: "https://www.cublya.com" },
+} as const;
 
 const base = process.env.DOCS_BASE ?? "/docs/";
 const storybookUrl = process.env.STORYBOOK_URL ?? "http://localhost:6006/";
@@ -14,25 +24,39 @@ const ogImage = `${siteRoot}assets/og-image.png`;
 
 export default defineConfig({
   lang: "en-US",
-  title: "Geomap",
-  description:
-    "Guides and API reference for @cublya/geomap — composable React map and globe primitives built on d3-geo.",
+  title: brand.name,
+  description: `Guides and API reference for ${brand.packageName}: composable React map and globe primitives built on d3-geo.`,
   base,
   cleanUrls: true,
+  // Git timestamps feed the sitemap's <lastmod>; the Pages workflow checks out
+  // full history so each page gets its own date.
+  lastUpdated: true,
   sitemap: { hostname: `${origin}${base}` },
+  // The docs home is README.md (readable on GitHub without frontmatter); give it
+  // a descriptive <title> here instead of the generic "Documentation".
+  transformPageData(pageData) {
+    if (pageData.relativePath === "index.md") {
+      pageData.title = `${brand.name} documentation`;
+      pageData.titleTemplate = ":title: guides and API reference";
+    }
+  },
   transformHead({ pageData, siteData }) {
     const rel = pageData.relativePath
       .replace(/(^|\/)index\.md$/, "$1")
       .replace(/\.md$/, "");
     const canonical = `${origin}${siteData.base}${rel}`;
-    const pageTitle = pageData.title
-      ? `${pageData.title} | Geomap`
-      : "Geomap · React maps & globes on d3-geo";
+    const isHome = rel === "";
+    const isGuide = rel.startsWith("guides/");
+    const pageTitle = isHome
+      ? `${pageData.title}: guides and API reference`
+      : pageData.title
+        ? `${pageData.title} | ${brand.name}`
+        : `${brand.name} · ${brand.tagline}`;
     const description = pageData.description || siteData.description;
-    return [
+    const head: HeadConfig[] = [
       ["link", { rel: "canonical", href: canonical }],
-      ["meta", { property: "og:type", content: "website" }],
-      ["meta", { property: "og:site_name", content: "Geomap" }],
+      ["meta", { property: "og:type", content: isGuide ? "article" : "website" }],
+      ["meta", { property: "og:site_name", content: brand.name }],
       ["meta", { property: "og:title", content: pageTitle }],
       ["meta", { property: "og:description", content: description }],
       ["meta", { property: "og:url", content: canonical }],
@@ -42,6 +66,9 @@ export default defineConfig({
       ["meta", { name: "twitter:description", content: description }],
       ["meta", { name: "twitter:image", content: ogImage }],
     ];
+    const jsonLd = structuredData({ isHome, isGuide, canonical, description, pageData });
+    if (jsonLd) head.push(["script", { type: "application/ld+json" }, JSON.stringify(jsonLd)]);
+    return head;
   },
   rewrites: {
     "README.md": "index.md",
@@ -69,11 +96,11 @@ export default defineConfig({
     ["meta", { name: "theme-color", content: "#17211b" }],
   ],
   themeConfig: {
-    siteTitle: "@cublya/geomap",
+    siteTitle: brand.packageName,
     logo: {
       light: "/brand/icon-black.svg",
       dark: "/brand/icon-white.svg",
-      alt: "Geomap",
+      alt: brand.name,
     },
     nav: [
       { text: "Guide", link: "/getting-started" },
@@ -93,6 +120,13 @@ export default defineConfig({
         ],
       },
       {
+        text: "Guides",
+        items: [
+          { text: "Choosing a projection", link: "/guides/choosing-a-projection" },
+          { text: "Rendering a choropleth map", link: "/guides/choropleth-map" },
+        ],
+      },
+      {
         text: "Project internals",
         items: [
           { text: "Architecture", link: "/architecture" },
@@ -102,12 +136,55 @@ export default defineConfig({
         ],
       },
     ],
-    socialLinks: [{ icon: "github", link: "https://github.com/cublya/geomap" }],
+    socialLinks: [{ icon: "github", link: brand.repository }],
     search: { provider: "local" },
     outline: { level: [2, 3] },
     footer: {
       message: "Released under the MIT License.",
-      copyright: "Copyright © Cublya",
+      copyright: `Copyright © ${brand.organization.name}`,
     },
   },
 });
+
+interface StructuredDataInput {
+  isHome: boolean;
+  isGuide: boolean;
+  canonical: string;
+  description: string;
+  pageData: { title: string; lastUpdated?: number };
+}
+
+// schema.org data for pages where it describes visible content: the package on
+// the docs home, and each long-form guide as a technical article.
+function structuredData({ isHome, isGuide, canonical, description, pageData }: StructuredDataInput) {
+  const publisher = { "@type": "Organization", ...brand.organization };
+  if (isHome) {
+    return {
+      "@context": "https://schema.org",
+      "@type": "SoftwareSourceCode",
+      name: brand.packageName,
+      description,
+      url: canonical,
+      codeRepository: brand.repository,
+      programmingLanguage: ["TypeScript", "JavaScript"],
+      runtimePlatform: "React",
+      license: "https://opensource.org/licenses/MIT",
+      author: publisher,
+    };
+  }
+  if (isGuide) {
+    return {
+      "@context": "https://schema.org",
+      "@type": "TechArticle",
+      headline: pageData.title,
+      description,
+      url: canonical,
+      mainEntityOfPage: canonical,
+      ...(pageData.lastUpdated ? { dateModified: new Date(pageData.lastUpdated).toISOString() } : {}),
+      author: publisher,
+      publisher,
+      about: { "@type": "SoftwareSourceCode", name: brand.packageName, codeRepository: brand.repository },
+    };
+  }
+  return undefined;
+}
