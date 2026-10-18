@@ -82,7 +82,8 @@ const fill = (country: PreparedCountry) => {
 
 Memoize the lookup and callbacks when records change frequently. Keep callback
 results deterministic: layers may evaluate them again when projection or theme
-state changes.
+state changes. The [choropleth guide](guides/choropleth-map.md) walks through a
+full join, including how to list records that match no country.
 
 ## Layer inputs
 
@@ -136,6 +137,9 @@ A custom projection factory receives the viewBox size. It must return a d3
 pan, cursor-centred zoom, and fit behavior.
 
 `GeoGlobe` always uses an orthographic projection with 90-degree clipping.
+
+[Choosing a projection](guides/choosing-a-projection.md) compares the named
+projections with measured area ratios and explains the rotation used above.
 
 ## Custom layers
 

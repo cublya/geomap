@@ -6,15 +6,17 @@
 
 ## Essential Links
 
-- [README](./README.md): install, quickstart, country data, cameras, layers, theming, accessibility, static output, and development commands.
-- [Documentation index](./docs/README.md): long-form guides and project documentation.
-- [Getting started](./docs/getting-started.md): first map, basemap setup, surface choice, and interaction.
-- [API reference](./docs/api-reference.md): public components, hooks, stores, types, utilities, and static rendering APIs.
-- [Data and rendering](./docs/data-and-rendering.md): coordinate conventions, country preparation, projections, routes, custom layers, and performance.
-- [Theming and accessibility](./docs/theming-and-accessibility.md): presets, CSS variables, controls, tooltip behavior, keyboard support, and reduced motion.
-- [Basemap coverage](./docs/basemap-coverage.md): country coverage by `@cublya/world-atlas` resolution.
-- [Troubleshooting](./docs/troubleshooting.md): common integration, rendering, camera, styling, and export issues.
-- [Examples](./examples/README.md): complete typed example scenarios.
+- [README](https://github.com/cublya/geomap#readme): install, quickstart, country data, cameras, layers, theming, accessibility, static output, and development commands.
+- [Documentation index](https://cublya.github.io/geomap/docs/): long-form guides and project documentation.
+- [Getting started](https://cublya.github.io/geomap/docs/getting-started): first map, basemap setup, surface choice, and interaction.
+- [API reference](https://cublya.github.io/geomap/docs/api-reference): public components, hooks, stores, types, utilities, and static rendering APIs.
+- [Data and rendering](https://cublya.github.io/geomap/docs/data-and-rendering): coordinate conventions, country preparation, projections, routes, custom layers, and performance.
+- [Theming and accessibility](https://cublya.github.io/geomap/docs/theming-and-accessibility): presets, CSS variables, controls, tooltip behavior, keyboard support, and reduced motion.
+- [Basemap coverage](https://cublya.github.io/geomap/docs/basemap-coverage): country coverage by `@cublya/world-atlas` resolution.
+- [Choosing a projection](https://cublya.github.io/geomap/docs/guides/choosing-a-projection): Mercator, Natural Earth and Equal Earth compared with measured area ratios, moving the 180° seam, and custom d3-geo projection factories.
+- [Rendering a choropleth map](https://cublya.github.io/geomap/docs/guides/choropleth-map): resolution choice, joining data by ISO code, finding unmatched records, class breaks with d3-scale, and non-colour accessibility.
+- [Troubleshooting](https://cublya.github.io/geomap/docs/troubleshooting): common integration, rendering, camera, styling, and export issues.
+- [Examples](https://github.com/cublya/geomap/tree/main/examples): complete typed example scenarios.
 
 ## Public Package Surface
 
