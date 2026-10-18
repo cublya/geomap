@@ -54,11 +54,10 @@ how to re-verify after a `@cublya/world-atlas` upgrade.
 ## Quickstart
 
 ```tsx
-import { GeoMap, prepareCountries } from "@cublya/geomap";
+import { GeoMap, prepareCountries, type CountrySource } from "@cublya/geomap";
 import world from "@cublya/world-atlas/countries-10m.json";
-import type { Topology } from "topojson-specification"; // from @types/topojson-specification
 
-const countries = prepareCountries(world as unknown as Topology, { exclude: ["AQ"] });
+const countries = prepareCountries(world as unknown as CountrySource, { exclude: ["AQ"] });
 
 export function SpendMap() {
   return (
