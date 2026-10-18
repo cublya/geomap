@@ -149,9 +149,10 @@ import { scaleThreshold } from "d3-scale";
 import { schemeBlues } from "d3-scale-chromatic";
 
 export const breaks = [5, 10, 20, 40];        // four breaks, five classes
+export const PALETTE = schemeBlues[5];
 const colour = scaleThreshold<number, string>()
   .domain(breaks)
-  .range(schemeBlues[5]);
+  .range(PALETTE);
 
 export const fillFor = (alpha3: string | null) => {
   const rate = rateOf(alpha3);
