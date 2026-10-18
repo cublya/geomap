@@ -1,5 +1,6 @@
 ---
-description: Build a world choropleth in React that survives real data. Join values by ISO code, find the records that silently fail to match, class values with d3-scale, and make the map readable without colour.
+date: 2026-10-18
+description: Build a world choropleth in React. Join values by ISO code, find the records that silently fail to match, class values with d3-scale, and make the map readable without colour.
 ---
 
 # Rendering a choropleth map in React
@@ -33,8 +34,9 @@ re-check them.
 ```ts
 import { prepareCountries } from "@cublya/geomap";
 import world from "@cublya/world-atlas/countries-50m.json";
+import type { Topology } from "topojson-specification";
 
-export const countries = prepareCountries(world, { exclude: ["AQ"] });
+export const countries = prepareCountries(world as unknown as Topology, { exclude: ["AQ"] });
 ```
 
 Call `prepareCountries` once, at module scope or behind `useMemo`. It converts
@@ -69,7 +71,9 @@ Then list both kinds of mismatch. Run this in development or in a data test,
 not on every render:
 
 ```ts
-const unmatchedRows = rows.filter((r) => !countries.get(r.iso3));
+const mapAlpha3 = new Set(countries.countries.map((c) => c.alpha3).filter(Boolean));
+
+const unmatchedRows = rows.filter((r) => !mapAlpha3.has(r.iso3.toUpperCase()));
 const countriesWithoutRow = countries.countries.filter(
   (c) => c.alpha3 && !byIso3.has(c.alpha3),
 );
@@ -96,8 +100,9 @@ a few conventions that change what a fill means:
 - **Small dependencies may share a code.** In the 50m and 10m files, Ashmore
   and Cartier Islands carries Australia's numeric code `036`, so it takes
   Australia's colour.
-- **Some areas have no ISO code.** The 10m file includes features such as Bir
-  Tawil, Siachen Glacier and the Spratly Islands that have no ISO identity.
+- **Some areas have no ISO code.** The 50m file includes Siachen Glacier and
+  the Indian Ocean Territories without an ISO identity; the 10m file adds
+  more, such as Bir Tawil and the Spratly Islands.
   They render, and your join will never colour them.
 - **Disputed areas follow a policy.** The default `countries-*.json` files
   assign Crimea to Ukraine and dissolve Kosovo into Serbia; the
