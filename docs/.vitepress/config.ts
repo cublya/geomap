@@ -151,7 +151,7 @@ interface StructuredDataInput {
   isGuide: boolean;
   canonical: string;
   description: string;
-  pageData: { title: string; lastUpdated?: number };
+  pageData: { title: string; lastUpdated?: number; frontmatter: Record<string, unknown> };
 }
 
 // schema.org data for pages where it describes visible content: the package on
@@ -167,7 +167,6 @@ function structuredData({ isHome, isGuide, canonical, description, pageData }: S
       url: canonical,
       codeRepository: brand.repository,
       programmingLanguage: ["TypeScript", "JavaScript"],
-      runtimePlatform: "React",
       license: "https://opensource.org/licenses/MIT",
       author: publisher,
     };
@@ -180,6 +179,8 @@ function structuredData({ isHome, isGuide, canonical, description, pageData }: S
       description,
       url: canonical,
       mainEntityOfPage: canonical,
+      image: ogImage,
+      ...(pageData.frontmatter.date ? { datePublished: isoDate(pageData.frontmatter.date) } : {}),
       ...(pageData.lastUpdated ? { dateModified: new Date(pageData.lastUpdated).toISOString() } : {}),
       author: publisher,
       publisher,
@@ -187,4 +188,11 @@ function structuredData({ isHome, isGuide, canonical, description, pageData }: S
     };
   }
   return undefined;
+}
+
+// YAML turns `date: 2026-10-18` into a Date, which reaches here as a Date or an
+// ISO timestamp string; publish the calendar date only.
+function isoDate(value: unknown): string {
+  const text = value instanceof Date ? value.toISOString() : String(value);
+  return /^\d{4}-\d{2}-\d{2}/.test(text) ? text.slice(0, 10) : text;
 }
