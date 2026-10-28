@@ -1,6 +1,6 @@
 name: Deploy documentation to GitHub Pages
 
-# Deploys only from the default branch — pull requests are tested by ci.yml and
+# Deploys only from the default branch; pull requests are tested by ci.yml and
 # never deploy.
 on:
   push:
@@ -20,6 +20,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          # Full history so VitePress can date each page from git for the
+          # sitemap's <lastmod> instead of stamping every page with HEAD.
+          fetch-depth: 0
       - uses: actions/setup-node@v6
         with:
           node-version: 24

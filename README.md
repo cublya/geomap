@@ -7,12 +7,30 @@
 
 # @cublya/geomap
 
-Composable React map primitives on [d3-geo](https://github.com/d3/d3-geo): country
-choropleths with real ISO identity, rotatable orthographic globes, markers,
-great-circle routes, animated live objects, and a camera with fit / focus / fly-to
-(SVG by default, optional Canvas, all tree-shakeable, no basemap or product data bundled).
+[![npm](https://img.shields.io/npm/v/@cublya/geomap)](https://www.npmjs.com/package/@cublya/geomap)
+[![CI](https://github.com/cublya/geomap/actions/workflows/ci.yml/badge.svg)](https://github.com/cublya/geomap/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-Built to subsume the hand-rolled maps in several Cublya apps.
+React components for world maps and globes, built on
+[d3-geo](https://d3js.org/d3-geo). Colour countries by ISO code, switch between
+a flat map and a drag-rotatable globe, draw markers and great-circle routes,
+animate live objects, and move a camera that can fit, focus and fly. Renders to
+SVG by default or Canvas when scenes get dense, and exports static SVG or PNG
+from the same pipeline. No tiles, API keys or WebGL; you bring the geometry.
+
+**[Documentation](https://cublya.github.io/geomap/docs/)** ·
+**[Storybook](https://cublya.github.io/geomap/storybook/)** ·
+**[Project site](https://cublya.github.io/geomap/)**
+
+## When to use it
+
+| You need | Good fit |
+| --- | --- |
+| A world or regional choropleth, a globe, travel routes or a share image in a React app | This package |
+| Full control over every path, and time to write projection fitting, gestures, ISO joins and accessibility yourself | d3-geo directly (this package exports the pieces it is built from) |
+| A quick choropleth inside a dashboard that already uses a chart library | That chart library's geo chart type |
+| Streets, buildings and zoom to city level | A tile-based slippy map library |
+| 3D scenes, terrain or hundreds of thousands of points | A WebGL globe library |
 
 ## Install
 
@@ -36,10 +54,10 @@ how to re-verify after a `@cublya/world-atlas` upgrade.
 ## Quickstart
 
 ```tsx
-import { GeoMap, prepareCountries } from "@cublya/geomap";
+import { GeoMap, prepareCountries, type CountrySource } from "@cublya/geomap";
 import world from "@cublya/world-atlas/countries-10m.json";
 
-const countries = prepareCountries(world, { exclude: ["AQ"] });
+const countries = prepareCountries(world as unknown as CountrySource, { exclude: ["AQ"] });
 
 export function SpendMap() {
   return (
@@ -407,6 +425,15 @@ The [documentation index](docs/README.md) links the getting-started guide, publi
 API reference, architecture, data and rendering concepts, theming and
 accessibility, testing and releases, troubleshooting, and basemap coverage
 notes.
+
+Guides:
+
+- [Choosing a projection for a world map](docs/guides/choosing-a-projection.md):
+  measured area distortion of Mercator, Natural Earth and Equal Earth, the 180°
+  seam, and custom d3-geo projections.
+- [Rendering a choropleth map in React](docs/guides/choropleth-map.md): joining
+  data by ISO code, finding records that fail to match, classing values, and
+  readability without colour.
 
 ## Development
 
