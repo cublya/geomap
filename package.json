@@ -1,8 +1,16 @@
 {
   "name": "@cublya/geomap",
   "version": "0.0.1-beta.5",
-  "description": "Composable React map primitives on d3-geo: SVG/Canvas country choropleths, globes, markers, great-circle routes, live objects and camera control.",
+  "description": "React components for world maps and globes on d3-geo: ISO-aware country choropleths, rotatable globes, markers, great-circle routes, live objects and cameras, rendered to SVG or Canvas.",
   "license": "MIT",
+  "author": {
+    "name": "Cublya",
+    "url": "https://www.cublya.com"
+  },
+  "homepage": "https://cublya.github.io/geomap/",
+  "bugs": {
+    "url": "https://github.com/cublya/geomap/issues"
+  },
   "type": "module",
   "sideEffects": false,
   "main": "./dist/index.js",
@@ -35,7 +43,7 @@
     "docs:build": "vitepress build docs --outDir storybook-static/docs",
     "docs:preview": "vitepress preview docs --outDir storybook-static/docs",
     "build-site": "npm run build-storybook && npm run docs:build",
-    "build-pages": "storybook build -o site/storybook && vitepress build docs --outDir site/docs && cp docs/index.html docs/styles.css docs/robots.txt docs/sitemap.xml site/ && rm -rf site/public && cp -R docs/public site/public && cp -R docs/assets site/assets",
+    "build-pages": "storybook build -o site/storybook && vitepress build docs --outDir site/docs && cp docs/index.html docs/styles.css docs/robots.txt docs/sitemap.xml llms.txt site/ && rm -rf site/public && cp -R docs/public site/public && cp -R docs/assets site/assets",
     "serve-storybook": "http-server storybook-static -p 6006 -s",
     "test-storybook": "test-storybook",
     "test-storybook:ci": "concurrently -k -s first \"npm:serve-storybook\" \"wait-on tcp:127.0.0.1:6006 && test-storybook --url http://127.0.0.1:6006\"",
@@ -90,14 +98,24 @@
   "keywords": [
     "react",
     "map",
+    "world-map",
+    "react-map",
     "globe",
+    "react-globe",
     "d3-geo",
     "choropleth",
+    "choropleth-map",
     "topojson",
     "geojson",
+    "natural-earth",
+    "iso-3166",
     "great-circle",
+    "orthographic",
     "svg",
-    "canvas"
+    "canvas",
+    "cartography",
+    "data-visualization",
+    "typescript"
   ],
   "repository": {
     "type": "git",
