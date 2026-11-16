@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this package adheres to [Semantic Versioning](https://semver.org/). It is
 currently pre-1.0 beta, so the public API may still change.
 
+## [0.1.0] - 2026-11-17 (Hikmat Samadov)
+
+### Changed
+
+- First release without a beta tag. The API is unchanged from 0.0.1-beta.5.
+- Guides on choosing a projection and rendering a choropleth map, and a
+  rewritten README.
+
+### Fixed
+
+- `prepareCountries` merges features that resolve to the same country into
+  one entry, so ids stay unique. The 50m and 10m atlases draw Ashmore and
+  Cartier Islands under Australia's code, which gave two `au` entries and a
+  duplicate React key in `CountriesLayer`.
+
 ## [0.0.1-beta.5] - 2026-07-17 (Hikmat Samadov)
 
 ### Added
