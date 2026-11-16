@@ -161,3 +161,16 @@ describe("prepareCountries (GeoJSON input)", () => {
     expect(() => prepareCountries(topo110, { object: "nope" })).toThrow(/no object "nope"/);
   });
 });
+
+describe("prepareCountries with one country drawn as several features", () => {
+  it("keeps one entry per country in the 50m atlas, with Ashmore and Cartier inside Australia", () => {
+    const world = prepareCountries(topo50, { exclude: ["AQ"] });
+    const ids = world.countries.map((c) => c.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    const au = world.get("AU")!;
+    expect(au.name).toBe("Australia");
+    expect(au.feature.properties.isoA2).toBe("AU");
+    expect(au.centroid[0]).toBeGreaterThan(120);
+    expect(au.centroid[1]).toBeLessThan(-20);
+  });
+});

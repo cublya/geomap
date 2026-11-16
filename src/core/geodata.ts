@@ -115,6 +115,35 @@ function slug(name: string): string {
  * Convert a TopoJSON topology (e.g. `@cublya/world-atlas`) or GeoJSON FeatureCollection
  * into a {@link CountrySet} with resolved ISO identity, centroids and bounds.
  */
+function polygonsOf(geometry: Geometry | null): Position[][][] {
+  if (!geometry) return [];
+  if (geometry.type === "Polygon") return [geometry.coordinates];
+  if (geometry.type === "MultiPolygon") return geometry.coordinates;
+  if (geometry.type === "GeometryCollection") return geometry.geometries.flatMap(polygonsOf);
+  return [];
+}
+
+/**
+ * One country from two features with the same id: the polygons of both, the
+ * properties and feature id of the larger one.
+ */
+function mergeCountries(a: PreparedCountry, b: PreparedCountry): PreparedCountry {
+  const [main, extra] = geoArea(b.feature) > geoArea(a.feature) ? [b, a] : [a, b];
+  const feature: CountryFeature = {
+    ...main.feature,
+    geometry: {
+      type: "MultiPolygon",
+      coordinates: [...polygonsOf(main.feature.geometry), ...polygonsOf(extra.feature.geometry)],
+    },
+  };
+  return {
+    ...main,
+    feature,
+    centroid: main.centroid,
+    bounds: geoBounds(feature) as GeoBounds,
+  };
+}
+
 export function prepareCountries(
   source: CountrySource,
   options: PrepareCountriesOptions = {},
@@ -131,6 +160,10 @@ export function prepareCountries(
       .some((v) => excludeKeys.has(normalizeName(v)));
 
   const countries: PreparedCountry[] = [];
+  // Several features can resolve to one country (an atlas may draw a dependency
+  // such as Ashmore and Cartier Islands as its own shape under Australia's
+  // code): they become one entry, so ids stay unique.
+  const byId = new Map<string, number>();
   for (const rawFeature of features) {
     const feature = rewindFeature(rawFeature);
     const iso = resolveIdentity(feature);
@@ -155,7 +188,14 @@ export function prepareCountries(
       centroid: geoCentroid(feature) as LonLat,
       bounds: geoBounds(feature) as GeoBounds,
     };
-    if (!isExcluded(country)) countries.push(country);
+    if (isExcluded(country)) continue;
+    const existing = byId.get(country.id);
+    if (existing === undefined) {
+      byId.set(country.id, countries.length);
+      countries.push(country);
+    } else {
+      countries[existing] = mergeCountries(countries[existing]!, country);
+    }
   }
 
   const index = new Map<string, PreparedCountry>();
